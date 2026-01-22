@@ -14,6 +14,7 @@
 package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
@@ -25,7 +26,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
-  private final Pigeon2 pigeon = new Pigeon2(0, "rio");
+  private final Pigeon2 pigeon = new Pigeon2(0, new CANBus("rio"));
   private final StatusSignal<Angle> yaw = pigeon.getYaw();
   private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZDevice(); // Note: There is a device frame and a world frame, device = old implementation, but is world better here? - EKM
 

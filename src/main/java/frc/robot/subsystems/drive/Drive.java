@@ -55,8 +55,8 @@ import frc.robot.Constants;
 import frc.robot.Constants.HeadingTargets;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.TargetLocations;
+import frc.robot.subsystems.vision.Limelight;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.subsystems.limelight.Limelight;
 import frc.robot.util.LimelightHelpers;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.PolarCoordinate;
@@ -97,10 +97,10 @@ public class Drive extends SubsystemBase {
 
   private boolean doRejectVisionUpdate = false;
 	
-  @AutoLogOutput(key = "/RealOutputs/Drive/headingSetpoint")
+  @AutoLogOutput(key = "/Drive/headingSetpoint")
   private double headingSetpoint = 0.0;
 
-  @AutoLogOutput(key = "/RealOutputs/Drive/headingLocked")
+  @AutoLogOutput(key = "/Drive/headingLocked")
   private boolean headingLocked = false;
 
   private boolean updatePoseUsingVision = false;
@@ -162,7 +162,7 @@ public class Drive extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("/RealOutputs/Drive/SysIdState", state.toString())),
+                (state) -> Logger.recordOutput("/Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> {
                   for (int i = 0; i < 4; i++) {
@@ -202,8 +202,8 @@ public class Drive extends SubsystemBase {
 
     // Log key / useful values for Debugging with AdvantageKit/AdvantageScope
     gyroIO.updateInputs(gyroInputs);
-    Logger.processInputs("/RealOutputs/Drive/Gyro", gyroInputs);
-    // Example : Logger.recordOutput("/RealOutputs/Drive/somethingUseful", somethingUseful);
+    Logger.processInputs("/Drive/Gyro", gyroInputs);
+    // Example : Logger.recordOutput("/Drive/somethingUseful", somethingUseful);
 
 
     // This switch case lets us run different code based on the robot we are using
@@ -278,7 +278,7 @@ public class Drive extends SubsystemBase {
           Logger.recordOutput("Odometry/VisionPoseReef", visionPose.toPose2d());
  
           double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
-          Logger.recordOutput("/RealOutputs/Drive/poseDifference", poseDifference);
+          Logger.recordOutput("/Drive/poseDifference", poseDifference);
 
           LimelightHelpers.SetRobotOrientation("limelight-reef", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-reef");
@@ -325,7 +325,7 @@ public class Drive extends SubsystemBase {
           Logger.recordOutput("Odometry/VisionPoseCoral", visionPose.toPose2d());
  
           double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
-          Logger.recordOutput("/RealOutputs/Drive/poseDifference", poseDifference);
+          Logger.recordOutput("/Drive/poseDifference", poseDifference);
 
           LimelightHelpers.SetRobotOrientation("limelight-coral", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-coral");

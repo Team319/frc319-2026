@@ -32,6 +32,8 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
 
 
 public class RobotContainer {
@@ -160,9 +162,9 @@ public class RobotContainer {
 
         if (true){ // Turned off for safety at demos
 
-          driverController.rightBumper().whileTrue(   new InstantCommand(()-> drive.pathfindToClosestRightReef().schedule() ) );
+          driverController.rightBumper().whileTrue(   new InstantCommand(()-> CommandScheduler.getInstance().schedule( drive.pathfindToClosestRightReef() )) );  // TODO 1/22/26 - test these, as the schedule method changed
 
-          driverController.leftBumper().whileTrue( new InstantCommand(()-> drive.pathfindToClosestLeftReef().schedule() ));
+          driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( drive.pathfindToClosestLeftReef() )) );
   
          // driverController.back().whileTrue( new InstantCommand(()-> drive.pathfindToProcessor().schedule()  ) );
         

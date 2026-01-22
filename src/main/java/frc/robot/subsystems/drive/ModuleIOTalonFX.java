@@ -14,6 +14,7 @@
 package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -68,17 +69,17 @@ public class ModuleIOTalonFX implements ModuleIO {
 
          switch (Constants.getRobot()) {
           case COMPBOT:
-            driveTalon = new TalonFX(1, "swerve");
-            turnTalon = new TalonFX(2, "swerve");
-            cancoder = new CANcoder(3, "swerve");
+            driveTalon = new TalonFX(1, new CANBus("swerve"));
+            turnTalon = new TalonFX(2, new CANBus("swerve"));
+            cancoder = new CANcoder(3, new CANBus("swerve"));
             absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0));
             break;
         
           case DEVBOT:
           default:
-            driveTalon = new TalonFX(1, "rio");
-            turnTalon = new TalonFX(2, "rio");
-            cancoder = new CANcoder(3, "rio");
+            driveTalon = new TalonFX(1, new CANBus("rio"));
+            turnTalon = new TalonFX(2, new CANBus("rio"));
+            cancoder = new CANcoder(3, new CANBus("rio"));
             absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(75)); // MUST BE CALIBRATED DEVBOT
             break;
         }
@@ -88,17 +89,17 @@ public class ModuleIOTalonFX implements ModuleIO {
 
         switch (Constants.getRobot()) {
           case COMPBOT:
-            driveTalon = new TalonFX(10, "swerve");
-            turnTalon = new TalonFX(11, "swerve");
-            cancoder = new CANcoder(12, "swerve");
+            driveTalon = new TalonFX(10, new CANBus("swerve"));
+            turnTalon = new TalonFX(11, new CANBus("swerve"));
+            cancoder = new CANcoder(12, new CANBus("swerve"));
             absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0));
             break;
         
           case DEVBOT:
           default:
-            driveTalon = new TalonFX(10, "rio");
-            turnTalon = new TalonFX(11, "rio");
-            cancoder = new CANcoder(12, "rio");
+            driveTalon = new TalonFX(10, new CANBus("rio"));
+            turnTalon = new TalonFX(11, new CANBus("rio"));
+            cancoder = new CANcoder(12, new CANBus("rio"));
             absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(60));
             break;
         }
@@ -108,17 +109,17 @@ public class ModuleIOTalonFX implements ModuleIO {
 
          switch (Constants.getRobot()) {
           case COMPBOT:
-            driveTalon = new TalonFX(4, "swerve");
-            turnTalon = new TalonFX(5, "swerve");
-            cancoder = new CANcoder(6, "swerve");
+            driveTalon = new TalonFX(4, new CANBus("swerve"));
+            turnTalon = new TalonFX(5, new CANBus("swerve"));
+            cancoder = new CANcoder(6, new CANBus("swerve"));
             absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0));
             break;
 
           case DEVBOT:
           default:
-            driveTalon = new TalonFX(4, "rio");
-            turnTalon = new TalonFX(5, "rio");
-            cancoder = new CANcoder(6, "rio");
+            driveTalon = new TalonFX(4, new CANBus("rio"));
+            turnTalon = new TalonFX(5, new CANBus("rio"));
+            cancoder = new CANcoder(6, new CANBus("rio"));
             absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(-15));
             break;
          }
@@ -127,17 +128,17 @@ public class ModuleIOTalonFX implements ModuleIO {
 
         switch (Constants.getRobot()) {
           case COMPBOT:
-            driveTalon = new TalonFX(7, "swerve");
-            turnTalon = new TalonFX(8, "swerve");
-            cancoder = new CANcoder(9, "swerve");
+            driveTalon = new TalonFX(7, new CANBus("swerve"));
+            turnTalon = new TalonFX(8, new CANBus("swerve"));
+            cancoder = new CANcoder(9, new CANBus("swerve"));
             absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0)); // was 265
             break;
         
           case DEVBOT:
           default:
-            driveTalon = new TalonFX(7, "rio");
-            turnTalon = new TalonFX(8, "rio");
-            cancoder = new CANcoder(9, "rio");
+            driveTalon = new TalonFX(7, new CANBus("rio"));
+            turnTalon = new TalonFX(8, new CANBus("rio"));
+            cancoder = new CANcoder(9, new CANBus("rio"));
             absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(60)); 
             break;
         }

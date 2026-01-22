@@ -65,7 +65,7 @@ public class Robot extends LoggedRobot {
     // END : Required setup for AdvantageKit Logging
     //=============================================
 
-    FollowPathCommand.warmupCommand().schedule();
+    CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
 
     SmartDashboard.putString("DynamicAutoInput", "");
 
@@ -93,7 +93,7 @@ public class Robot extends LoggedRobot {
     // Read dynamic auto selection from SmartDashboard
     m_robotContainer.dynamicAutoInput = SmartDashboard.getString("DynamicAutoInput", "");
 
-    System.out.println("DynamicAuto Input :" +m_robotContainer.dynamicAutoInput);
+    //System.out.println("DynamicAuto Input :" +m_robotContainer.dynamicAutoInput);
 
    if (!hasBeenEnabled) {
     Optional<Alliance> allianceColor = DriverStation.getAlliance();
@@ -127,7 +127,7 @@ public class Robot extends LoggedRobot {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
      if (m_autonomousCommand != null) {
-        m_autonomousCommand.schedule();
+        CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
 
 

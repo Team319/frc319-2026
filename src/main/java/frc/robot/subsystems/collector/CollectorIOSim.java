@@ -1,0 +1,34 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems.collector;
+
+/** Add your docs here. */
+public class CollectorIOSim implements CollectorIO {
+
+    @Override
+    public void updateInputs(CollectorIOInputs inputs) 
+    {
+
+    }
+
+    @Override
+    public void stop() 
+    {
+
+    }
+
+    @Override
+    public void extend() 
+    {
+
+    }
+
+    @Override
+    public void retract() 
+    {   
+
+    }
+
+}

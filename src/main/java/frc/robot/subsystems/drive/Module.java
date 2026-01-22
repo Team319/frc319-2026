@@ -68,7 +68,7 @@ public class Module {
 
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("/RealOutputs/Drive/Module" + Integer.toString(index), inputs);
+    Logger.processInputs("/Drive/Module" + Integer.toString(index), inputs);
 
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
@@ -89,7 +89,7 @@ public class Module {
         // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
         // towards the setpoint, its velocity should increase. This is achieved by
         // taking the component of the velocity in the direction of the setpoint.
-        double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
+        double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getError());
 
         // Run drive controller
         double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
@@ -104,7 +104,9 @@ public class Module {
   public SwerveModuleState runSetpoint(SwerveModuleState state) {
     // Optimize state based on current angle
     // Controllers run in "periodic" when the setpoint is not null
-    var optimizedState = SwerveModuleState.optimize(state, getAngle());
+
+    state.optimize(getAngle());
+    var optimizedState = state;
 
     // Update setpoints, controllers run in "periodic"
     angleSetpoint = optimizedState.angle;

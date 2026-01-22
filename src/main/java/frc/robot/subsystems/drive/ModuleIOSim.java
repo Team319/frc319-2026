@@ -32,24 +32,22 @@ public class ModuleIOSim implements ModuleIO {
   private final DCMotorSim driveSim;
   private final DCMotorSim turnSim;
 
-  //2024 implementation
-  //private DCMotorSim driveSim = new DCMotorSim(DCMotor.getNEO(1), 6.75, 0.025);
-  //private DCMotorSim turnSim = new DCMotorSim(DCMotor.getNEO(1), 150.0 / 7.0, 0.004);
-  
-  public ModuleIOSim() {
-  // Create drive and turn sim models
-  driveSim =
-      new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), 0.025, 6.75),
-          DCMotor.getKrakenX60(1));
-  turnSim =
-      new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), 0.004, 150.0 / 7.0),
-          DCMotor.getKrakenX60(1));
-  }
   private final Rotation2d turnAbsoluteInitPosition = new Rotation2d(Math.random() * 2.0 * Math.PI);
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
+  
+  // Constructor
+  public ModuleIOSim() {
+    // Create drive and turn sim models
+    driveSim =
+        new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), 0.025, 6.75),
+            DCMotor.getKrakenX60(1));
+    turnSim =
+        new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), 0.004, 150.0 / 7.0),
+            DCMotor.getKrakenX60(1));
+  }
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
