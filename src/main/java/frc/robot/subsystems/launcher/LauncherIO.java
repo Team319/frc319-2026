@@ -10,8 +10,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 import edu.wpi.first.units.measure.Voltage;
 
-import static edu.wpi.first.units.Units.Volts;
-
 
 /** Add your docs here. */
 public interface LauncherIO {
@@ -22,14 +20,28 @@ public interface LauncherIO {
     public double turretAngleRadians = 0.0;
     public double hoodAngleRadians = 0.0;
     public double flywheelVelocityRpm = 0.0;
+    public double kickerVelocityRpm = 0.0;
   }
 
   // Update the set of inputs for AdvantageKit logging
   public default void updateInputs( LauncherIOInputs inputs ) {}
   
   public default void setTurnOutput( Voltage out ) {};
+
   public default void setHoodOutput( Voltage out ) {};
+
   public default void setFlywheelOutput( Voltage out ) {};
-  public default void setShootOutput( Voltage out ) {};
+
+  public default void setKickerOutput( Voltage out ) {};
+
+  public default void stopTurn() {}
+
+  public default void stopHood() {}
+
+  public default void stopFlywheel() {}
+
+  public default void stopShoot() {}
+
+  public default void resetTurnEncoder() {}
 
 }

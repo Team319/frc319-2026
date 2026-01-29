@@ -69,8 +69,6 @@ public class Drive extends SubsystemBase {
   // PathPlanner configuration
   public RobotConfig ppConfig;
 
-  public boolean nearTheReef = false;
-
   AprilTagFieldLayout aprilTagFieldLayout = null ;
 
   private final GyroIO gyroIO;
@@ -268,9 +266,9 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput("Odometry/Robot", getPose());
  
         // Update / Correct the pose using Localization from Vision (using the 'Reef' Limelight) 
-        if(Limelight.isValidTargetSeen(LimelightConstants.Device.REEF) /*&& DriverStation.isTeleop()*/ )
+        if(Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN) /*&& DriverStation.isTeleop()*/ )
         {
-          double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.REEF);
+          double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.DRIVETRAIN);
           Pose3d visionPose = new Pose3d(
                                 new Translation3d(poseBuf[0],poseBuf[1],poseBuf[2]), 
                                 new Rotation3d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]),Units.degreesToRadians(poseBuf[5]))
@@ -314,10 +312,10 @@ public class Drive extends SubsystemBase {
           
         }
 
-        // Update / Correct the pose using Localization from Vision (using the 'coral station' Limelight) 
-        if(Limelight.isValidTargetSeen(LimelightConstants.Device.CORAL_STATION) /*&& DriverStation.isTeleop()*/ )
+        // Update / Correct the pose using Localization from Vision (using the 'TURRET' Limelight) 
+        if(Limelight.isValidTargetSeen(LimelightConstants.Device.TURRET) /*&& DriverStation.isTeleop()*/ )
         {
-          double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.CORAL_STATION);
+          double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.TURRET);
           Pose3d visionPose = new Pose3d(
                                 new Translation3d(poseBuf[0],poseBuf[1],poseBuf[2]), 
                                 new Rotation3d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]),Units.degreesToRadians(poseBuf[5]))
@@ -353,17 +351,17 @@ public class Drive extends SubsystemBase {
           
         }
 
-        // ============ Get Closest Tag / reef pairing... Is it a reef? (Used for driver assistance) ============
+        // ============ Get Closest Tag of interest... (Used for driver assistance) ============
 
-        String closestTagID = getClosestReefIdPairing();
-        if( closestTagID != "xx" )
-        {
-          nearTheReef = true;
-        }
-        else
-        {
-          nearTheReef = false;
-        }
+        // String closestTagID = getClosestReefIdPairing();
+        // if( closestTagID != "xx" )
+        // {
+        //   nearTheTrench = true;
+        // }
+        // else
+        // {
+        //   nearTheTrench = false;
+        // }
 
         break; // End of Swerve logic
     
@@ -521,32 +519,20 @@ public class Drive extends SubsystemBase {
 
     if ( DriverStation.getAlliance().isPresent()){
       switch (this.headingTarget) {
-        case REEF_CENTER:
+        case HUB:
           switch (DriverStation.getAlliance().get()) {
             case Red:
-              retVal = TargetLocations.RED_REEF_CENTER.getTranslation();
+              retVal = TargetLocations.RED_HUB.getTranslation();
               break;
           
             default: // Blue
-              retVal = TargetLocations.BLUE_REEF_CENTER.getTranslation();
+              retVal = TargetLocations.BLUE_HUB.getTranslation();
               break;
           }
           break;// Escape Speaker Case
-
-        case PROCESSOR:
-          switch (DriverStation.getAlliance().get()) {
-            case Red:
-              retVal = TargetLocations.RED_SIDE_PROCESSOR.getTranslation();
-              break;
-          
-            default: // Blue
-              retVal = TargetLocations.BLUE_SIDE_PROCESSOR.getTranslation();
-              break;
-          }
-          break; // Escape Source Case
       
         default:
-          retVal = TargetLocations.ORIGIN.getTranslation();
+          retVal = TargetLocations.CENTER_OF_FIELD.getTranslation();
           break; // Escape Default Case
       }
   }
@@ -565,7 +551,7 @@ public class Drive extends SubsystemBase {
   public double snapToTarget() {
     // ===================  Thank you 4481 for the help ! =======================
     double theta = 0.0;
-    boolean isTargetVisible = Limelight.isValidTargetSeen(LimelightConstants.Device.REEF);
+    boolean isTargetVisible = Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN);
 
    /*  if(false/*isTargetVisible){
       //System.out.println("Target Visible, use limelight data to automatically control heading");
@@ -614,21 +600,21 @@ public class Drive extends SubsystemBase {
     return target.getDistance(getPose().getTranslation());
   }
 
-  public double getDistanceToAllianceReef(){
-    Translation2d targetPose = TargetLocations.BLUE_REEF_CENTER.getTranslation();
-    if ( DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red){
-      targetPose = TargetLocations.RED_REEF_CENTER.getTranslation();
-    }
-    return getDistanceToTarget(targetPose);
-  }
+  // public double getDistanceToAllianceReef(){
+  //   Translation2d targetPose = TargetLocations.BLUE_REEF_CENTER.getTranslation();
+  //   if ( DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red){
+  //     targetPose = TargetLocations.RED_REEF_CENTER.getTranslation();
+  //   }
+  //   return getDistanceToTarget(targetPose);
+  // }
 
-  public double getDistanceToAllianceProcessor(){
-    Translation2d targetPose = TargetLocations.BLUE_SIDE_PROCESSOR.getTranslation();
-    if ( DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red){
-      targetPose = TargetLocations.RED_SIDE_PROCESSOR.getTranslation();
-    }
-    return getDistanceToTarget(targetPose);
-  }
+  // public double getDistanceToAllianceProcessor(){
+  //   Translation2d targetPose = TargetLocations.BLUE_SIDE_PROCESSOR.getTranslation();
+  //   if ( DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red){
+  //     targetPose = TargetLocations.RED_SIDE_PROCESSOR.getTranslation();
+  //   }
+  //   return getDistanceToTarget(targetPose);
+  // }
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {
@@ -708,89 +694,74 @@ public class Drive extends SubsystemBase {
     return closestTagID;
   }
 
-  public String getClosestReefIdPairing() {
-    int closestTagID = getClosestTagFromField();
-    String rv = "xx"; // returned value
+  // TODO - Finish these pathfinding to trench commands once we have trench paths created - EKM 1/22/26
 
-    switch (closestTagID) {
+  // public String getClosestTrenchTransition() {
+  //   int closestTagID = getClosestTagFromField();
+  //   String rv = "xx"; // returned value
 
-      case 7 , 18:
-        rv = "ab";
-        break;
+  //   switch (closestTagID) {
 
-      case 8 , 17:
-        rv = "cd";
-        break;
+  //     case 7 , 18:
+  //       rv = "ab";
+  //       break;
 
-      case 9 , 22:
-        rv = "ef";
-        break;
+  //     case 8 , 17:
+  //       rv = "cd";
+  //       break;
 
-      case 10 , 21:
-        rv = "gh";
-        break;
+  //     case 9 , 22:
+  //       rv = "ef";
+  //       break;
 
-      case 11 , 20:
-        rv = "ij";
-        break;
+  //     case 10 , 21:
+  //       rv = "gh";
+  //       break;
 
-      case 6 , 19:
-        rv = "kl";
-        break;
+  //     case 11 , 20:
+  //       rv = "ij";
+  //       break;
+
+  //     case 6 , 19:
+  //       rv = "kl";
+  //       break;
     
-      default:
-        rv = "xx";
-        break;
-    }
+  //     default:
+  //       rv = "xx";
+  //       break;
+  //   }
 
-    return rv;
+  //   return rv;
 
-  }
+  // }
 
-  public Command pathfindToClosestLeftReef(){
+  // TODO - Finish these pathfinding to trench commands once we have trench paths created - EKM 1/22/26
 
-    String closestReefPair = getClosestReefIdPairing();
-    if(closestReefPair.length() != 2 || closestReefPair.equals("xx")){
-      System.out.println("[pathfindToClosestLeftReef] No reef pair found");
-      return Commands.none();
-    }
-    else{
-      System.out.println("[pathfindToClosestLeftReef]: "+ "goto_" + closestReefPair.charAt(0));
-      return pathfindThenFollowPath(DriveConstants.pathingConstraints, "goto_" + closestReefPair.charAt(0));
-    }
-  }
+  // public Command pathfindThruClosestLeftTrench(){
 
-  public Command pathfindToClosestRightReef(){
-    String closestReefPair = getClosestReefIdPairing();
-    if(closestReefPair.length() != 2 || closestReefPair.equals("xx")){
-      System.out.println("[pathfindToClosestRightReef] No reef pair found");
-      return Commands.none();
-    }
-    else{
-      System.out.println("[pathfindToClosestRightReef]: "+ "goto_" + closestReefPair.charAt(1));
-      return pathfindThenFollowPath(DriveConstants.pathingConstraints, "goto_" + closestReefPair.charAt(1));
-    }
+  //   String closestTrench = getClosestTrenchTransition();
+  //   if(closestTrench.length() != 2 || closestTrench.equals("xx")){
+  //     System.out.println("[pathfindToClosestLeftReef] No reef pair found");
+  //     return Commands.none();
+  //   }
+  //   else{
+  //     System.out.println("[pathfindToClosestLeftTrench]: "+ "goto_" + closestTrench.charAt(0));
+  //     return pathfindThenFollowPath(DriveConstants.pathingConstraints, "goto_" + closestTrench.charAt(0));
+  //   }
+  // }
 
-  }
+  // public Command pathfindThruClosestRightTrench(){
+  //   String closestTrench = getClosestTrenchTransition();
+  //   if(closestTrench.length() != 2 || closestTrench.equals("xx")){
+  //     System.out.println("[pathfindToClosestRightTrench] No trench found");
+  //     return Commands.none();
+  //   }
+  //   else{
+  //     System.out.println("[pathfindToClosestRightTrench]: "+ "goto_" + closestTrench.charAt(1));
+  //     return pathfindThenFollowPath(DriveConstants.pathingConstraints, "goto_" + closestTrench.charAt(1));
+  //   }
 
-  public Command pathfindToProcessor(){
-
-    Pose2d targetPose = new Pose2d();
-
-    Optional<Alliance> allianceColor = DriverStation.getAlliance();
-
-    switch (allianceColor.get()) {
-      case Red:
-        targetPose = TargetLocations.RED_SIDE_PROCESSOR;
-        break;
-    
-      default:
-        targetPose = TargetLocations.BLUE_SIDE_PROCESSOR;
-        break;
-    }
-
-    return pathFindToPose(DriveConstants.pathingConstraints, targetPose);
-  }
+  // }
 
   public Command stopPathing(){
     return Commands.none();

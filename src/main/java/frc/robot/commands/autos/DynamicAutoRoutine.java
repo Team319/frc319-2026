@@ -14,12 +14,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 
-import frc.robot.Constants;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.drive.Drive;
 
 
@@ -69,16 +65,16 @@ public DynamicAutoRoutine(Drive a_drive){
                 switch (modifier) 
                 {
                     case 1:
-                        startingPose = isBlueAlliance ? Constants.TargetLocations.BLUE_START_LEFT : Constants.TargetLocations.RED_START_LEFT;
+                        //startingPose = isBlueAlliance ? Constants.TargetLocations.BLUE_START_LEFT : Constants.TargetLocations.RED_START_LEFT;
                         break;
                     
                     case 2:
                     default:
-                        startingPose = isBlueAlliance ? Constants.TargetLocations.BLUE_START_CENTER : Constants.TargetLocations.RED_START_CENTER;
+                        //startingPose = isBlueAlliance ? Constants.TargetLocations.BLUE_START_CENTER : Constants.TargetLocations.RED_START_CENTER;
                         break;
                 
                     case 3:
-                        startingPose = isBlueAlliance ? Constants.TargetLocations.BLUE_START_RIGHT : Constants.TargetLocations.RED_START_RIGHT;
+                        //startingPose = isBlueAlliance ? Constants.TargetLocations.BLUE_START_RIGHT : Constants.TargetLocations.RED_START_RIGHT;
                         break;
 
                 }

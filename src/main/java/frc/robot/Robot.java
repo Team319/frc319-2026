@@ -151,13 +151,20 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopPeriodic() {
 
-    if(m_robotContainer.drive.nearTheReef){
-      m_robotContainer.driverController.setRumble(RumbleType.kBothRumble, 0.1);
-    } else {
-      m_robotContainer.driverController.setRumble(RumbleType.kBothRumble, 0.0);
-    }
+    // TODO add Trench / Autopilot rumble feedback
 
-    // ===============  manual climbing ===============================================
+    // if(m_robotContainer.drive.nearTheReef){
+    //   m_robotContainer.driverController.setRumble(RumbleType.kBothRumble, 0.1);
+    // } else {
+    //   m_robotContainer.driverController.setRumble(RumbleType.kBothRumble, 0.0);
+    // }
+
+
+
+
+    // TODO - for manual climb control (may not need)
+
+    // ===============  Manual climbing ===============================================
     // if(m_robotContainer.superstructure.climber.getClimbMode()){
     //   m_robotContainer.operatorController.setRumble(RumbleType.kBothRumble, 0.1);
 

@@ -160,14 +160,15 @@ public class RobotContainer {
           );
 
 
-        if (true){ // Turned off for safety at demos
+        if (false){ // Turned off for safety at demos
 
-          driverController.rightBumper().whileTrue(   new InstantCommand(()-> CommandScheduler.getInstance().schedule( drive.pathfindToClosestRightReef() )) );  // TODO 1/22/26 - test these, as the schedule method changed
+          // TODO 1/22/26 - test these, as the schedule method changed
+          
+          // TODO - add pathfinding under the closest trench
 
-          driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( drive.pathfindToClosestLeftReef() )) );
-  
-         // driverController.back().whileTrue( new InstantCommand(()-> drive.pathfindToProcessor().schedule()  ) );
-        
+          //driverController.rightBumper().whileTrue(   new InstantCommand(()-> CommandScheduler.getInstance().schedule( drive.pathfindToClosestRightReef() )) );  
+          //driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( drive.pathfindToClosestLeftReef() )) );
+          
         }
 
         //  ===========================================================================
@@ -178,7 +179,14 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     
     if(autoChooser.get() == null){
-      return new DynamicAutoRoutine(drive); // The command needs to be created at runtime so that the instruction string is populated from the dashboard
+
+      // TODO - Will probably hard code the Dynamic Autos this year... 
+      
+      // TODO - Potentially implement behaviorTreeAuto routine instead of DynamicAutoRoutine
+
+      // The command needs to be created at runtime so that the formatted 
+      //  instruction string is populated from the dashboard
+      return new DynamicAutoRoutine(drive); 
     }
     else{
       return autoChooser.get();

@@ -34,9 +34,9 @@ public class LauncherIOSim implements LauncherIO {
     private final FlywheelSim flywheelSim =
             new FlywheelSim(LinearSystemId.createFlywheelSystem(flywheelMotor, 0.005, 2), flywheelMotor, 0.0005);
 
-    private final DCMotor shootMotor = DCMotor.getKrakenX60(1);
-    private final FlywheelSim shootSim =
-            new FlywheelSim(LinearSystemId.createFlywheelSystem(shootMotor, 0.001, 2), shootMotor, 0.0005);
+    private final DCMotor kickerMotor = DCMotor.getKrakenX60(1);
+    private final FlywheelSim kickerSim =
+            new FlywheelSim(LinearSystemId.createFlywheelSystem(kickerMotor, 0.001, 2), kickerMotor, 0.0005);
 
 
     public LauncherIOSim()
@@ -44,7 +44,7 @@ public class LauncherIOSim implements LauncherIO {
         setTurnOutput(Volts.zero());
         setHoodOutput(Volts.zero());
         setFlywheelOutput(Volts.zero());
-        setShootOutput(Volts.zero());
+        setKickerOutput(Volts.zero());
     }
 
     @Override
@@ -53,7 +53,7 @@ public class LauncherIOSim implements LauncherIO {
         turretSim.update(0.02);
         hoodSim.update(0.02);
         flywheelSim.update(0.02);
-        shootSim.update(0.02);
+        kickerSim.update(0.02);
     }
 
      @Override
@@ -72,12 +72,9 @@ public class LauncherIOSim implements LauncherIO {
     }
 
     @Override
-    public void setShootOutput(Voltage out) {
-        shootSim.setInputVoltage(out.in(Volts));
+    public void setKickerOutput(Voltage out) {
+        kickerSim.setInputVoltage(out.in(Volts));
     }
 
 
-
-
-
-}
+} // End of LauncherIOSim
