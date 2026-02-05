@@ -1,0 +1,19 @@
+package frc319.robot.subsystems.serializer;
+
+import frc319.redhawk_lib.io.MotorInputsAutoLogged;
+import frc319.redhawk_lib.io.TalonFXIO;
+import frc319.redhawk_lib.subsystem.MotorSubsystem;
+import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
+
+public class Kicker extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO> {
+
+  public Kicker(final TalonFXSubsystemConfig config, final TalonFXIO feederMotorIO) {
+    super(config, new MotorInputsAutoLogged(), feederMotorIO);
+  }
+
+  @Override
+  public void periodic() {
+    super.periodic();
+    // Additional periodic code for feeder can be added here
+  }
+}
