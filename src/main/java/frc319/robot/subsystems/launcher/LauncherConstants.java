@@ -43,6 +43,8 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio = 0.08695;// = 1/(( 92*3 )/ 24)    // 1/(250/24) = 0.0959;
 
+      config.momentOfInertia = 0.25; // KgMetersSquared
+
       switch (Constants.getRobot()) {
         case DEVBOT:
             config.initialTransform =

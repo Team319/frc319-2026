@@ -64,7 +64,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
         currentTargetPose = LaunchingSolutionManager.getInstance().getTargetPose();
         break;
       case TRACK_HUB_ON_MOVE:
-        this.setAngle(() -> Degrees.of(LaunchingSolutionManager.getInstance().getSolution().turretFieldRelativeYaw().getDegrees())).schedule();
+        this.setAngle(() -> getLauncOnTheFlyAngle()).schedule();
         currentTargetPose = LaunchingSolutionManager.getInstance().getTargetOnMovePose();
         break;
       case IDLE:
