@@ -4,6 +4,7 @@
 
 package frc319.robot;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.LogFileUtil;
@@ -14,14 +15,14 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.UsbCamera;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc319.robot.util.FieldUtils;
 
 public class Robot extends LoggedRobot {
   
@@ -75,6 +76,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    logStates();
 
     if(!hasBeenEnabled){
       SmartDashboard.putString("Dynamic Reading", m_robotContainer.dynamicAutoInput);
@@ -200,4 +202,26 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void testExit() {}
+  
+  private void logStates() {
+  boolean isInAllianceZone = FieldUtils.isInAllianceZone(m_robotContainer.drive.getGlobalPose().getTranslation().toTranslation2d());
+  boolean isInNeutralZone = FieldUtils.isInNeutralZone(m_robotContainer.drive.getGlobalPose().getTranslation().toTranslation2d());
+  boolean isInOpposingZone = FieldUtils.isInOpposingZone(m_robotContainer.drive.getGlobalPose().getTranslation().toTranslation2d());
+
+  boolean isInAnyTrenchOpening = FieldUtils.isInAnyTrenchOpening(m_robotContainer.drive.getGlobalPose().getTranslation().toTranslation2d());
+
+  boolean isLeftSideOfField = FieldUtils.isLeftSide(m_robotContainer.drive.getGlobalPose().getTranslation().toTranslation2d());
+  boolean isRightSideOfField = FieldUtils.isRightSide(m_robotContainer.drive.getGlobalPose().getTranslation().toTranslation2d());
+  
+  Logger.recordOutput("FieldStates/isInAllianceZone", isInAllianceZone);
+  Logger.recordOutput("FieldStates/isInNeutralZone", isInNeutralZone);
+  Logger.recordOutput("FieldStates/isInOpposingZone", isInOpposingZone);
+  Logger.recordOutput("FieldStates/isInAnyTrenchOpening", isInAnyTrenchOpening);
+
+  Logger.recordOutput("FieldStates/isLeftSideOfField", isLeftSideOfField);
+  Logger.recordOutput("FieldStates/isRightSideOfField", isRightSideOfField);
+
+  }
 }
+
+

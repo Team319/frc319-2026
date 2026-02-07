@@ -15,6 +15,7 @@ package frc319.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -24,9 +25,14 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc319.robot.Constants;
+import frc319.robot.Constants.DriveConstants;
 import frc319.robot.Constants.HeadingTargets;
+import frc319.robot.FieldConstants;
 import frc319.robot.subsystems.drive.Drive;
+import frc319.robot.util.AllianceUtils;
+import frc319.robot.util.FieldUtils;
 
+import java.lang.reflect.Field;
 import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -191,4 +197,88 @@ public class DriveCommands {
   //     ()-> { drive.setUpdatePoseWithVision(false); }
   //   ) ;
   // }
+
+    // ========================= PathPlanner =========================
+
+  public static Command followPathCommand(String pathName) {
+    try{
+        PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+      return AutoBuilder.followPath(path);
+
+    } catch (Exception e) {
+        DriverStation.reportError("Something went wrong while following a path (1): " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
+  }
+
+  public static Command pathFindToPose(PathConstraints constraints, Pose2d targetPose) {
+    return AutoBuilder.pathfindToPose(targetPose, constraints);
+  }
+
+  public static Command pathfindThenFollowPath(PathConstraints constraints,String pathName ) {
+    try{
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+    return AutoBuilder.pathfindThenFollowPath(path, constraints);
+
+    } catch (Exception e) {
+        DriverStation.reportError("Something went wrong while following a path (2): " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
+
+  }
+
+  public static Command pathfindThenFollowPath(PathConstraints constraints,String pathName, double speed ) {
+    try{
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+    return AutoBuilder.pathfindThenFollowPath(path, constraints);
+
+    } catch (Exception e) {
+        DriverStation.reportError("Something went wrong while following a path (3): " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
+
+  }
+
+  // ========================= Trench Pathfinding =========================
+  public static Command pathfindUnderNearestTrench(Drive drive){
+
+    Pose2d robotPose = drive.getGlobalPose().toPose2d();
+
+    // 1. Determine zone robot is in
+    FieldUtils.getZoneDescription(robotPose);
+    // 2. Determine which path to take based on zone
+    
+    String side = FieldUtils.isLeftSide(robotPose) ? "left" : "right";
+    String direction;
+    String zone;
+    
+    if (FieldUtils.isInAllianceZone(robotPose) || FieldUtils.isInOpposingZone(robotPose)) {
+      // We want to exit the Current Alliance Zone and enter the neutral zone
+      direction = "exit";
+    } else {
+      // We want to enter the Closest Alliance Zone 
+      direction = "enter";
+
+    }
+
+      
+      // Determine which alliance zone is closest
+      if(FieldUtils.isCloserToBlueSide(robotPose)){
+        zone = AllianceUtils.isBlueAlliance() ? "alliance" : "opposing";
+      }
+      else{
+        zone = AllianceUtils.isRedAlliance() ? "alliance" : "opposing";
+      }
+    
+    String pathString =  "go_" + direction + "_" + side + "_" + zone; // e.g. "go_exit_left_alliance", "go_enter_right_opposing", etc.;
+
+
+    // 3. Execute pathfinding command for chosen path
+    System.out.println("[pathfindUnderNearestTrench]: "+ pathString);
+    return pathfindThenFollowPath(DriveConstants.pathingConstraints, pathString);
+
+  }
+
 }

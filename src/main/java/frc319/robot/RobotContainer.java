@@ -192,14 +192,13 @@ public class RobotContainer {
 
         //driverController.rightBumper().whileTrue( new InstantCommand(() -> turret.setAngle(() -> turret.getLauncOnTheFlyAngle())) );
         
-        if (false){ // Turned off for safety at demos
+        if (true){ // Turned off for safety at demos
 
           // TODO 1/22/26 - test these, as the schedule method changed
           
           // TODO - add pathfinding under the closest trench
 
-          //driverController.rightBumper().whileTrue(   new InstantCommand(()-> CommandScheduler.getInstance().schedule( drive.pathfindToClosestRightReef() )) );  
-          //driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( drive.pathfindToClosestLeftReef() )) );
+          driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( DriveCommands.pathfindUnderNearestTrench(drive)) ));
           
         }
 

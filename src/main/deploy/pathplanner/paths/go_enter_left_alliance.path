@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.85,
-        "y": 6.0
+        "x": 5.693295454545454,
+        "y": 7.401771019677997
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.1592336823279776,
-        "y": 6.0
+        "x": 4.796602272727272,
+        "y": 7.395022727272727
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.6,
-        "y": 6.0
+        "x": 3.539170454545454,
+        "y": 7.401771019677997
       },
       "prevControl": {
-        "x": 1.1050785918152974,
-        "y": 6.0
+        "x": 4.240034090909091,
+        "y": 7.384715909090909
       },
       "nextControl": null,
       "isLocked": false,
@@ -41,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 2.0,
+    "rotation": 179.51752589243193
   },
   "reversed": false,
-  "folder": null,
+  "folder": "alliance_trenches",
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 2.0,
+    "rotation": 179.72901700701834
   },
   "useDefaultConstraints": true
 }
