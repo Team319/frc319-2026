@@ -244,7 +244,7 @@ public class RobotContainer {
         driverController.povUp()
           .onTrue( flywheels.setVelocity(() -> RPM.of(2000)) );
 
-        driverController.povUp()
+        driverController.povLeft()
           .onTrue( flywheels.setVelocity(() -> RPM.of(3000)) );
 
         driverController.povDown()

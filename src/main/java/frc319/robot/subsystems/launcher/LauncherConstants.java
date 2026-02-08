@@ -92,8 +92,8 @@ public final class LauncherConstants {
       leftConfig.fxConfig.Slot0.kP = 0.0;
       leftConfig.fxConfig.Slot0.kI = 0.0;
       leftConfig.fxConfig.Slot0.kD = 0.0;
-      leftConfig.fxConfig.Slot0.kS = 0.15;
-      leftConfig.fxConfig.Slot0.kV = 0.114;
+      leftConfig.fxConfig.Slot0.kS = 0.15; //0.15
+      leftConfig.fxConfig.Slot0.kV = 0.13; //0.114
       leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
