@@ -29,14 +29,17 @@ import frc319.robot.subsystems.drive.ModuleIOSim;
 import frc319.robot.subsystems.drive.ModuleIOTalonFX;
 import frc319.robot.subsystems.intake.IntakeConstants;
 import frc319.robot.subsystems.launcher.Turret;
+import frc319.robot.subsystems.launcher.Flywheels;
+import frc319.robot.subsystems.launcher.Hood;
 import frc319.robot.subsystems.serializer.SerializerConstants;
 import frc319.robot.subsystems.launcher.LauncherConstants;
-import frc319.robot.subsystems.launcher.LauncherConstants.*;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager;
 
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.function.Supplier;
 
@@ -55,6 +58,8 @@ public class RobotContainer {
   // Subsystems
   public final Drive drive;  
   public final Turret turret;
+  public final Flywheels flywheels;
+  public final Hood hood;
 
   // Controller
   public final CommandXboxController driverController = new CommandXboxController(0);
@@ -84,6 +89,46 @@ public class RobotContainer {
             new Turret(
                 LauncherConstants.Turret.config, new TalonFXIO(LauncherConstants.Turret.config));
 
+        flywheels =
+            new Flywheels(
+                LauncherConstants.Flywheels.leftConfig,
+                LauncherConstants.Flywheels.rightConfig,
+                new SimTalonFXIO(LauncherConstants.Flywheels.leftConfig),
+                new SimTalonFXIO(LauncherConstants.Flywheels.rightConfig));
+
+          hood =
+            new Hood(
+              LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
+
+
+          break;
+
+        case LAUNCHER_PROTOTYPE:
+              // Simulated drivetrain
+              drive =
+              new Drive(
+                  new GyroIO() {},
+                  new ModuleIOSim(),
+                  new ModuleIOSim(),
+                  new ModuleIOSim(),
+                  new ModuleIOSim() );
+            // Simulated Turret
+            turret =
+              new Turret(
+                  LauncherConstants.Turret.config, new SimTalonFXIO(LauncherConstants.Turret.config));
+
+        flywheels =
+            new Flywheels(
+                LauncherConstants.Flywheels.leftConfig,
+                LauncherConstants.Flywheels.rightConfig,
+                new TalonFXIO(LauncherConstants.Flywheels.leftConfig),
+                new TalonFXIO(LauncherConstants.Flywheels.rightConfig));
+
+            hood =
+              new Hood(
+                LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
+
+
 
           break;
 
@@ -101,6 +146,16 @@ public class RobotContainer {
             turret =
               new Turret(
                   LauncherConstants.Turret.config, new SimTalonFXIO(LauncherConstants.Turret.config));
+
+        flywheels =
+            new Flywheels(
+                LauncherConstants.Flywheels.leftConfig,
+                LauncherConstants.Flywheels.rightConfig,
+                new SimTalonFXIO(LauncherConstants.Flywheels.leftConfig),
+                new SimTalonFXIO(LauncherConstants.Flywheels.rightConfig));
+            hood =
+              new Hood(
+                LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
                   
             break;
       }
@@ -109,18 +164,6 @@ public class RobotContainer {
       // NamedCommands.registerCommand(
       //   "Collect",
       //   new CollectCoral(superstructure));
-
-      // NamedCommands.registerCommand(
-      //   "ScoreL4",
-      //   new SafelyMoveToScoringPosition(superstructure, 4));
-
-      // NamedCommands.registerCommand(
-      //   "ScoreCoral",
-      //   new AutoScoreCoral(superstructure));
-
-      // NamedCommands.registerCommand(
-      //   "GoHome",
-      //   new AutoGoHome(superstructure));
 
       // Set up auto routines
       autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -168,9 +211,7 @@ public class RobotContainer {
               () -> -driverController.getRightY(), 
               () -> -driverController.getRightX(),
               () -> driverController.getLeftTriggerAxis()));
-
-        
-        
+              
         break;
       }
   
@@ -185,7 +226,31 @@ public class RobotContainer {
             .onTrue(new InstantCommand(()->turret.setState(LauncherConstants.Turret.TurretState.TRACK_HUB_ON_MOVE)))
             .onFalse(new InstantCommand(()->turret.setState(LauncherConstants.Turret.TurretState.IDLE)));
 
-        // driverController.a().onTrue( turret.setAngle(() -> Degrees.of(0)) );
+        driverController.a()
+          .onTrue( hood.setAngle(() -> Degrees.of(0)) );
+          //.onFalse( hood.setAngle(() -> Degrees.of(0)) );
+
+        driverController.b()
+          .onTrue( hood.setAngle(() -> Degrees.of(15)) );
+          //.onFalse( hood.setAngle(() -> Degrees.of(0)) );
+
+        driverController.y()
+          .onTrue( hood.setAngle(() -> Degrees.of(25)) );
+          //.onFalse( hood.setAngle(() -> Degrees.of(0)) );
+
+        driverController.povRight()
+          .onTrue( flywheels.setVelocity(() -> RPM.of(1000)) );
+
+        driverController.povUp()
+          .onTrue( flywheels.setVelocity(() -> RPM.of(2000)) );
+
+        driverController.povUp()
+          .onTrue( flywheels.setVelocity(() -> RPM.of(3000)) );
+
+        driverController.povDown()
+          .onTrue( flywheels.setVelocity(() -> RPM.of(0)) );
+          
+
         // driverController.x().onTrue( turret.setAngle(() -> Degrees.of(90)) );  
         // driverController.y().onTrue( turret.setAngle(() -> Degrees.of(180)) );
         // driverController.b().onTrue( turret.setAngle(() -> Degrees.of(360)) );
