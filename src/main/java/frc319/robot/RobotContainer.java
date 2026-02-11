@@ -41,6 +41,7 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -158,7 +159,24 @@ public class RobotContainer {
                 LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
                   
             break;
-      }
+      } // End of robot-specific subsystem instantiation switch statement
+
+      // ==========================================
+      // Set up for Elastic dashboard for testing
+      // ==========================================
+
+      // The slider will be available in Elastic's dashboard
+      DoubleSupplier flywheelTestRPM = () -> SmartDashboard.getNumber("Flywheel Test RPM", 0.0);
+      flywheels.setTestFlywheelRPMSupplier(flywheelTestRPM);
+      
+      // Initialize the slider with a default value and bounds (optional but recommended)
+      SmartDashboard.putNumber("Flywheel Test RPM", 0.0);  // Default value
+
+      // ==========================================
+      // End of Elastic dashboard setup
+      // ==========================================
+
+
       //Set up Named Commands in Pathplanner
 
       // NamedCommands.registerCommand(
@@ -249,6 +267,10 @@ public class RobotContainer {
 
         driverController.povDown()
           .onTrue( flywheels.setVelocity(() -> RPM.of(0)) );
+
+        driverController.back()
+          .onTrue( new InstantCommand(()->flywheels.setState(LauncherConstants.Flywheels.FlywheelsState.TESTING_ENABLED)))
+          .onFalse( new InstantCommand(()->flywheels.setState(LauncherConstants.Flywheels.FlywheelsState.IDLE)));
           
 
         // driverController.x().onTrue( turret.setAngle(() -> Degrees.of(90)) );  
