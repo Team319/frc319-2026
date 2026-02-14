@@ -29,6 +29,7 @@ import frc319.robot.subsystems.drive.ModuleIOSim;
 import frc319.robot.subsystems.drive.ModuleIOTalonFX;
 import frc319.robot.subsystems.intake.IntakeConstants;
 import frc319.robot.subsystems.launcher.Turret;
+import frc319.robot.subsystems.serializer.BallTunnel;
 import frc319.robot.subsystems.serializer.SerializerConstants;
 import frc319.robot.subsystems.serializer.Spindexer;
 import frc319.robot.subsystems.launcher.LauncherConstants;
@@ -56,6 +57,7 @@ public class RobotContainer {
   // Subsystems
   public final Drive drive;  
   public final Turret turret;
+  public final BallTunnel ballTunnel;
   public final Spindexer spindexer;
   // Controller
   public final CommandXboxController driverController = new CommandXboxController(0);
@@ -84,9 +86,11 @@ public class RobotContainer {
           turret =
             new Turret(
                 LauncherConstants.Turret.config, new TalonFXIO(LauncherConstants.Turret.config));
-
-          spindexer = new Spindexer(
-                  SerializerConstants.Spindexer.config, new TalonFXIO(SerializerConstants.Spindexer.config)); 
+          ballTunnel =
+            new BallTunnel(SerializerConstants.BallTunnel.config, new TalonFXIO(SerializerConstants.BallTunnel.config));
+          
+          spindexer = 
+            new Spindexer(SerializerConstants.Spindexer.config, new TalonFXIO(SerializerConstants.Spindexer.config)); 
           break;
 
           case SIMBOT:
@@ -103,9 +107,13 @@ public class RobotContainer {
             turret =
               new Turret(
                   LauncherConstants.Turret.config, new SimTalonFXIO(LauncherConstants.Turret.config));
+             
+          ballTunnel =
+              new BallTunnel(SerializerConstants.BallTunnel.config, new simTalonFXIO(SerializerConstants.BallTunnel.config));
+ 
             
-            spindexer = new Spindexer(
-                  SerializerConstants.Spindexer.config, new SimTalonFXIO(SerializerConstants.Spindexer.config)); 
+          spindexer = 
+              new Spindexer(SerializerConstants.Spindexer.config, new SimTalonFXIO(SerializerConstants.Spindexer.config)); 
             
             break;
       }
