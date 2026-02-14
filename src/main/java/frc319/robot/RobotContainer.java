@@ -31,7 +31,9 @@ import frc319.robot.subsystems.intake.IntakeConstants;
 import frc319.robot.subsystems.launcher.Turret;
 import frc319.robot.subsystems.launcher.Flywheels;
 import frc319.robot.subsystems.launcher.Hood;
+import frc319.robot.subsystems.serializer.BallTunnel;
 import frc319.robot.subsystems.serializer.SerializerConstants;
+import frc319.robot.subsystems.serializer.Spindexer;
 import frc319.robot.subsystems.launcher.LauncherConstants;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager;
 
@@ -61,7 +63,8 @@ public class RobotContainer {
   public final Turret turret;
   public final Flywheels flywheels;
   public final Hood hood;
-
+  public final BallTunnel ballTunnel;
+  public final Spindexer spindexer;
   // Controller
   public final CommandXboxController driverController = new CommandXboxController(0);
   public final CommandXboxController operatorController = new CommandXboxController(1);
@@ -89,8 +92,13 @@ public class RobotContainer {
           turret =
             new Turret(
                 LauncherConstants.Turret.config, new TalonFXIO(LauncherConstants.Turret.config));
-
-        flywheels =
+          ballTunnel =
+            new BallTunnel(SerializerConstants.BallTunnel.config, new SimTalonFXIO(SerializerConstants.BallTunnel.config));
+          
+          spindexer = 
+            new Spindexer(SerializerConstants.Spindexer.config, new SimTalonFXIO(SerializerConstants.Spindexer.config));         
+            
+          flywheels =
             new Flywheels(
                 LauncherConstants.Flywheels.leftConfig,
                 LauncherConstants.Flywheels.rightConfig,
@@ -125,6 +133,12 @@ public class RobotContainer {
                 new TalonFXIO(LauncherConstants.Flywheels.leftConfig),
                 new TalonFXIO(LauncherConstants.Flywheels.rightConfig));
 
+            ballTunnel =
+              new BallTunnel(SerializerConstants.BallTunnel.config, new TalonFXIO(SerializerConstants.BallTunnel.config));
+            
+            spindexer = 
+              new Spindexer(SerializerConstants.Spindexer.config, new TalonFXIO(SerializerConstants.Spindexer.config));  
+
             hood =
               new Hood(
                 LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
@@ -157,7 +171,14 @@ public class RobotContainer {
             hood =
               new Hood(
                 LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
-                  
+             
+          ballTunnel =
+              new BallTunnel(SerializerConstants.BallTunnel.config, new SimTalonFXIO(SerializerConstants.BallTunnel.config));
+ 
+            
+          spindexer = 
+              new Spindexer(SerializerConstants.Spindexer.config, new SimTalonFXIO(SerializerConstants.Spindexer.config)); 
+            
             break;
       } // End of robot-specific subsystem instantiation switch statement
 
