@@ -31,6 +31,7 @@ import frc319.robot.subsystems.intake.IntakeConstants;
 import frc319.robot.subsystems.launcher.Turret;
 import frc319.robot.subsystems.serializer.BallTunnel;
 import frc319.robot.subsystems.serializer.SerializerConstants;
+import frc319.robot.subsystems.serializer.Spindexer;
 import frc319.robot.subsystems.launcher.LauncherConstants;
 import frc319.robot.subsystems.launcher.LauncherConstants.*;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager;
@@ -57,6 +58,7 @@ public class RobotContainer {
   public final Drive drive;  
   public final Turret turret;
   public final BallTunnel ballTunnel;
+  public final Spindexer spindexer;
   // Controller
   public final CommandXboxController driverController = new CommandXboxController(0);
   public final CommandXboxController operatorController = new CommandXboxController(1);
@@ -84,9 +86,11 @@ public class RobotContainer {
           turret =
             new Turret(
                 LauncherConstants.Turret.config, new TalonFXIO(LauncherConstants.Turret.config));
-            ballTunnel =
+          ballTunnel =
             new BallTunnel(SerializerConstants.BallTunnel.config, new TalonFXIO(SerializerConstants.BallTunnel.config));
-
+          
+          spindexer = 
+            new Spindexer(SerializerConstants.Spindexer.config, new TalonFXIO(SerializerConstants.Spindexer.config)); 
           break;
 
           case SIMBOT:
@@ -103,9 +107,14 @@ public class RobotContainer {
             turret =
               new Turret(
                   LauncherConstants.Turret.config, new SimTalonFXIO(LauncherConstants.Turret.config));
-                  ballTunnel =
-            new BallTunnel(SerializerConstants.BallTunnel.config, new simTalonFXIO(SerializerConstants.BallTunnel.config));
+             
+          ballTunnel =
+              new BallTunnel(SerializerConstants.BallTunnel.config, new simTalonFXIO(SerializerConstants.BallTunnel.config));
  
+            
+          spindexer = 
+              new Spindexer(SerializerConstants.Spindexer.config, new SimTalonFXIO(SerializerConstants.Spindexer.config)); 
+            
             break;
       }
       //Set up Named Commands in Pathplanner

@@ -36,4 +36,10 @@ public class Spindexer extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
     return config.initialTransform.plus(localTransform);
   }
+  public void stop(){
+    super.setOpenLoopDutyCycleImpl(0.0);
+  }
+  public void setDutyCycle(double dutyCycle){
+    super.setOpenLoopDutyCycleImpl(dutyCycle);
+  }
 }
