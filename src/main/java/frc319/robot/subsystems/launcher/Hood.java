@@ -25,15 +25,17 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   public Hood(final TalonFXSubsystemConfig config, final TalonFXIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
+    setMotionMagicConfigImpl(LauncherConstants.Hood.mmConfig);
+
   }
 
-  public Command setAngleCommand(Supplier<Angle> desiredAngle) {
+  public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
         () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
   }
 
   public Command retract() {
-    return setAngleCommand(() -> LauncherConstants.Hood.retractedPosition);
+    return setAngle(() -> LauncherConstants.Hood.retractedPosition);
   }
 
   @Override
@@ -44,7 +46,6 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     Angle aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
 
     Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);
-    super.setCurrentPosition(aimAngle);
   }
 
   @Override

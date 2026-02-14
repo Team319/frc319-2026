@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Radians;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -66,7 +67,7 @@ public final class LauncherConstants {
 
       }
 
-    }
+    } 
 
     public static MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
@@ -77,19 +78,35 @@ public final class LauncherConstants {
 
     public static int MODEL_INDEX = 3;
     public static int PARENT_INDEX = 0; // drivetrain
-  }
+
+  } // End of Turret Constants
 
   public final class Flywheels {
 
-    public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
+        public static enum FlywheelsState {
+      IDLE,
+      TESTING_ENABLED
+    }
+
+    public static TalonFXSubsystemConfig leftConfig = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig rightConfig = new TalonFXSubsystemConfig();
 
     static {
-      config.name = "Flywheels";
-      config.talonCANID = new CANDeviceId(13); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kP = 0.2;
-      config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
+      leftConfig.name = "Flywheel Left";
+      leftConfig.talonCANID = new CANDeviceId(21); // Example CAN ID, replace with actual ID
+      leftConfig.fxConfig.Slot0.kP = 0.0;
+      leftConfig.fxConfig.Slot0.kI = 0.0;
+      leftConfig.fxConfig.Slot0.kD = 0.0;
+      leftConfig.fxConfig.Slot0.kS = 0.15; //0.15
+      leftConfig.fxConfig.Slot0.kV = 0.1; //0.114
+      leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+      leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+      leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
+      //leftConfig.tunable = true;
+
+      rightConfig.name = "Flywheel Right";
+      rightConfig.talonCANID = new CANDeviceId(22); // Example CAN ID, replace with actual ID
+      rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
     }
 
     public static int MODEL_INDEX = 5;
@@ -110,7 +127,7 @@ public final class LauncherConstants {
       velocityMap.put(4.0, 25.0);
       velocityMap.put(5.17, 28.0);
     }
-  }
+  } // End of Flywheels Constants
 
   public final class Hood {
 
@@ -118,11 +135,12 @@ public final class LauncherConstants {
 
     static {
       config.name = "Hood";
-      config.talonCANID = new CANDeviceId(14); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kP = 0.2;
+      config.talonCANID = new CANDeviceId(23); // Example CAN ID, replace with actual ID
+      config.fxConfig.Slot0.kS = 0.5;
+      config.fxConfig.Slot0.kP = 10;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
+      config.unitToRotorRatio = 0.008974359; // 1:1 ratio   // todo is this right? (14/50 * 15/24 * 20/390) = 0.008974359
       config.initialTransform =
           new Transform3d(
               new Translation3d(Inches.of(4.086915).in(Meters), 0, 0), new Rotation3d());
@@ -141,5 +159,13 @@ public final class LauncherConstants {
       angleMap.put(3.0, 30.0);
       angleMap.put(4.0, 40.0);
     }
-  }
+
+    public static MotionMagicConfigs mmConfig = new MotionMagicConfigs();
+
+    static {
+      mmConfig.MotionMagicCruiseVelocity = 30.0;
+      mmConfig.MotionMagicAcceleration = 60.0;
+    }
+
+  } // End of Hood Constants
 }

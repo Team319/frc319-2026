@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -17,55 +18,105 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc319.redhawk_lib.io.ArticulatedComponent;
+import frc319.redhawk_lib.io.MotorIO;
 import frc319.redhawk_lib.io.MotorInputsAutoLogged;
-import frc319.redhawk_lib.io.TalonFXIO;
-import frc319.redhawk_lib.subsystem.MotorSubsystem;
+import frc319.redhawk_lib.subsystem.MotorFollowerSubsystem;
 import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
 import frc319.redhawk_lib.util.RobotTime;
 import frc319.robot.FieldConstants;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Flywheels extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
+public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
 
-  public Flywheels(final TalonFXSubsystemConfig config, final TalonFXIO launcherMotorIO) {
-    super(config, new MotorInputsAutoLogged(), launcherMotorIO);
+  private LauncherConstants.Flywheels.FlywheelsState flywheelsState = LauncherConstants.Flywheels.FlywheelsState.IDLE;
+
+  // Elastic slider for testing flywheel speed (0 to 6000 RPM)
+  private DoubleSupplier testFlywheelRPM = () -> 0.0;  // Default to 0, will be set from Elastic
+
+
+  public Flywheels(
+      final TalonFXSubsystemConfig leftConfig,
+      final TalonFXSubsystemConfig rightConfig,
+      final MotorIO leftLauncherMotorIO,
+      final MotorIO rightLauncherMotorIO) {
+    super(
+        "Flywheel",
+        leftConfig,
+        rightConfig,
+        new MotorInputsAutoLogged(),
+        new MotorInputsAutoLogged(),
+        leftLauncherMotorIO,
+        rightLauncherMotorIO);
     this.fuelTrajectories = new FuelTrajectories();
   }
 
+  public void setState(LauncherConstants.Flywheels.FlywheelsState newState) {
+  this.flywheelsState = newState;
+  }
+
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
-    return velocitySetpointCommand(() -> desiredVelocity.get().times(config.unitToRotorRatio));
+    return velocitySetpointCommand(() -> desiredVelocity.get().times(leftConfig.unitToRotorRatio));
   }
 
   public Command stop() {
     return setVelocity(() -> RotationsPerSecond.of(0));
   }
 
+  /**
+   * Sets the supplier for the test flywheel RPM slider.
+   * Call this from RobotContainer to connect an Elastic slider.
+   * 
+   * @param rpmSupplier A DoubleSupplier that returns the desired RPM from Elastic
+   */
+  public void setTestFlywheelRPMSupplier(DoubleSupplier rpmSupplier) {
+    this.testFlywheelRPM = rpmSupplier;
+  }
+
   @Override
   public void periodic() {
     super.periodic();
+    
+    Logger.recordOutput(pb.makePath("flywheelVelocityRPM"), super.getLeftCurrentVelocity().in(RPM));
 
-    var solution = LaunchingSolutionManager.getInstance().getSolution();
+    switch (flywheelsState) {
 
-    if (solution.isValid()) {
-      launchFuel(solution);
+      case TESTING_ENABLED:
+        // Use the value from Elastic slider
+        System.out.println("Test Flywheel RPM: " + testFlywheelRPM.getAsDouble()); // Debug print
+        this.setVelocity(() -> RPM.of(testFlywheelRPM.getAsDouble())).schedule();
+        break;
+
+      case IDLE:
+      default:
+        this.setVelocity(() -> RPM.of(0)).schedule();
+        break;
     }
-    Pose3d globalPose = this.getGlobalPose();
-    Logger.recordOutput(
-        super.pb.makePath("ball_vector"),
-        new Pose3d[] {
-          globalPose, globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
-        });
-    Time now = RobotTime.getTimestamp();
-    Time dt = now.minus(lastUpdateTime);
-    fuelTrajectories.update(dt);
-    this.lastUpdateTime = now;
-    Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
+
+  // TODO - add this when we have the launching solution manager working
+
+    // var solution = LaunchingSolutionManager.getInstance().getSolution();
+
+    // if (solution.isValid()) {
+    //   launchFuel(solution);
+    // }
+    // Pose3d globalPose = this.getGlobalPose();
+    // Logger.recordOutput(
+    //     super.pb.makePath("ball_vector"),
+    //     new Pose3d[] {
+    //       globalPose, globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
+    //     });
+    // Time now = RobotTime.getTimestamp();
+    // Time dt = now.minus(lastUpdateTime);
+    // fuelTrajectories.update(dt);
+    // this.lastUpdateTime = now;
+    // Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
   }
 
   @Override
@@ -79,7 +130,7 @@ public class Flywheels extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   }
 
   public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = super.getCurrentVelocity().div(config.unitToRotorRatio);
+    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity().div(leftConfig.unitToRotorRatio);
     Distance wheelDiameter = Inches.of(4);
     Distance wheelCircumference = wheelDiameter.times(Math.PI);
     return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));

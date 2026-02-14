@@ -20,7 +20,7 @@ public class Constants {
   public static final boolean tuningMode = false;
   public static final double loopPeriodSecs = 0.02;
 
-  private static RobotType robotType = RobotType.DEVBOT;
+  private static RobotType robotType = RobotType.LAUNCHER_PROTOTYPE;
 
   private static FieldType fieldType = FieldType.ANDYMARK;
 
@@ -46,7 +46,7 @@ public class Constants {
 
   public static Mode getMode() {
     return switch (robotType) {
-      case DEVBOT, COMPBOT -> RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
+      case DEVBOT, COMPBOT, LAUNCHER_PROTOTYPE -> RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
       case SIMBOT -> Mode.SIM;
     };
   }
@@ -73,7 +73,8 @@ public class Constants {
   public enum RobotType {
     SIMBOT,
     DEVBOT,
-    COMPBOT
+    COMPBOT,
+    LAUNCHER_PROTOTYPE
   }
 
   public enum FieldType {
