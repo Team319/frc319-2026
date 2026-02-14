@@ -30,12 +30,12 @@ public final class SerializerConstants {
     public static int PARENT_INDEX = 0; // drivetrain
   }
 
-  public static final class Kicker {
+  public static final class BallTunnel {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
 
     static {
-      config.name = "Kicker";
+      config.name = "BallTunnel";
       config.talonCANID = new CANDeviceId(11); // Example CAN ID, replace with actual ID
       config.fxConfig.Slot0.kP = 0.2;
       config.fxConfig.Slot0.kI = 0.0;

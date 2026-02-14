@@ -29,6 +29,7 @@ import frc319.robot.subsystems.drive.ModuleIOSim;
 import frc319.robot.subsystems.drive.ModuleIOTalonFX;
 import frc319.robot.subsystems.intake.IntakeConstants;
 import frc319.robot.subsystems.launcher.Turret;
+import frc319.robot.subsystems.serializer.BallTunnel;
 import frc319.robot.subsystems.serializer.SerializerConstants;
 import frc319.robot.subsystems.launcher.LauncherConstants;
 import frc319.robot.subsystems.launcher.LauncherConstants.*;
@@ -55,7 +56,7 @@ public class RobotContainer {
   // Subsystems
   public final Drive drive;  
   public final Turret turret;
-
+  public final BallTunnel ballTunnel;
   // Controller
   public final CommandXboxController driverController = new CommandXboxController(0);
   public final CommandXboxController operatorController = new CommandXboxController(1);
@@ -83,7 +84,8 @@ public class RobotContainer {
           turret =
             new Turret(
                 LauncherConstants.Turret.config, new TalonFXIO(LauncherConstants.Turret.config));
-
+            ballTunnel =
+            new BallTunnel(SerializerConstants.BallTunnel.config, new TalonFXIO(SerializerConstants.BallTunnel.config));
 
           break;
 
@@ -101,7 +103,9 @@ public class RobotContainer {
             turret =
               new Turret(
                   LauncherConstants.Turret.config, new SimTalonFXIO(LauncherConstants.Turret.config));
-                  
+                  ballTunnel =
+            new BallTunnel(SerializerConstants.BallTunnel.config, new simTalonFXIO(SerializerConstants.BallTunnel.config));
+ 
             break;
       }
       //Set up Named Commands in Pathplanner
