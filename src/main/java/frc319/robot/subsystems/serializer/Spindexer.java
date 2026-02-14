@@ -3,6 +3,8 @@ package frc319.robot.subsystems.serializer;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -17,6 +19,8 @@ import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
 public class Spindexer extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     implements ArticulatedComponent {
 
+      DoubleSupplier spindexerDutyCycle;
+
   public Spindexer(final TalonFXSubsystemConfig config, final TalonFXIO indexerMotorIO) {
     super(config, new MotorInputsAutoLogged(), indexerMotorIO);
   }
@@ -24,6 +28,7 @@ public class Spindexer extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   @Override
   public void periodic() {
     super.periodic();
+    setDutyCycle(spindexerDutyCycle.getAsDouble());
     // Additional periodic code for indexer can be added here
   }
 
@@ -41,5 +46,14 @@ public class Spindexer extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   }
   public void setDutyCycle(double dutyCycle){
     super.setOpenLoopDutyCycleImpl(dutyCycle);
+  }
+  /**
+   * Sets the supplier for the test flywheel RPM slider.
+   * Call this from RobotContainer to connect an Elastic slider.
+   * 
+   * @param dutyCycleSupplier A DoubleSupplier that returns the desired RPM from Elastic
+   */
+  public void setTestSpindexerDutyCycle(DoubleSupplier dutyCycleSupplier) {
+    this.spindexerDutyCycle = dutyCycleSupplier;
   }
 }

@@ -190,9 +190,14 @@ public class RobotContainer {
       DoubleSupplier flywheelTestRPM = () -> SmartDashboard.getNumber("Flywheel Test RPM", 0.0);
       flywheels.setTestFlywheelRPMSupplier(flywheelTestRPM);
       
+      DoubleSupplier ballTunnelTestDutyCycle = () -> SmartDashboard.getNumber("BallTunnel Test DutyCycle", 0.0);
+      ballTunnel.setTestBallTunnelDutyCycle(ballTunnelTestDutyCycle);
+      DoubleSupplier SpindexerTestDutyCycle = () -> SmartDashboard.getNumber("SpindexerTestDutyCycle", 0.0);
+      spindexer.setTestSpindexerDutyCycle(SpindexerTestDutyCycle);
       // Initialize the slider with a default value and bounds (optional but recommended)
       SmartDashboard.putNumber("Flywheel Test RPM", 0.0);  // Default value
-
+      SmartDashboard.putNumber("BallTunnel Test DutyCycle", 0.0);  // Default value
+       SmartDashboard.putNumber("SpindexerTestDutyCycle", 0.0);
       // ==========================================
       // End of Elastic dashboard setup
       // ==========================================
