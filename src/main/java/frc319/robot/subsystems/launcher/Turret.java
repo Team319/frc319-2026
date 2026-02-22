@@ -79,7 +79,8 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public Transform3d getTransform3d() {
-    Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
+    Angle rotations = super.getCurrentPosition().div(1/config.unitToRotorRatio); // was times
+    
     return config.initialTransform.plus(
         new Transform3d(new Translation3d(), new Rotation3d(0, 0, rotations.in(Radians))));
   }

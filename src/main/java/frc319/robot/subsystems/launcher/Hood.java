@@ -51,7 +51,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   @Override
   public Transform3d getTransform3d() {
     // TODO: Get this from sensors
-    Angle rotations = super.getCurrentPosition().div(config.unitToRotorRatio);
+    Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
     Transform3d localTransform =
         new Transform3d(new Translation3d(), new Rotation3d(0, rotations.in(Radians), 0));
 

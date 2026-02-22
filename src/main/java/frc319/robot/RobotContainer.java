@@ -28,6 +28,8 @@ import frc319.robot.subsystems.drive.GyroIOPigeon2;
 import frc319.robot.subsystems.drive.ModuleIOSim;
 import frc319.robot.subsystems.drive.ModuleIOTalonFX;
 import frc319.robot.subsystems.intake.IntakeConstants;
+import frc319.robot.subsystems.intake.IntakeExtension;
+import frc319.robot.subsystems.intake.IntakeRollers;
 import frc319.robot.subsystems.launcher.Turret;
 import frc319.robot.subsystems.launcher.Flywheels;
 import frc319.robot.subsystems.launcher.Hood;
@@ -65,6 +67,8 @@ public class RobotContainer {
   public final Hood hood;
   public final BallTunnel ballTunnel;
   public final Spindexer spindexer;
+  public final IntakeExtension intakeExtension;
+  public final IntakeRollers intakeRollers;
   // Controller
   public final CommandXboxController driverController = new CommandXboxController(0);
   public final CommandXboxController operatorController = new CommandXboxController(1);
@@ -93,57 +97,30 @@ public class RobotContainer {
             new Turret(
                 LauncherConstants.Turret.config, new TalonFXIO(LauncherConstants.Turret.config));
           ballTunnel =
-            new BallTunnel(SerializerConstants.BallTunnel.config, new SimTalonFXIO(SerializerConstants.BallTunnel.config));
+            new BallTunnel(SerializerConstants.BallTunnel.config, new TalonFXIO(SerializerConstants.BallTunnel.config));
           
           spindexer = 
-            new Spindexer(SerializerConstants.Spindexer.config, new SimTalonFXIO(SerializerConstants.Spindexer.config));         
+            new Spindexer(SerializerConstants.Spindexer.config, new TalonFXIO(SerializerConstants.Spindexer.config));         
             
           flywheels =
-            new Flywheels(
-                LauncherConstants.Flywheels.leftConfig,
-                LauncherConstants.Flywheels.rightConfig,
-                new SimTalonFXIO(LauncherConstants.Flywheels.leftConfig),
-                new SimTalonFXIO(LauncherConstants.Flywheels.rightConfig));
-
-          hood =
-            new Hood(
-              LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
-
-
-          break;
-
-        case LAUNCHER_PROTOTYPE:
-              // Simulated drivetrain
-              drive =
-              new Drive(
-                  new GyroIO() {},
-                  new ModuleIOSim(),
-                  new ModuleIOSim(),
-                  new ModuleIOSim(),
-                  new ModuleIOSim() );
-            // Simulated Turret
-            turret =
-              new Turret(
-                  LauncherConstants.Turret.config, new SimTalonFXIO(LauncherConstants.Turret.config));
-
-        flywheels =
             new Flywheels(
                 LauncherConstants.Flywheels.leftConfig,
                 LauncherConstants.Flywheels.rightConfig,
                 new TalonFXIO(LauncherConstants.Flywheels.leftConfig),
                 new TalonFXIO(LauncherConstants.Flywheels.rightConfig));
 
-            ballTunnel =
-              new BallTunnel(SerializerConstants.BallTunnel.config, new TalonFXIO(SerializerConstants.BallTunnel.config));
-            
-            spindexer = 
-              new Spindexer(SerializerConstants.Spindexer.config, new TalonFXIO(SerializerConstants.Spindexer.config));  
+          hood =
+            new Hood(
+              LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
 
-            hood =
-              new Hood(
-                LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
+          intakeExtension =
+            new IntakeExtension(
+              IntakeConstants.Extension.config, new TalonFXIO(IntakeConstants.Extension.config));
 
-
+          intakeRollers =
+            new IntakeRollers(
+              IntakeConstants.Rollers.leadConfig, IntakeConstants.Rollers.followConfig,
+              new TalonFXIO(IntakeConstants.Rollers.leadConfig), new TalonFXIO(IntakeConstants.Rollers.followConfig));
 
           break;
 
@@ -178,6 +155,15 @@ public class RobotContainer {
             
           spindexer = 
               new Spindexer(SerializerConstants.Spindexer.config, new SimTalonFXIO(SerializerConstants.Spindexer.config)); 
+
+          intakeExtension =
+            new IntakeExtension(
+              IntakeConstants.Extension.config, new SimTalonFXIO(IntakeConstants.Extension.config));
+
+          intakeRollers =
+            new IntakeRollers(
+              IntakeConstants.Rollers.leadConfig, IntakeConstants.Rollers.followConfig,
+              new SimTalonFXIO(IntakeConstants.Rollers.leadConfig), new SimTalonFXIO(IntakeConstants.Rollers.followConfig));
             
             break;
       } // End of robot-specific subsystem instantiation switch statement

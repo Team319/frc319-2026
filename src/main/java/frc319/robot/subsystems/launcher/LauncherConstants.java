@@ -46,26 +46,10 @@ public final class LauncherConstants {
 
       config.momentOfInertia = 0.25; // KgMetersSquared
 
-      switch (Constants.getRobot()) {
-        case DEVBOT:
-            config.initialTransform =
-              new Transform3d(
-                  new Translation3d(0, Inches.of(0).in(Meters), Inches.of(18.484119).in(Meters)),
-                  new Rotation3d(0, 0, Units.degreesToRadians(0)));
-          break;
-
-        // Real Robot Geometry
-        case COMPBOT:
-        case SIMBOT:
-        default:
-          config.initialTransform =
-              new Transform3d(
-                  new Translation3d(Inches.of(-9).in(Meters), Inches.of(12).in(Meters), Inches.of(18.484119).in(Meters)),
-                  new Rotation3d(0, 0, Units.degreesToRadians(0)));
-          break;
-        
-
-      }
+      config.initialTransform =
+          new Transform3d(
+              new Translation3d( Inches.of(-4.371627).in(Meters), Inches.of(6.257212).in(Meters), Inches.of(14.008475).in(Meters)),
+              new Rotation3d(0, 0, Units.degreesToRadians(0)));        
 
     } 
 
