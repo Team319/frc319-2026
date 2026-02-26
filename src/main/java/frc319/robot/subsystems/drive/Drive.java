@@ -15,6 +15,7 @@ package frc319.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
@@ -54,11 +55,12 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc319.robot.subsystems.drive.GyroIOInputsAutoLogged;
 import frc319.redhawk_lib.io.ArticulatedComponent;
 import frc319.robot.Constants;
+import frc319.robot.FieldConstants;
 import frc319.robot.Constants.DriveConstants;
 import frc319.robot.Constants.HeadingTargets;
 import frc319.robot.Constants.LimelightConstants;
-import frc319.robot.Constants.TargetLocations;
 import frc319.robot.subsystems.vision.Limelight;
+import frc319.robot.util.AllianceFlipUtil;
 import frc319.robot.util.LimelightHelpers;
 import frc319.robot.util.LocalADStarAK;
 import frc319.robot.util.PolarCoordinate;
@@ -546,24 +548,18 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   }
 
   public Translation2d getCurrentTargetLocation(){
-    Translation2d retVal = TargetLocations.ORIGIN.getTranslation();
+    Translation2d retVal = new Translation2d(); // origin (0,0)
 
     if ( DriverStation.getAlliance().isPresent()){
       switch (this.headingTarget) {
         case HUB:
-          switch (DriverStation.getAlliance().get()) {
-            case Red:
-              retVal = TargetLocations.RED_HUB.getTranslation();
-              break;
+
+            retVal = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
           
-            default: // Blue
-              retVal = TargetLocations.BLUE_HUB.getTranslation();
-              break;
-          }
-          break;// Escape Speaker Case
+          break;
       
         default:
-          retVal = TargetLocations.CENTER_OF_FIELD.getTranslation();
+          retVal = new Translation2d(FieldConstants.LinesVertical.center, FieldConstants.LinesHorizontal.center);
           break; // Escape Default Case
       }
   }

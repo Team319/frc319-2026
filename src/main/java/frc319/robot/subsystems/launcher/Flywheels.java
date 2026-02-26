@@ -24,6 +24,7 @@ import frc319.redhawk_lib.subsystem.MotorFollowerSubsystem;
 import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
 import frc319.redhawk_lib.util.RobotTime;
 import frc319.robot.FieldConstants;
+import frc319.robot.subsystems.launcher.LauncherConstants.Flywheels.FlywheelsState;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -35,7 +36,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
 
-  private LauncherConstants.Flywheels.FlywheelsState flywheelsState = LauncherConstants.Flywheels.FlywheelsState.IDLE;
+  private FlywheelsState flywheelsState = LauncherConstants.Flywheels.FlywheelsState.IDLE;
 
   // Elastic slider for testing flywheel speed (0 to 6000 RPM)
   private DoubleSupplier testFlywheelRPM = () -> 0.0;  // Default to 0, will be set from Elastic
@@ -57,7 +58,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     this.fuelTrajectories = new FuelTrajectories();
   }
 
-  public void setState(LauncherConstants.Flywheels.FlywheelsState newState) {
+  public void setState(FlywheelsState newState) {
   this.flywheelsState = newState;
   }
 
@@ -81,11 +82,26 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   @Override
   public void periodic() {
+    Logger.recordOutput(pb.makePath("state"), flywheelsState);
+
     super.periodic();
     
-    Logger.recordOutput(pb.makePath("flywheelVelocityRPM"), super.getLeftCurrentVelocity().in(RPM));
+    //Logger.recordOutput(pb.makePath("flywheelVelocityRPM"), super.getLeftCurrentVelocity().in(RPM));
+
+    var solution = LaunchingSolutionManager.getInstance().getSolution();
 
     switch (flywheelsState) {
+
+      case SHOOT:
+        this.setVelocity(()->RPM.of(3000)).schedule(); // TODO :  need matching flywheel ANGULAR Velocity
+        if (solution.isValid()) {
+          launchFuel(solution);
+        }
+        break;
+
+      case PRESPIN:
+        this.setVelocity(()->RPM.of(3000)).schedule();
+        break;
 
       case TESTING_ENABLED:
         // Use the value from Elastic slider
@@ -99,24 +115,18 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         break;
     }
 
-  // TODO - add this when we have the launching solution manager working
+    Pose3d globalPose = this.getGlobalPose();
+    Logger.recordOutput(
+        super.pb.makePath("ball_vector"),
+        new Pose3d[] {
+          globalPose, globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
+        });
+    Time now = RobotTime.getTimestamp();
+    Time dt = now.minus(lastUpdateTime);
+    fuelTrajectories.update(dt);
+    this.lastUpdateTime = now;
+    Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
 
-    // var solution = LaunchingSolutionManager.getInstance().getSolution();
-
-    // if (solution.isValid()) {
-    //   launchFuel(solution);
-    // }
-    // Pose3d globalPose = this.getGlobalPose();
-    // Logger.recordOutput(
-    //     super.pb.makePath("ball_vector"),
-    //     new Pose3d[] {
-    //       globalPose, globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
-    //     });
-    // Time now = RobotTime.getTimestamp();
-    // Time dt = now.minus(lastUpdateTime);
-    // fuelTrajectories.update(dt);
-    // this.lastUpdateTime = now;
-    // Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
   }
 
   @Override
@@ -174,6 +184,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return structureVel.plus(launchVelGlobal);
   }
 
+  // EKM - Is this just simulated???
   public void launchFuel(LaunchSolution solution) {
     this.fuelTrajectories.launch(
         this.getGlobalPose().getTranslation(), getLaunchVector(solution), RotationsPerSecond.of(0));

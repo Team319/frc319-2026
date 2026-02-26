@@ -17,14 +17,26 @@ import frc319.redhawk_lib.io.MotorInputsAutoLogged;
 import frc319.redhawk_lib.io.TalonFXIO;
 import frc319.redhawk_lib.subsystem.MotorSubsystem;
 import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
+import frc319.robot.subsystems.intake.IntakeConstants.IntakeStates;
+
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
+
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.Idle;
 
 public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     implements ArticulatedComponent {
 
+      IntakeStates intakeState = IntakeStates.IDLE;
+
   public IntakeExtension(
       final TalonFXSubsystemConfig config, final TalonFXIO intakeExtensionMotorIO) {
     super(config, new MotorInputsAutoLogged(), intakeExtensionMotorIO);
+  }
+
+  public void setState(IntakeStates state){
+    this.intakeState = state;
   }
 
   /**
@@ -58,14 +70,34 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
 
   @Override
   public void periodic() {
+    Logger.recordOutput(pb.makePath("state"), intakeState);
+
     super.periodic();
-    // Additional periodic code for intake can be added here
+
+    switch(intakeState){
+      case EXTENDED:
+        this.extendCommand().schedule();
+        break;
+
+      case RETRACTED:
+        this.retractCommand().schedule();
+        break;
+
+      case IDLE:
+      default:
+        super.stop();
+        break;
+    }
   }
 
   @Override
   public Transform3d getTransform3d() {
     // TODO: Get this from sensors
-    Distance distance = Inches.of(Math.sin(Timer.getFPGATimestamp()) + 1).times(6);
+    //Distance distance = Inches.of(Math.sin(Timer.getFPGATimestamp()) + 1).times(6);
+
+    Distance distance = getCurrentPositionAsDistance();
+    Logger.recordOutput(pb.makePath("distance"), distance);
+
     Angle sliderAngle = Degrees.of(-4.479515);
 
     Distance distanceX = distance.times(Math.cos(sliderAngle.in(Radians)));

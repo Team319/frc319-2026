@@ -70,6 +70,14 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   }
 
   /**
+   * Something to tell motors to stop moving. 
+   *
+   */ 
+  public void stop(){
+    io.setOpenLoopDutyCycle(0);
+  }
+
+  /**
    * Multiply by the unit to rotor ratio to get motor rotations
    *
    * @param subsystemPosition
@@ -247,6 +255,16 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    */
   public Angle getCurrentPosition() {
     return inputs.position;
+  }
+
+    /**
+   * Gets the current position as linear distance. For linear mechanisms (elevators, extensions),
+   * converts mechanism rotations to meters using unitRotationsPerMeter.
+   *
+   * @return The current position as a Distance
+   */
+  public Distance getCurrentPositionAsDistance() {
+    return Meters.of(inputs.position.in(Rotations) / config.unitRotationsPerMeter);
   }
 
   /**

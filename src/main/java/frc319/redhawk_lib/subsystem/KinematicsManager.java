@@ -7,6 +7,9 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc319.redhawk_lib.io.AdvantageScopePathBuilder;
 import frc319.redhawk_lib.io.ArticulatedComponent;
+import frc319.robot.FieldConstants;
+import frc319.robot.Constants.DriveConstants;
+
 import java.util.*;
 import org.littletonrobotics.junction.Logger;
 
@@ -43,6 +46,8 @@ public class KinematicsManager extends SubsystemBase {
   private Translation3d[] globalLinVels = new Translation3d[0];
   private Translation3d[] globalAngVels = new Translation3d[0];
 
+  private Translation3d[] globalLinAccels = new Translation3d[0];
+  private Translation3d[] globalAngAccels = new Translation3d[0];
   // Lookup map for O(1) access by Component instance
   private final Map<ArticulatedComponent, Integer> componentToIdMap = new HashMap<>();
 
@@ -152,8 +157,12 @@ public class KinematicsManager extends SubsystemBase {
     int size = globalPoses.length;
     this.globalLinVels = new Translation3d[size];
     this.globalAngVels = new Translation3d[size];
+    this.globalLinAccels = new Translation3d[size];
+    this.globalAngAccels = new Translation3d[size];
     Arrays.fill(this.globalLinVels, new Translation3d());
     Arrays.fill(this.globalAngVels, new Translation3d());
+    Arrays.fill(this.globalLinAccels, new Translation3d());
+    Arrays.fill(this.globalAngAccels, new Translation3d());
 
     // 1. Filter nodes to find which ones are publishable
     List<Integer> indicesList = new ArrayList<>();
@@ -187,6 +196,10 @@ public class KinematicsManager extends SubsystemBase {
       // Rotate local vectors to global frame
       Translation3d localLinDelta = node.component.getRelativeLinearVelocity().rotateBy(globalRot);
       Translation3d localAngDelta = node.component.getRelativeAngularVelocity().rotateBy(globalRot);
+      Translation3d localLinAccelDelta =
+          node.component.getRelativeLinearAcceleration().rotateBy(globalRot);
+      Translation3d localAngAccelDelta =
+          node.component.getRelativeAngularAcceleration().rotateBy(globalRot);
 
       if (node.parentId == -1) {
         // --- ROOT (Chassis) ---
@@ -196,6 +209,8 @@ public class KinematicsManager extends SubsystemBase {
         localPoses[node.id] = new Pose3d();
         globalLinVels[node.id] = localLinDelta;
         globalAngVels[node.id] = localAngDelta;
+        globalLinAccels[node.id] = localLinAccelDelta;
+        globalAngAccels[node.id] = localAngAccelDelta;
 
       } else {
         // --- CHILD ---
@@ -224,6 +239,30 @@ public class KinematicsManager extends SubsystemBase {
 
         globalLinVels[node.id] =
             globalLinVels[node.parentId].plus(tangentialVel).plus(localLinDelta);
+
+        // 4. Update Angular Acceleration: Parent Global + Local Delta
+        globalAngAccels[node.id] = globalAngAccels[node.parentId].plus(localAngAccelDelta);
+
+        // 5. Update Linear Acceleration:
+        // A_child = A_parent + (Alpha_parent x Radius) + (Omega_parent x (Omega_parent x Radius)) +
+        // A_local_delta
+        // where Alpha is angular acceleration and Omega is angular velocity
+
+        // Angular acceleration term: Alpha x Radius
+        Translation3d angAccelTerm =
+            new Translation3d(globalAngAccels[node.parentId].cross(radius));
+
+        // Centripetal acceleration term: Omega x (Omega x Radius)
+        Translation3d omegaCrossRadius =
+            new Translation3d(globalAngVels[node.parentId].cross(radius));
+        Translation3d centripetalAccel =
+            new Translation3d(globalAngVels[node.parentId].cross(omegaCrossRadius));
+
+        globalLinAccels[node.id] =
+            globalLinAccels[node.parentId]
+                .plus(angAccelTerm)
+                .plus(centripetalAccel)
+                .plus(localLinAccelDelta);
       }
     }
   }
@@ -251,5 +290,45 @@ public class KinematicsManager extends SubsystemBase {
 
   public Translation3d getGlobalLinearVelocity(int index) {
     return globalLinVels[index];
+  }
+
+  public Translation3d getGlobalAngularVelocity(int index) {
+    return new Translation3d(
+        globalAngVels[index].getX(), globalAngVels[index].getY(), globalAngVels[index].getZ());
+  }
+
+  public Translation3d getGlobalLinearAcceleration(ArticulatedComponent c) {
+    Integer id = componentToIdMap.get(c);
+    if (id == null || id >= globalLinAccels.length) return new Translation3d();
+    return globalLinAccels[id];
+  }
+
+  public Translation3d getGlobalLinearAcceleration(int index) {
+    return globalLinAccels[index];
+  }
+
+  public Translation3d getGlobalAngularAcceleration(ArticulatedComponent c) {
+    Integer id = componentToIdMap.get(c);
+    if (id == null || id >= globalAngAccels.length) return new Translation3d();
+    return globalAngAccels[id];
+  }
+
+  public Translation3d getGlobalAngularAcceleration(int index) {
+    return new Translation3d(
+        globalAngAccels[index].getX(),
+        globalAngAccels[index].getY(),
+        globalAngAccels[index].getZ());
+  }
+
+  public Pose3d limitPoseToField(Pose3d pose) {
+    double clampedX =
+        Math.min(
+            Math.max(DriveConstants.DRIVE_BASE_RADIUS, pose.getTranslation().getX()),
+            FieldConstants.fieldLength - DriveConstants.DRIVE_BASE_RADIUS);
+    double clampedY =
+        Math.min(
+            Math.max(DriveConstants.DRIVE_BASE_RADIUS, pose.getTranslation().getY()),
+            FieldConstants.fieldWidth - DriveConstants.DRIVE_BASE_RADIUS);
+    return new Pose3d(clampedX, clampedY, pose.getTranslation().getZ(), pose.getRotation());
   }
 }

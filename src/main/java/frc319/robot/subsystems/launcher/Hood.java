@@ -23,10 +23,19 @@ import org.littletonrobotics.junction.Logger;
 public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     implements ArticulatedComponent {
 
+  private LauncherConstants.LauncherStates laucherState = LauncherConstants.LauncherStates.IDLE;
+
+  Angle aimAngle = Degrees.of(0.0);
+  Distance toGoal = Meters.of(0.0);
+
   public Hood(final TalonFXSubsystemConfig config, final TalonFXIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
     setMotionMagicConfigImpl(LauncherConstants.Hood.mmConfig);
 
+  }
+
+  public void setState(LauncherConstants.LauncherStates state) {
+    this.laucherState = state;
   }
 
   public Command setAngle(Supplier<Angle> desiredAngle) {
@@ -40,17 +49,42 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public void periodic() {
+    Logger.recordOutput(pb.makePath("state"), laucherState);
     super.periodic();
-    Distance toGoal = this.getDistance2d(FieldConstants.Hub.topCenterPoint);
-    Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
-    Angle aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
 
-    Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);
+    switch (laucherState) {
+      case STOWED:
+          aimAngle = Degrees.of(0.0);
+          Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);
+          this.retract().schedule();
+        break;
+
+      case TRACKING_TARGET:
+          toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+          Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
+          aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
+          Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);
+          this.setAngle(()->aimAngle).schedule();
+      
+      case TRACK_HUB_ON_MOVE:
+          // Calculate angle to adjust when Shooting on the Move
+          toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetOnMovePose());
+          Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
+          aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
+          Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);
+          this.setAngle(()->aimAngle).schedule();
+        break;
+
+      case IDLE:
+        super.stop();
+      default:
+        break;
+    }
+
   }
 
   @Override
   public Transform3d getTransform3d() {
-    // TODO: Get this from sensors
     Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
     Transform3d localTransform =
         new Transform3d(new Translation3d(), new Rotation3d(0, rotations.in(Radians), 0));

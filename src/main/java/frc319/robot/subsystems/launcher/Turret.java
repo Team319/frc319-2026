@@ -31,20 +31,17 @@ import org.littletonrobotics.junction.Logger;
 public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     implements ArticulatedComponent {
 
-  private LauncherConstants.Turret.TurretState turretState = LauncherConstants.Turret.TurretState.IDLE;
+  private LauncherConstants.LauncherStates laucherState = LauncherConstants.LauncherStates.IDLE;
 
   private Pose3d currentTargetPose = new Pose3d(); // TODO : Blue origin for now. but use center field or something... 
 
   public Turret(final TalonFXSubsystemConfig config, final TalonFXIO turretMotorIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO);
     setMotionMagicConfigImpl(LauncherConstants.Turret.mmConfig);
-
-
-   
   }
 
-  public void setState(LauncherConstants.Turret.TurretState newState) {
-    this.turretState = newState;
+  public void setState(LauncherConstants.LauncherStates state) {
+    this.laucherState = state;
   }
 
   public Command setAngle(Supplier<Angle> desiredAngle) {
@@ -55,21 +52,31 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public void periodic() {
+    Logger.recordOutput(pb.makePath("state"), laucherState);
 
     super.periodic();
     
-    switch (turretState) {
+    switch (laucherState) {
+
       case TRACKING_TARGET:
         this.setAngle(() -> getCurrentTargetAngle()).schedule();
         currentTargetPose = LaunchingSolutionManager.getInstance().getTargetPose();
+        Logger.recordOutput(super.pb.makePath("currentTargetPose"), currentTargetPose);
         break;
+      
       case TRACK_HUB_ON_MOVE:
         this.setAngle(() -> getLauncOnTheFlyAngle()).schedule();
         currentTargetPose = LaunchingSolutionManager.getInstance().getTargetOnMovePose();
+        Logger.recordOutput(super.pb.makePath("currentTargetPose"), currentTargetPose);
         break;
+
+      case STOWED:
+        this.setAngle(() -> Degrees.of(0)).schedule();
+        break;
+      
       case IDLE:
       default:
-      this.setAngle(() -> Degrees.of(0)).schedule();
+        super.stop(); // Does this not stop Closed loop control???
         break;
     }
 

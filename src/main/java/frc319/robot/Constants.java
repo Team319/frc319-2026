@@ -92,24 +92,23 @@ public class Constants {
 // =========================================================================
 
   public static class DriveConstants{
-    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.1); 
-    public static final double TRACK_WIDTH_X = Units.inchesToMeters(22); 
-    public static final double TRACK_WIDTH_Y = Units.inchesToMeters(22); 
+    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(15.5); 
+    public static final double TRACK_WIDTH_X = Units.inchesToMeters(29); 
+    public static final double TRACK_WIDTH_Y = Units.inchesToMeters(25); 
     public static final double DRIVE_BASE_RADIUS =
         Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
-    public static final int currentLimit = 60;
+    public static final int currentLimit = 80; // was 60
     public static final double wheelRadiusMeters = Units.inchesToMeters(3.875); 
-    public static final double robotMassKg = 52.16312; 
-    public static final double robotMOI = 6.883; 
-    public static final double wheelCOF = 1.2; 
-    public static final double DRIVE_GEAR_RATIO = 6.122; //(50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0); // L3
+    public static final double robotMassKg = 52.16312; // TODO: UPDATE for 2026
+    public static final double robotMOI = 6.883; // TODO: UPDATE for 2026
+    public static final double wheelCOF = 1.2; // TODO: UPDATE for 2026
+    public static final double DRIVE_GEAR_RATIO = 6.75;  // L2
     public static final double TURN_GEAR_RATIO = 150.0 / 7.0;
     public static final boolean isTurnMotorInverted = true;
 
     public static final PathConstraints pathingConstraints = new PathConstraints(
         2.0,2.0,
-        //2.0, 2.0, // at battlecry
         Units.degreesToRadians(540), Units.degreesToRadians(720));
 
     public static final PathConstraints testingPathingConstraints = new PathConstraints(
@@ -122,7 +121,7 @@ public class Constants {
           //3.0, 4.0,
           Units.degreesToRadians(540), Units.degreesToRadians(720));
 
-    private static final double DEMO_MODE_SPEED_FACTOR = 0.5;
+    private static final double DEMO_MODE_SPEED_FACTOR = 0.25;
     public static final double DEMO_MODE_MAX_LINEAR_SPEED_METERS_PER_SEC = MAX_LINEAR_SPEED * DEMO_MODE_SPEED_FACTOR;
     public static final double DEMO_MODE_MAX_ANGULAR_SPEED_RAD_PER_SEC = MAX_ANGULAR_SPEED * DEMO_MODE_SPEED_FACTOR;
 
@@ -132,22 +131,6 @@ public class Constants {
     NO_TARGET,
     HUB
   } // End of HeadingTargets
-
-  public static class TargetLocations{
-    public static final double FIELD_LENGTH = Units.feetToMeters(54);
-    public static final double FIELD_WIDTH = Units.feetToMeters(27);
-    
-    // =============== COMMON TARGET POSES ===============
-    public static Pose2d ORIGIN = new Pose2d();
-    public static Pose2d CENTER_OF_FIELD = new Pose2d();
-
-    // =============== BLUE SIDE TARGET POSES ===============
-    public static Pose2d BLUE_HUB = new Pose2d();
-
-    // =============== RED SIDE TARGET POSES ===============
-    public static Pose2d RED_HUB = new Pose2d();
-  
-  } // End of TargetLocations
 
   public static class LimelightConstants{
     public static enum Device{

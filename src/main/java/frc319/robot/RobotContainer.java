@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc319.redhawk_lib.io.SimTalonFXIO;
 import frc319.redhawk_lib.io.TalonFXIO;
 import frc319.redhawk_lib.subsystem.KinematicsManager;
+import frc319.robot.Constants.DemoMode;
 import frc319.robot.Constants.DriveConstants;
 import frc319.robot.commands.DriveCommands;
 import frc319.robot.commands.autos.DynamicAutoRoutine;
@@ -30,12 +31,16 @@ import frc319.robot.subsystems.drive.ModuleIOTalonFX;
 import frc319.robot.subsystems.intake.IntakeConstants;
 import frc319.robot.subsystems.intake.IntakeExtension;
 import frc319.robot.subsystems.intake.IntakeRollers;
+import frc319.robot.subsystems.intake.IntakeConstants.IntakeStates;
 import frc319.robot.subsystems.launcher.Turret;
+import frc319.robot.subsystems.launcher.LauncherConstants.LauncherStates;
+import frc319.robot.subsystems.launcher.LauncherConstants.Flywheels.FlywheelsState;
 import frc319.robot.subsystems.launcher.Flywheels;
 import frc319.robot.subsystems.launcher.Hood;
 import frc319.robot.subsystems.serializer.BallTunnel;
 import frc319.robot.subsystems.serializer.SerializerConstants;
 import frc319.robot.subsystems.serializer.Spindexer;
+import frc319.robot.subsystems.serializer.SerializerConstants.SerializerStates;
 import frc319.robot.subsystems.launcher.LauncherConstants;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager;
 
@@ -45,6 +50,7 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.io.Serial;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -173,17 +179,17 @@ public class RobotContainer {
       // ==========================================
 
       // The slider will be available in Elastic's dashboard
-      DoubleSupplier flywheelTestRPM = () -> SmartDashboard.getNumber("Flywheel Test RPM", 0.0);
-      flywheels.setTestFlywheelRPMSupplier(flywheelTestRPM);
+      // DoubleSupplier flywheelTestRPM = () -> SmartDashboard.getNumber("Flywheel Test RPM", 0.0);
+      // flywheels.setTestFlywheelRPMSupplier(flywheelTestRPM);
       
-      DoubleSupplier ballTunnelTestDutyCycle = () -> SmartDashboard.getNumber("BallTunnel Test DutyCycle", 0.0);
-      ballTunnel.setTestBallTunnelDutyCycle(ballTunnelTestDutyCycle);
-      DoubleSupplier SpindexerTestDutyCycle = () -> SmartDashboard.getNumber("SpindexerTestDutyCycle", 0.0);
-      spindexer.setTestSpindexerDutyCycle(SpindexerTestDutyCycle);
-      // Initialize the slider with a default value and bounds (optional but recommended)
-      SmartDashboard.putNumber("Flywheel Test RPM", 0.0);  // Default value
-      SmartDashboard.putNumber("BallTunnel Test DutyCycle", 0.0);  // Default value
-       SmartDashboard.putNumber("SpindexerTestDutyCycle", 0.0);
+      // DoubleSupplier ballTunnelTestDutyCycle = () -> SmartDashboard.getNumber("BallTunnel Test DutyCycle", 0.0);
+      // ballTunnel.setTestBallTunnelDutyCycle(ballTunnelTestDutyCycle);
+      // DoubleSupplier SpindexerTestDutyCycle = () -> SmartDashboard.getNumber("SpindexerTestDutyCycle", 0.0);
+      // spindexer.setTestSpindexerDutyCycle(SpindexerTestDutyCycle);
+      // // Initialize the slider with a default value and bounds (optional but recommended)
+      // SmartDashboard.putNumber("Flywheel Test RPM", 0.0);  // Default value
+      // SmartDashboard.putNumber("BallTunnel Test DutyCycle", 0.0);  // Default value
+      //  SmartDashboard.putNumber("SpindexerTestDutyCycle", 0.0);
       // ==========================================
       // End of Elastic dashboard setup
       // ==========================================
@@ -216,7 +222,16 @@ public class RobotContainer {
     kinematicsManager.registerUnpublished(drive, 0, -1);
 
     kinematicsManager.register(
+        intakeExtension, IntakeConstants.Extension.MODEL_INDEX, IntakeConstants.Extension.PARENT_INDEX);
+
+    kinematicsManager.register(
+        spindexer, SerializerConstants.Spindexer.MODEL_INDEX, SerializerConstants.Spindexer.PARENT_INDEX);
+
+    kinematicsManager.register(
         turret, LauncherConstants.Turret.MODEL_INDEX, LauncherConstants.Turret.PARENT_INDEX);
+
+    kinematicsManager.register(
+        hood, LauncherConstants.Hood.MODEL_INDEX, LauncherConstants.Hood.PARENT_INDEX);
 
   }
   
@@ -252,50 +267,28 @@ public class RobotContainer {
             )
           );
 
-          driverController.rightBumper()
-            .onTrue(new InstantCommand(()->turret.setState(LauncherConstants.Turret.TurretState.TRACK_HUB_ON_MOVE)))
-            .onFalse(new InstantCommand(()->turret.setState(LauncherConstants.Turret.TurretState.IDLE)));
-
-        driverController.a()
-          .onTrue( hood.setAngle(() -> Degrees.of(0)) );
-          //.onFalse( hood.setAngle(() -> Degrees.of(0)) );
-
-        driverController.b()
-          .onTrue( hood.setAngle(() -> Degrees.of(15)) );
-          //.onFalse( hood.setAngle(() -> Degrees.of(0)) );
-
-        driverController.y()
-          .onTrue( hood.setAngle(() -> Degrees.of(25)) );
-          //.onFalse( hood.setAngle(() -> Degrees.of(0)) );
-
-        driverController.povRight()
-          .onTrue( flywheels.setVelocity(() -> RPM.of(1000)) );
-
-        driverController.povUp()
-          .onTrue( flywheels.setVelocity(() -> RPM.of(2000)) );
-
-        driverController.povLeft()
-          .onTrue( flywheels.setVelocity(() -> RPM.of(3000)) );
+        driverController.rightBumper()
+          .onTrue(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.TRACK_HUB_ON_MOVE)))
+          .onFalse(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.IDLE)));
 
         driverController.povDown()
-          .onTrue( flywheels.setVelocity(() -> RPM.of(0)) );
+          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.IDLE)));
 
-        driverController.back()
-          .onTrue( new InstantCommand(()->flywheels.setState(LauncherConstants.Flywheels.FlywheelsState.TESTING_ENABLED)))
-          .onFalse( new InstantCommand(()->flywheels.setState(LauncherConstants.Flywheels.FlywheelsState.IDLE)));
-          
+        driverController.povRight()
+          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.COLLECTING)));
 
-        // driverController.x().onTrue( turret.setAngle(() -> Degrees.of(90)) );  
-        // driverController.y().onTrue( turret.setAngle(() -> Degrees.of(180)) );
-        // driverController.b().onTrue( turret.setAngle(() -> Degrees.of(360)) );
+        driverController.povUp()
+          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.SNOWBLOW)));
 
-        //driverController.rightBumper().whileTrue( new InstantCommand(() -> turret.setAngle(() -> turret.getLauncOnTheFlyAngle())) );
+        driverController.povUp()
+          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)));
+
+        // driverController.back()
+        //   .onTrue( new InstantCommand(()->flywheels.setState(LauncherConstants.Flywheels.FlywheelsState.TESTING_ENABLED)))
+        //   .onFalse( new InstantCommand(()->flywheels.setState(LauncherConstants.Flywheels.FlywheelsState.IDLE)));
+
         
-        if (true){ // Turned off for safety at demos
-
-          // TODO 1/22/26 - test these, as the schedule method changed
-          
-          // TODO - add pathfinding under the closest trench
+        if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos
 
           driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( DriveCommands.pathfindUnderNearestTrench(drive)) ));
           
@@ -310,10 +303,8 @@ public class RobotContainer {
     
     if(autoChooser.get() == null){
 
-      // TODO - Will probably hard code the Dynamic Autos this year... 
+      // TODO - Will probably hard code the Dynamic Autos options this year... 
       
-      // TODO - Potentially implement behaviorTreeAuto routine instead of DynamicAutoRoutine
-
       // The command needs to be created at runtime so that the formatted 
       //  instruction string is populated from the dashboard
       return new DynamicAutoRoutine(drive); 
@@ -321,9 +312,72 @@ public class RobotContainer {
     else{
       return autoChooser.get();
     }
-    
-    
+  } // End of getAutonomousCommand()
 
+  //  ===========================================================================
+  //  ========================        Robot States      =========================
+  //  ===========================================================================
+
+  // probably smart to make 
+
+  public enum RobotStates{
+    IDLE,
+    STOWED,
+    COLLECTING,
+    SHOOTING,
+    SNOWBLOW // Means collecting while shooting at the desired target. probably want to have some logic when to gracefully switch while shooting
+    // TRENCH ?
+  }
+
+  private void setRobotState(RobotStates state){
+
+    switch(state){
+
+      case STOWED:
+        intakeExtension.setState(IntakeStates.RETRACTED);
+        intakeRollers.setState(IntakeStates.IDLE);
+        flywheels.setState(FlywheelsState.PRESPIN);
+        spindexer.setState(SerializerStates.IDLE);
+        turret.setState(LauncherStates.STOWED);
+        hood.setState(LauncherStates.STOWED);
+        break;
+
+      case COLLECTING:
+        intakeExtension.setState(IntakeStates.EXTENDED);
+        intakeRollers.setState(IntakeStates.COLLECT); 
+        flywheels.setState(FlywheelsState.PRESPIN);
+        spindexer.setState(SerializerStates.IDLE); // Maybe jostle hopper while collecting?
+        turret.setState(LauncherStates.STOWED);
+        hood.setState(LauncherStates.STOWED);
+        break;
+
+      case SHOOTING:
+        flywheels.setState(FlywheelsState.SHOOT);
+        spindexer.setState(SerializerStates.SHOOT);
+        turret.setState(LauncherStates.TRACKING_TARGET);
+        hood.setState(LauncherStates.TRACKING_TARGET);
+        break;
+
+      case SNOWBLOW:
+        intakeExtension.setState(IntakeStates.EXTENDED);
+        intakeRollers.setState(IntakeStates.COLLECT);
+        flywheels.setState(FlywheelsState.SHOOT);        
+        spindexer.setState(SerializerStates.SHOOT);
+        turret.setState(LauncherStates.TRACKING_TARGET);
+        hood.setState(LauncherStates.TRACKING_TARGET);
+        break;
+      
+      case IDLE:
+      default:  
+        intakeExtension.setState(IntakeStates.IDLE);
+        intakeRollers.setState(IntakeStates.IDLE);
+        flywheels.setState(FlywheelsState.IDLE); 
+        spindexer.setState(SerializerStates.IDLE);
+        turret.setState(LauncherStates.IDLE);
+        hood.setState(LauncherStates.IDLE);
+        break;
+    }
 
   }
+
 }

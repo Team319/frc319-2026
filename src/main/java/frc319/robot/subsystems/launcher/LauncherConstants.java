@@ -17,17 +17,17 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import frc319.redhawk_lib.drivers.CANDeviceId;
 import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
-import frc319.robot.Constants;
 
 public final class LauncherConstants {
 
-  public static final class Turret {
-
-    public static enum TurretState {
+    public static enum LauncherStates {
+      STOWED,
       IDLE,
       TRACKING_TARGET,
       TRACK_HUB_ON_MOVE
     }
+
+  public static final class Turret {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
 
@@ -42,7 +42,8 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kP = 10.0; // 6.4
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio = 0.08695;// = 1/(( 92*3 )/ 24)    // 1/(250/24) = 0.0959;
+      config.unitToRotorRatio = 0.08695;// is now ( 92*3 )/ 24) 
+                                        // was 1/(( 92*3 )/ 24) but i had to swap something elsewhere  // 1/(250/24) = 0.0959;
 
       config.momentOfInertia = 0.25; // KgMetersSquared
 
@@ -67,9 +68,11 @@ public final class LauncherConstants {
 
   public final class Flywheels {
 
-        public static enum FlywheelsState {
+    public static enum FlywheelsState {
       IDLE,
-      TESTING_ENABLED
+      PRESPIN,
+      TESTING_ENABLED,
+      SHOOT
     }
 
     public static TalonFXSubsystemConfig leftConfig = new TalonFXSubsystemConfig();
@@ -124,10 +127,11 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kP = 10;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio = 0.008974359; // 1:1 ratio   // todo is this right? (14/50 * 15/24 * 20/390) = 0.008974359
+      config.unitToRotorRatio =  0.035087; //0.008974359;   //  is this right? (14/50 * 15/24 * 20/390) = 0.008974359
+                                              // comp robot - 28.5 reduction
       config.initialTransform =
           new Transform3d(
-              new Translation3d(Inches.of(4.086915).in(Meters), 0, 0), new Rotation3d());
+              new Translation3d(Inches.of(3.75).in(Meters), 0, Inches.of(1.75).in(Meters)), new Rotation3d());
     }
 
     public static Angle retractedPosition = Degrees.of(0);

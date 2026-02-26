@@ -11,6 +11,12 @@ import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
 
 public final class SerializerConstants {
 
+  public enum SerializerStates{
+    IDLE,
+    JOSTLE,
+    SHOOT
+  }
+
   public static final class Spindexer {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
