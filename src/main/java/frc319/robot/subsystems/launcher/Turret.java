@@ -37,7 +37,6 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   public Turret(final TalonFXSubsystemConfig config, final TalonFXIO turretMotorIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO);
-    setMotionMagicConfigImpl(LauncherConstants.Turret.mmConfig);
   }
 
   public void setState(LauncherConstants.LauncherStates state) {
@@ -76,7 +75,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       
       case IDLE:
       default:
-        super.stop(); // Does this not stop Closed loop control???
+        //super.stop(); // Does this not stop Closed loop control???
         break;
     }
 
@@ -86,7 +85,9 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public Transform3d getTransform3d() {
-    Angle rotations = super.getCurrentPosition().div(1/config.unitToRotorRatio); // was times
+    Angle rotations = super.getCurrentPosition().div(1/config.unitToRotorRatio);
+
+    Logger.recordOutput(pb.makePath("motor_rotations"), rotations);
     
     return config.initialTransform.plus(
         new Transform3d(new Translation3d(), new Rotation3d(0, 0, rotations.in(Radians))));

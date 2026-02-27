@@ -2,6 +2,7 @@ package frc319.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -16,6 +17,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import frc319.redhawk_lib.drivers.CANDeviceId;
+import frc319.redhawk_lib.dynamics.MoiUnits;
 import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
 
 public final class LauncherConstants {
@@ -45,7 +47,17 @@ public final class LauncherConstants {
       config.unitToRotorRatio = 0.08695;// is now ( 92*3 )/ 24) 
                                         // was 1/(( 92*3 )/ 24) but i had to swap something elsewhere  // 1/(250/24) = 0.0959;
 
-      config.momentOfInertia = 0.25; // KgMetersSquared
+      config.momentOfInertia = KilogramSquareMeters.of(500); // KgMetersSquared
+
+      // Motion Magic parameters
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 10.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 15.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
+
+      // Example From Redhawk:
+      // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
+      // config.unitToRotorRatio = 120.0 / 60.0;
+      // config.momentOfInertia = MoiUnits.PoundSquareInches.of(522.908341);
 
       config.initialTransform =
           new Transform3d(
@@ -53,13 +65,6 @@ public final class LauncherConstants {
               new Rotation3d(0, 0, Units.degreesToRadians(0)));        
 
     } 
-
-    public static MotionMagicConfigs mmConfig = new MotionMagicConfigs();
-
-    static {
-      mmConfig.MotionMagicCruiseVelocity = 500.0;
-      mmConfig.MotionMagicAcceleration = 500.0;
-    }
 
     public static int MODEL_INDEX = 3;
     public static int PARENT_INDEX = 0; // drivetrain
@@ -79,7 +84,7 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig rightConfig = new TalonFXSubsystemConfig();
 
     static {
-      leftConfig.name = "Flywheel Left";
+      leftConfig.name = "Flywheels Left Lead";
       leftConfig.talonCANID = new CANDeviceId(21); // Example CAN ID, replace with actual ID
       leftConfig.fxConfig.Slot0.kP = 0.0;
       leftConfig.fxConfig.Slot0.kI = 0.0;
@@ -91,7 +96,7 @@ public final class LauncherConstants {
       leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
       //leftConfig.tunable = true;
 
-      rightConfig.name = "Flywheel Right";
+      rightConfig.name = "Flywheels Right Follower";
       rightConfig.talonCANID = new CANDeviceId(22); // Example CAN ID, replace with actual ID
       rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
     }
@@ -129,6 +134,12 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio =  0.035087; //0.008974359;   //  is this right? (14/50 * 15/24 * 20/390) = 0.008974359
                                               // comp robot - 28.5 reduction
+
+      // Motion Magic parameters
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 30.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 60.0; // rotations per second^2
+      //config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
+
       config.initialTransform =
           new Transform3d(
               new Translation3d(Inches.of(3.75).in(Meters), 0, Inches.of(1.75).in(Meters)), new Rotation3d());
@@ -148,12 +159,6 @@ public final class LauncherConstants {
       angleMap.put(4.0, 40.0);
     }
 
-    public static MotionMagicConfigs mmConfig = new MotionMagicConfigs();
-
-    static {
-      mmConfig.MotionMagicCruiseVelocity = 30.0;
-      mmConfig.MotionMagicAcceleration = 60.0;
-    }
 
   } // End of Hood Constants
 }

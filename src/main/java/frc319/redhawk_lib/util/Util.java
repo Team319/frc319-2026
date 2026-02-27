@@ -1,5 +1,8 @@
 package frc319.redhawk_lib.util;
 
+import static edu.wpi.first.units.Units.Radians;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 
@@ -29,6 +32,19 @@ public class Util {
     return (a.minus(epsilon).lte(b)) && (a.plus(epsilon).gte(b));
   }
 
+    public static Angle fieldToRobotRelative(Angle robotRelative, Pose2d robotPose) {
+    Rotation2d converted = new Rotation2d(robotRelative.in(Radians)).minus(robotPose.getRotation());
+    return converted.getMeasure();
+  }
+  
+  //   public static <T> T modeDependentValue(T real, T sim) {
+  //   return Robot.isReal() ? real : sim;
+  // }
+
+  // public static <T> T modeDependentValue(T real) {
+  //   return modeDependentValue(real, real);
+	// }
+  
   /**
    * Clamps an angle to be within the specified min and max bounds.
    * 

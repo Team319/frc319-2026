@@ -20,6 +20,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc319.redhawk_lib.drivers.CANDeviceId;
 import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
 import frc319.redhawk_lib.util.CTREUtil;
+import frc319.redhawk_lib.util.LoggedTunableGains;
 import frc319.robot.Robot;
 
 public class TalonFXIO implements MotorIO {
@@ -31,13 +32,16 @@ public class TalonFXIO implements MotorIO {
   // Control signals
   DutyCycleOut dutyCycleControl = new DutyCycleOut(0.0);
   private final VelocityVoltage velocityVoltageControl = new VelocityVoltage(0.0);
+  private final VelocityTorqueCurrentFOC velocityTorqueFOCControl =
+      new VelocityTorqueCurrentFOC(0.0);
   private final VoltageOut voltageControl = new VoltageOut(0.0);
   private final PositionVoltage positionVoltageControl = new PositionVoltage(0.0);
   private final MotionMagicVoltage motionMagicPositionControl = new MotionMagicVoltage(0.0);
   private final DynamicMotionMagicVoltage dynamicMotionMagicVoltage =
       new DynamicMotionMagicVoltage(0.0, 0.0, 0.0);
-  private final Follower followerControl = new Follower(0, MotorAlignmentValue.Aligned);
   private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0);
+  private final VelocityTorqueCurrentFOC velocityTorqueCurrentFOC =
+      new VelocityTorqueCurrentFOC(0.0);
 
   // Status signals
   private final StatusSignal<Angle> positionSignal;
@@ -45,13 +49,17 @@ public class TalonFXIO implements MotorIO {
   private final StatusSignal<Voltage> voltageSignal;
   private final StatusSignal<Current> currentStatorSignal;
   private final StatusSignal<Current> currentSupplySignal;
+  private final StatusSignal<Current> currentTorqueSignal;
   private final StatusSignal<Angle> rawRotorPositionSignal;
-  private final StatusSignal<Double> referenceSignal;
-
+  private final StatusSignal<Double> closedLoopErrorSignal;
+  private final StatusSignal<Boolean> motionMagicAtTargetSignal;
   private final BaseStatusSignal[] signals;
 
+  protected static final double KRAKEN_X60_KV_RPS_PER_VOLT = 5.29; // (from CTRE specs)
+  protected LoggedTunableGains tunableGains = null;
   public TalonFXIO(TalonFXSubsystemConfig config) {
-    this.talon = new TalonFX(config.talonCANID.getDeviceNumber(), new CANBus(config.talonCANID.getBus()));
+    this.talon =
+        new TalonFX(config.talonCANID.getDeviceNumber(), new CANBus(config.talonCANID.getBus()));
     this.config = config;
 
     this.pb = new AdvantageScopePathBuilder(this.config.name);
@@ -63,6 +71,7 @@ public class TalonFXIO implements MotorIO {
       this.config.fxConfig.OpenLoopRamps = new OpenLoopRampsConfigs();
     }
 
+    this.config.fxConfig.Feedback.SensorToMechanismRatio = config.unitToRotorRatio;
     CTREUtil.applyConfiguration(this.talon, this.config.fxConfig);
 
     positionSignal = talon.getPosition();
@@ -70,8 +79,10 @@ public class TalonFXIO implements MotorIO {
     voltageSignal = talon.getMotorVoltage();
     currentStatorSignal = talon.getStatorCurrent();
     currentSupplySignal = talon.getSupplyCurrent();
+    currentTorqueSignal = talon.getTorqueCurrent();
     rawRotorPositionSignal = talon.getRotorPosition();
-    referenceSignal = talon.getClosedLoopReference();
+    closedLoopErrorSignal = talon.getClosedLoopError();
+    motionMagicAtTargetSignal = talon.getMotionMagicAtTarget();
     signals =
         new BaseStatusSignal[] {
           positionSignal,
@@ -79,13 +90,20 @@ public class TalonFXIO implements MotorIO {
           voltageSignal,
           currentStatorSignal,
           currentSupplySignal,
+          currentTorqueSignal,
           rawRotorPositionSignal,
-          referenceSignal
+          closedLoopErrorSignal,
+          motionMagicAtTargetSignal,
         };
 
     CTREUtil.tryUntilOK(
         () -> BaseStatusSignal.setUpdateFrequencyForAll(50.0, signals), talon.getDeviceID());
     CTREUtil.tryUntilOK(() -> talon.optimizeBusUtilization(), talon.getDeviceID());
+    if (this.config.tunable) {
+      tunableGains =
+          new LoggedTunableGains(
+              this.config.name, this.config.fxConfig.Slot0, this.config.fxConfig.MotionMagic);
+    }
   }
 
   @Override
@@ -96,8 +114,19 @@ public class TalonFXIO implements MotorIO {
     inputs.appliedVolts = voltageSignal.getValue();
     inputs.currentStatorAmps = currentStatorSignal.getValue();
     inputs.currentSupplyAmps = currentSupplySignal.getValue();
+    inputs.currenTorqueAmps = currentTorqueSignal.getValue();
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
-    inputs.closedLoopReference = referenceSignal.getValue();
+    inputs.closedLoopError = closedLoopErrorSignal.getValue();
+    inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();
+    if (this.config.tunable && tunableGains != null) {
+      tunableGains.ifChanged(
+          this.hashCode(),
+          (Slot0Configs gains, MotionMagicConfigs motionMagic) -> {
+            this.config.fxConfig.Slot0 = gains;
+            this.config.fxConfig.MotionMagic = motionMagic;
+            CTREUtil.applyConfiguration(talon, this.config.fxConfig);
+          });
+    }
   }
 
   @Override
@@ -140,7 +169,9 @@ public class TalonFXIO implements MotorIO {
 
   @Override
   public void setVelocitySetpoint(AngularVelocity setpoint, int slot) {
-    talon.setControl(velocityVoltageControl.withVelocity(setpoint));
+    if (this.config.useFOC)
+      talon.setControl(velocityTorqueFOCControl.withVelocity(setpoint).withSlot(slot));
+    else talon.setControl(velocityVoltageControl.withVelocity(setpoint).withSlot(slot));
   }
 
   @Override
@@ -186,11 +217,7 @@ public class TalonFXIO implements MotorIO {
     MotorAlignmentValue alignment =
         opposeLeaderDirection ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned;
     CTREUtil.tryUntilOK(
-        () ->
-            talon.setControl(
-                followerControl
-                    .withLeaderID(leaderId.getDeviceNumber())
-                    .withMotorAlignment(alignment)),
+        () -> talon.setControl(new Follower(leaderId.getDeviceNumber(), alignment)),
         this.config.talonCANID.getDeviceNumber());
   }
 
@@ -199,6 +226,10 @@ public class TalonFXIO implements MotorIO {
     talon.setControl(torqueCurrentFOC.withOutput(current));
   }
 
+  @Override
+  public void setVelocityTorqueCurrentFOC(AngularVelocity velocity) {
+    talon.setControl(velocityTorqueCurrentFOC.withVelocity(velocity));
+  }
   @Override
   public void setMotionMagicConfig(MotionMagicConfigs config) {
     this.config.fxConfig.MotionMagic = config;

@@ -48,7 +48,7 @@ public class Spindexer extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       case IDLE:
       case JOSTLE:
       default:
-        super.stop();
+        //super.stop();
         break;
     }
   }

@@ -37,36 +37,29 @@ import org.littletonrobotics.junction.Logger;
  * and the right motor is the follower.
  */
 public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO>
-    extends SubsystemBase {
-  protected final IO leftIO;
-  protected final IO rightIO;
-  protected final MI leftInputs;
-  protected final MI rightInputs;
-  protected final TalonFXSubsystemConfig leftConfig;
-  protected final TalonFXSubsystemConfig rightConfig;
-  protected final AdvantageScopePathBuilder pb;
+    extends MotorSubsystem<MI, IO> {
+  protected final IO followerIO;
+  protected final MI followerInputs;
+  protected final TalonFXSubsystemConfig followerConfig;
 
   protected Angle positionSetpoint = Radians.of(0.0);
   protected AngularVelocity velocitySetpoint = RotationsPerSecond.of(0.0);
 
   public MotorFollowerSubsystem(
       String name,
-      TalonFXSubsystemConfig leftConfig,
-      TalonFXSubsystemConfig rightConfig,
-      MI leftInputs,
-      MI rightInputs,
-      IO leftIO,
-      IO rightIO) {
+      TalonFXSubsystemConfig leaderConfig,
+      TalonFXSubsystemConfig followerConfig,
+      MI leaderInputs,
+      MI followerInputs,
+      IO leaderIO,
+      IO followerIO) {
     // Set the subsystem name
-    super(name);
-    this.leftConfig = leftConfig;
-    this.rightConfig = rightConfig;
-    this.leftInputs = leftInputs;
-    this.rightInputs = rightInputs;
-    this.leftIO = leftIO;
-    this.rightIO = rightIO;
+    super(leaderConfig, leaderInputs, leaderIO);
+    setName(name);
+    this.followerConfig = followerConfig;
+    this.followerInputs = followerInputs;
+    this.followerIO = followerIO;
 
-    this.pb = new AdvantageScopePathBuilder(this.getName());
 
     // Set the default command to stop both motors
     setDefaultCommand(
@@ -74,383 +67,77 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
             .withName(pb.makeName("DefaultCommand"))
             .ignoringDisable(true));
 
-    this.rightIO.follow(leftConfig.talonCANID, true);
+    this.followerIO.follow(config.talonCANID, true);
   }
 
   @Override
   public void periodic() {
+    super.periodic();
     Time timestamp = RobotTime.getTimestamp();
-    leftIO.readInputs(leftInputs);
-    rightIO.readInputs(rightInputs);
-    Logger.processInputs(getName() + "/Left", leftInputs);
-    Logger.processInputs(getName() + "/Right", rightInputs);
+    followerIO.readInputs(followerInputs);
+    Logger.processInputs(getName() + "/Follower", followerInputs);
     Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
     Logger.recordOutput(
         pb.makePath("currentCommand"),
         (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
-  }
 
-  /**
-   * Multiply by the unit to rotor ratio to get motor rotations
-   *
-   * @param subsystemPosition
-   * @return
-   */
-  protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition.times(leftConfig.unitToRotorRatio);
-  }
-
-  /**
-   * Convert a linear distance to motor rotations
-   *
-   * @param subsystemPosition Desired distance
-   * @return the number of rotations the motor must move to achieve that distance
-   */
-  protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
-    Angle rotationsPerMeter =
-        Rotations.of(subsystemPosition.in(Meters) * leftConfig.unitRotationsPerMeter);
-    return convertSubsystemPositionToMotorPosition(rotationsPerMeter);
-  }
-
-  // IO Implementations
-
-  /**
-   * Sets the Motion Magic configuration for both motors.
-   *
-   * @param config The Motion Magic configuration to set.
-   */
-  protected void setMotionMagicConfigImpl(MotionMagicConfigs config) {
-    leftIO.setMotionMagicConfig(config);
-  }
-
-  /**
-   * Sets the neutral mode of both motors (e.g., brake or coast).
-   *
-   * @param mode The desired neutral mode.
-   */
-  protected void setNeutralModeImpl(NeutralModeValue mode) {
-    Logger.recordOutput(pb.makePath("API", "setNeutralModeImpl", "mode"), mode);
-    leftIO.setNeutralMode(mode);
-  }
-
-  /**
-   * Sets both motors to the specified duty cycle in open loop control.
-   *
-   * @param dutyCycle The desired duty cycle (-1.0 to 1.0).
-   */
-  protected void setOpenLoopDutyCycleImpl(double dutyCycle) {
-    Logger.recordOutput(pb.makePath("API", "setOpenLoopDutyCycleImpl", "dutyCycle"), dutyCycle);
-    leftIO.setOpenLoopDutyCycle(dutyCycle);
-  }
-
-  /**
-   * Sets both motors to the specified voltage.
-   *
-   * @param voltage The desired voltage.
-   */
-  protected void setVoltageImpl(Voltage voltage) {
-    Logger.recordOutput(pb.makePath("API", "setVoltageImpl", "voltage"), voltage);
-    Logger.recordOutput(pb.makePath("API", "setVoltageImpl", "units"), voltage.unit().toString());
-    leftIO.setVoltageOutput(voltage);
-  }
-
-  /**
-   * Sets both motors to the specified position setpoint. This is converted to rotations by the
-   * TalonFX API.
-   *
-   * @param position The desired position setpoint.
-   */
-  protected void setPositionSetpointImpl(Angle position) {
-    positionSetpoint = position;
-    Logger.recordOutput(pb.makePath("API", "setPositionSetpointImpl", "position"), position);
+    // Log setpoints for comparison with measurements (in same units as inputs)
     Logger.recordOutput(
-        pb.makePath("API", "setPositionSetpointImpl", "units"), position.unit().toString());
-    leftIO.setPositionSetpoint(position);
-  }
-
-  /**
-   * Sets both motors to the specified position setpoint using Motion Magic control. This is
-   * converted to rotations by the TalonFX API.
-   *
-   * @param position The desired position setpoint.
-   * @param slot The PID slot to use for the Motion Magic control.
-   */
-  protected void setMotionMagicSetpointImpl(Angle position, int slot) {
-    positionSetpoint = position;
-    Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpl", "position"), position);
+        pb.makePath("Setpoints", "velocityRotPerSec"), velocitySetpoint.in(RotationsPerSecond));
+    Logger.recordOutput(pb.makePath("Setpoints", "positionRot"), positionSetpoint.in(Rotations));
+    // Also log measurements as doubles for easy comparison
     Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpl", "units"), position.unit().toString());
-    Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpl", "slot"), slot);
-    leftIO.setMotionMagicSetpoint(position, slot);
-  }
-
-  /**
-   * Sets both motors to the specified position setpoint using Motion Magic control with dynamic
-   * parameters. This is converted to rotations by the TalonFX API.
-   *
-   * @param position The desired position setpoint.
-   * @param config The Motion Magic configuration to use.
-   * @param slot The PID slot to use for the Motion Magic control.
-   */
-  protected void setMotionMagicSetpointImpl(Angle position, MotionMagicConfigs config, int slot) {
-    positionSetpoint = position;
-
-    AngularVelocity velocity = config.getMotionMagicCruiseVelocityMeasure();
-    AngularAcceleration acceleration = config.getMotionMagicAccelerationMeasure();
-    Velocity<AngularAccelerationUnit> jerk = config.getMotionMagicJerkMeasure();
+        pb.makePath("Measurements", "leaderVelocityRotPerSec"),
+        inputs.velocity.in(RotationsPerSecond));
     Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Position"), position);
+        pb.makePath("Measurements", "followerVelocityRotPerSec"),
+        followerInputs.velocity.in(RotationsPerSecond));
     Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Units"),
-        position.unit().toString());
+        pb.makePath("Measurements", "leaderAppliedVolts"), inputs.appliedVolts.in(Volts));
     Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Velocity"), velocity);
-    Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Accel"), acceleration);
-    Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Jerk"), jerk);
-    Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Slot"), slot);
-    leftIO.setMotionMagicSetpoint(position, velocity, acceleration, jerk, slot);
-  }
-
-  /**
-   * Sets both motors to the specified position setpoint using Motion Magic control with dynamic
-   * parameters and feedforward. This is converted to rotations by the TalonFX API.
-   *
-   * @param position The desired position setpoint.
-   * @param config The Motion Magic configuration to use.
-   * @param feedfoward The feedforward value to apply.
-   * @param slot The PID slot to use for the Motion Magic control.
-   */
-  protected void setMotionMagicSetpointImpl(
-      Angle position, MotionMagicConfigs config, double feedfoward, int slot) {
-    positionSetpoint = position;
-
-    AngularVelocity velocity = config.getMotionMagicCruiseVelocityMeasure();
-    AngularAcceleration acceleration = config.getMotionMagicAccelerationMeasure();
-    Velocity<AngularAccelerationUnit> jerk = config.getMotionMagicJerkMeasure();
-    Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Position"), position);
-    Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Units"),
-        position.unit().toString());
-    Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Velocity"), velocity);
-    Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Accel"), acceleration);
-    Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Jerk"), jerk);
-    Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Slot"), slot);
-    Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Feedforward"), feedfoward);
-    leftIO.setMotionMagicSetpoint(position, velocity, acceleration, jerk, slot, feedfoward);
-  }
-
-  /**
-   * Sets both motors to the specified velocity setpoint. This is converted to rotations per second
-   * by the TalonFX API.
-   *
-   * @param setpoint The desired velocity setpoint.
-   * @param slot The PID slot to use for the velocity control.
-   */
-  protected void setVelocitySetpointImpl(AngularVelocity setpoint, int slot) {
-    velocitySetpoint = setpoint;
-    Logger.recordOutput(pb.makePath("API", "setVelocitySetpointImpl", "Velocity"), setpoint);
-    Logger.recordOutput(
-        pb.makePath("API", "setVelocitySetpointImpl", "Units"), setpoint.unit().toString());
-    Logger.recordOutput(pb.makePath("API", "setVelocitySetpointImpl", "Slot"), slot);
-    leftIO.setVelocitySetpoint(setpoint, slot);
+        pb.makePath("Measurements", "followerAppliedVolts"), followerInputs.appliedVolts.in(Volts));
+    Logger.recordOutput(pb.makePath("Measurements", "closedLoopError"), inputs.closedLoopError);
   }
 
   // Getters
   /**
-   * Gets the current position of the left motor.
+   * Gets the current position of the leader motor.
    *
-   * @return The current position of the left motor.
+   * @return The current position of the leader motor.
    */
-  public Angle getLeftCurrentPosition() {
-    return leftInputs.position;
+  public Angle getLeaderCurrentPosition() {
+    return inputs.position;
   }
 
   /**
-   * Gets the current position of the right motor.
+   * Gets the current position of the follower motor.
    *
-   * @return The current position of the right motor.
+   * @return The current position of the follower motor.
    */
-  public Angle getRightCurrentPosition() {
-    return rightInputs.position;
+  public Angle getFollowerCurrentPosition() {
+    return followerInputs.position;
   }
 
   /**
-   * Gets the current velocity of the left motor.
+   * Gets the current velocity of the leader motor.
    *
-   * @return The current velocity of the left motor.
+   * @return The current velocity of the leader motor.
    */
-  public AngularVelocity getLeftCurrentVelocity() {
-    return leftInputs.velocity;
+  public AngularVelocity getLeaderCurrentVelocity() {
+    return inputs.velocity;
   }
 
   /**
-   * Gets the current velocity of the right motor.
+   * Gets the current velocity of the follower motor.
    *
-   * @return The current velocity of the right motor.
+   * @return The current velocity of the follower motor.
    */
-  public AngularVelocity getRightCurrentVelocity() {
-    return rightInputs.velocity;
+  public AngularVelocity getFollowerCurrentVelocity() {
+    return followerInputs.velocity;
   }
 
-  /**
-   * Gets the current position setpoint of the motors.
-   *
-   * @return The current position setpoint of the motors.
-   */
-  public Angle getPositionSetpoint() {
-    return positionSetpoint;
-  }
-
-  /**
-   * Sets both motors to the specified torque current in FOC control.
-   *
-   * @param current The desired torque current.
-   */
-  public void setTorqueCurrentFOCImpl(Current current) {
-    Logger.recordOutput(pb.makePath("API", "setTorqueCurrentFoC", "Current"), current);
-    Logger.recordOutput(
-        pb.makePath("API", "setTorqueCurrentFoC", "Units"), current.unit().toString());
-
-    leftIO.setTorqueCurrentFOC(current);
-  }
-
-  /** Sets the current position of both motors as zero. */
-  protected void setCurrentPositionAsZero() {
-    leftIO.setCurrentPositionAsZero();
-  }
-
-  /**
-   * Sets the current position of both motors.
-   *
-   * @param position The desired current position.
-   */
-  public void setCurrentPosition(Angle position) {
-    leftIO.setCurrentPosition(position);
-  }
-
-  // Command Generators
-
-  /**
-   * Creates a command that sets the Motion Magic configuration for both motors.
-   *
-   * @param configs The Motion Magic configuration to set.
-   * @return A command that sets the Motion Magic configuration.
-   */
-  public Command setMotionMagicConfigCommand(MotionMagicConfigs configs) {
-    // Not taking requirements is intentional here.
-    return new InstantCommand(() -> setMotionMagicConfigImpl(configs));
-  }
-
-  /**
-   * Creates a command that sets both motors to the specified duty cycle in open loop control.
-   *
-   * @param dutyCycle The desired duty cycle supplier (-1.0 to 1.0).
-   * @return A command that sets both motors to the specified duty cycle. When the command ends, the
-   *     motors are set to 0.0 duty cycle.
-   */
-  public Command dutyCycleCommand(DoubleSupplier dutyCycle) {
-    return runEnd(
-            () -> {
-              setOpenLoopDutyCycleImpl(dutyCycle.getAsDouble());
-            },
-            () -> {
-              setOpenLoopDutyCycleImpl(0.0);
-            })
-        .withName(pb.makeName("DutyCycleControl"));
-  }
-
-  /**
-   * Creates a command that sets both motors to the specified duty cycle in open loop control.
-   *
-   * @param dutyCycle The desired duty cycle supplier (-1.0 to 1.0).
-   * @return A command that sets both motors to the specified duty cycle. When the command ends, the
-   *     motors are not modified.
-   */
-  public Command dutyCycleCommandNoEnd(DoubleSupplier dutyCycle) {
-    return runEnd(
-            () -> {
-              setOpenLoopDutyCycleImpl(dutyCycle.getAsDouble());
-            },
-            () -> {})
-        .withName(pb.makeName("DutyCycleControl"));
-  }
-
-  /**
-   * Creates a command that sets both motors to the specified voltage.
-   *
-   * @param voltage The desired voltage supplier.
-   * @return A command that sets both motors to the specified voltage. When the command ends, the
-   *     motors are set to 0.0 volts.
-   */
-  public Command voltageCommand(Supplier<Voltage> voltage) {
-    return runEnd(
-            () -> {
-              setVoltageImpl(voltage.get());
-            },
-            () -> {
-              setVoltageImpl(Volts.of(0.0));
-            })
-        .withName(pb.makeName("VoltageControl"));
-  }
-
-  /**
-   * Creates a command that sets both motors to the specified velocity setpoint.
-   *
-   * @param velocitySupplier The desired velocity setpoint supplier.
-   * @return A command that sets both motors to the specified velocity setpoint.
-   */
-  public Command velocitySetpointCommand(Supplier<AngularVelocity> velocitySupplier) {
-    return velocitySetpointCommand(velocitySupplier, 0);
-  }
-
-  /**
-   * Creates a command that sets both motors to the specified velocity setpoint.
-   *
-   * @param velocitySupplier The desired velocity setpoint supplier.
-   * @param slot The PID slot to use for the velocity control.
-   * @return A command that sets both motors to the specified velocity setpoint.
-   */
-  public Command velocitySetpointCommand(Supplier<AngularVelocity> velocitySupplier, int slot) {
-    return runEnd(
-            () -> {
-              setVelocitySetpointImpl(velocitySupplier.get(), slot);
-            },
-            () -> {})
-        .withName(pb.makeName("VelocityControl"));
-  }
-
-  /**
-   * Creates a command that sets both motors to brake mode when started and coast mode when ended.
-   *
-   * @return A command that sets both motors to brake mode when started and coast mode when ended.
-   */
-  public Command setCoast() {
-    return startEnd(
-            () -> setNeutralModeImpl(NeutralModeValue.Coast),
-            () -> setNeutralModeImpl(NeutralModeValue.Brake))
-        .withName(pb.makeName("CoastMode"))
-        .ignoringDisable(true);
-  }
-
-  /**
-   * Creates a command that sets both motors to the specified position setpoint.
-   *
-   * @param positionSupplier The desired position setpoint supplier.
-   * @return A command that sets both motors to the specified position setpoint.
-   */
-  public Command positionSetpointCommand(Supplier<Angle> positionSupplier) {
-    return runEnd(
-            () -> {
-              setPositionSetpointImpl(positionSupplier.get());
-            },
-            () -> {})
-        .withName(pb.makeName("PositionSetpointCommand"));
-  }
+  // Command Generators - Most commands are inherited from MotorSubsystem
+  // Only follower-specific commands that need to check both motors are defined here
 
   /**
    * Creates a command that sets both motors to the specified position setpoint and ends when both
@@ -467,9 +154,11 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
             new WaitUntilCommand(
                 () ->
                     Util.epsilonEquals(
-                            positionSupplier.get(), leftInputs.position, epsilonSupplier.get())
+                            positionSupplier.get(), inputs.position, epsilonSupplier.get())
                         && Util.epsilonEquals(
-                            positionSupplier.get(), rightInputs.position, epsilonSupplier.get())),
+                            positionSupplier.get(),
+                            followerInputs.position,
+                            epsilonSupplier.get())),
             positionSetpointCommand(positionSupplier))
         .withName(pb.makeName("PositionUntilOnTargetControl"));
   }
@@ -489,74 +178,13 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
             new WaitUntilCommand(
                 () ->
                     Util.epsilonEquals(
-                            velocitySupplier.get(), leftInputs.velocity, epsilonSupplier.get())
+                            velocitySupplier.get(), inputs.velocity, epsilonSupplier.get())
                         && Util.epsilonEquals(
-                            velocitySupplier.get(), rightInputs.velocity, epsilonSupplier.get())),
+                            velocitySupplier.get(),
+                            followerInputs.velocity,
+                            epsilonSupplier.get())),
             velocitySetpointCommand(velocitySupplier))
         .withName(pb.makeName("VelocityUntilOnTargetControl"));
-  }
-
-  /**
-   * Creates a command that sets both motors to the specified position setpoint using Motion Magic
-   * control.
-   *
-   * @param positionSupplier The desired position setpoint supplier.
-   * @param slot The PID slot to use for the Motion Magic control.
-   * @return A command that sets both motors to the specified position setpoint using Motion Magic
-   *     control.
-   */
-  public Command motionMagicSetpointCommand(Supplier<Angle> positionSupplier, int slot) {
-    return runEnd(
-            () -> {
-              setMotionMagicSetpointImpl(positionSupplier.get(), slot);
-            },
-            () -> {})
-        .withName(pb.makeName("motionMagicSetpointCommand"));
-  }
-
-  /**
-   * Creates a command that sets both motors to the specified position setpoint using Motion Magic
-   * control with dynamic parameters.
-   *
-   * @param positionSupplier The desired position setpoint supplier.
-   * @param configSupplier The Motion Magic configuration supplier.
-   * @param slot The PID slot to use for the Motion Magic control.
-   * @return A command that sets both motors to the specified position setpoint using Motion Magic
-   *     control with dynamic parameters.
-   */
-  public Command motionMagicSetpointCommand(
-      Supplier<Angle> positionSupplier, Supplier<MotionMagicConfigs> configSupplier, int slot) {
-    return runEnd(
-            () -> {
-              setMotionMagicSetpointImpl(positionSupplier.get(), configSupplier.get(), slot);
-            },
-            () -> {})
-        .withName(pb.makeName("dynamicMotionMagicSetpointCommand"));
-  }
-
-  /**
-   * Creates a command that sets both motors to the specified position setpoint using Motion Magic
-   * control with dynamic parameters and feedforward.
-   *
-   * @param unitSupplier The desired position setpoint supplier.
-   * @param configSupplier The Motion Magic configuration supplier.
-   * @param feedforward The feedforward supplier.
-   * @param slot The PID slot to use for the Motion Magic control.
-   * @return A command that sets both motors to the specified position setpoint using Motion Magic
-   *     control with dynamic parameters and feedforward.
-   */
-  public Command motionMagicSetpointCommand(
-      Supplier<Angle> unitSupplier,
-      Supplier<MotionMagicConfigs> configSupplier,
-      Supplier<Double> feedforward,
-      int slot) {
-    return runEnd(
-            () -> {
-              setMotionMagicSetpointImpl(
-                  unitSupplier.get(), configSupplier.get(), feedforward.get(), slot);
-            },
-            () -> {})
-        .withName(pb.makeName("dynamicMotionMagicSetpointCommand"));
   }
 
   /**
@@ -574,9 +202,9 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     return motionMagicSetpointCommand(setpointSupplier, slot)
         .until(
             () ->
-                Util.epsilonEquals(getLeftCurrentPosition(), setpointSupplier.get(), tolerance)
+                Util.epsilonEquals(getLeaderCurrentPosition(), setpointSupplier.get(), tolerance)
                     && Util.epsilonEquals(
-                        getRightCurrentPosition(), setpointSupplier.get(), tolerance));
+                        getFollowerCurrentPosition(), setpointSupplier.get(), tolerance));
   }
 
   /**
@@ -599,9 +227,9 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     return motionMagicSetpointCommand(setpointSupplier, configSupplier, slot)
         .until(
             () ->
-                Util.epsilonEquals(getLeftCurrentPosition(), setpointSupplier.get(), tolerance)
+                Util.epsilonEquals(getLeaderCurrentPosition(), setpointSupplier.get(), tolerance)
                     && Util.epsilonEquals(
-                        getRightCurrentPosition(), setpointSupplier.get(), tolerance));
+                        getFollowerCurrentPosition(), setpointSupplier.get(), tolerance));
   }
 
   /**
@@ -626,46 +254,9 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     return motionMagicSetpointCommand(setpointSupplier, configSupplier, feedforward, slot)
         .until(
             () ->
-                Util.epsilonEquals(getLeftCurrentPosition(), setpointSupplier.get(), tolerance)
+                Util.epsilonEquals(getLeaderCurrentPosition(), setpointSupplier.get(), tolerance)
                     && Util.epsilonEquals(
-                        getRightCurrentPosition(), setpointSupplier.get(), tolerance));
-  }
-
-  // Overloads for convenience
-  public Command motionMagicSetpointCommand(Supplier<Angle> setpointSupplier) {
-    return motionMagicSetpointCommand(setpointSupplier, 0);
-  }
-
-  public Command motionMagicSetpointCommand(
-      Supplier<Angle> setpointSupplier, Supplier<MotionMagicConfigs> configSupplier) {
-    return motionMagicSetpointCommand(setpointSupplier, configSupplier, 0);
-  }
-
-  public Command motionMagicSetpointCommandBlocking(
-      Supplier<Angle> setpointSupplier, Angle tolerance) {
-    return motionMagicSetpointCommandBlocking(setpointSupplier, tolerance, 0);
-  }
-
-  public Command motionMagicSetpointCommandBlocking(
-      Supplier<Angle> setpointSupplier,
-      Supplier<MotionMagicConfigs> configSupplier,
-      Angle tolerance) {
-    return motionMagicSetpointCommandBlocking(setpointSupplier, configSupplier, tolerance, 0);
-  }
-
-  /**
-   * Creates a command that sets both motors to the specified torque current in FOC control.
-   *
-   * @param current The desired torque current supplier.
-   * @return A command that sets both motors to the specified torque current in FOC control.
-   */
-  public Command setTorqueCurrentFOC(Supplier<Current> current) {
-    return runEnd(
-            () -> {
-              setTorqueCurrentFOCImpl(current.get());
-            },
-            () -> {})
-        .withName(pb.makeName("torqueCurrentFOCCommand"));
+                        getFollowerCurrentPosition(), setpointSupplier.get(), tolerance));
   }
 
   /**
@@ -674,7 +265,7 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
    * @return A command that temporarily disables software limits while running.
    */
   protected Command withoutLimitsTemporarily() {
-    var prevLeft =
+    var prevLeader =
         new Object() {
           boolean fwd = false;
           boolean rev = false;
@@ -682,13 +273,13 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
 
     return Commands.startEnd(
         () -> {
-          prevLeft.fwd = leftConfig.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable;
-          prevLeft.rev = leftConfig.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable;
+          prevLeader.fwd = config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable;
+          prevLeader.rev = config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable;
 
-          leftIO.setEnableSoftLimits(false, false);
+          io.setEnableSoftLimits(false, false);
         },
         () -> {
-          leftIO.setEnableSoftLimits(prevLeft.fwd, prevLeft.rev);
+          io.setEnableSoftLimits(prevLeader.fwd, prevLeader.rev);
         });
   }
 }

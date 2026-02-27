@@ -63,7 +63,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
-    return velocitySetpointCommand(() -> desiredVelocity.get().times(leftConfig.unitToRotorRatio));
+    return velocitySetpointCommand(desiredVelocity);
   }
 
   public Command stop() {
@@ -140,7 +140,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity().div(leftConfig.unitToRotorRatio);
+    AngularVelocity wheelSpeed = getLeaderCurrentVelocity();
     Distance wheelDiameter = Inches.of(4);
     Distance wheelCircumference = wheelDiameter.times(Math.PI);
     return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));

@@ -85,7 +85,7 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
 
       case IDLE:
       default:
-        super.stop();
+        //super.stop();
         break;
     }
   }

@@ -34,6 +34,10 @@ public final class IntakeConstants {
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio = 0.1; // TODO
       config.unitRotationsPerMeter = 10.0;
+
+        // Motion Magic parameters
+        config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0; // meters per second
+        config.fxConfig.MotionMagic.MotionMagicAcceleration = 2.0; // meters per second^2
     }
 
     public static Distance extendedPosition = Inches.of(12);
@@ -41,12 +45,6 @@ public final class IntakeConstants {
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain
 
-    public static MotionMagicConfigs mmConfig = new MotionMagicConfigs();
-
-    static {
-      mmConfig.MotionMagicCruiseVelocity = 10.0;
-      mmConfig.MotionMagicAcceleration = 10.0;
-    }
   }
 
   public static final class Rollers {

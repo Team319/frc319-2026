@@ -30,7 +30,6 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   public Hood(final TalonFXSubsystemConfig config, final TalonFXIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
-    setMotionMagicConfigImpl(LauncherConstants.Hood.mmConfig);
 
   }
 
@@ -76,7 +75,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
         break;
 
       case IDLE:
-        super.stop();
+        //super.stop();
       default:
         break;
     }

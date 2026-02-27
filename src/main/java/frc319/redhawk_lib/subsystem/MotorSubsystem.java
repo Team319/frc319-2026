@@ -52,10 +52,10 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
     this.pb = new AdvantageScopePathBuilder(this.getName());
 
     // Set the default command to stop the motor
-    // setDefaultCommand(
-    //     this.dutyCycleCommand(() -> 0.0)
-    //         .withName(pb.makeName("DefaultCommand"))
-    //         .ignoringDisable(true));
+    setDefaultCommand(
+        this.dutyCycleCommand(() -> 0.0)
+            .withName(pb.makeName("DefaultCommand"))
+            .ignoringDisable(true));
   }
 
   @Override
@@ -70,21 +70,15 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   }
 
   /**
-   * Something to tell motors to stop moving. 
+   * Convert subsystem position to the position value sent to the motor controller. Since TalonFX is
+   * configured with SensorToMechanismRatio, control requests use mechanism units directly - the
+   * controller handles the conversion internally.
    *
-   */ 
-  public void stop(){
-    io.setOpenLoopDutyCycle(0);
-  }
-
-  /**
-   * Multiply by the unit to rotor ratio to get motor rotations
-   *
-   * @param subsystemPosition
-   * @return
+   * @param subsystemPosition The desired mechanism position
+   * @return The position to send to the motor controller (same as input)
    */
   protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition.divide(config.unitToRotorRatio);
+    return subsystemPosition;
   }
 
   /**
@@ -94,9 +88,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return the number of rotations the motor must move to achieve that distance
    */
   protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
-    Angle rotationsPerMeter =
-        Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
-    return convertSubsystemPositionToMotorPosition(rotationsPerMeter);
+    return Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
   }
 
   // IO Implementations
@@ -286,6 +278,16 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   }
 
   /**
+   * Gets the current position setpoint as linear distance. For linear mechanisms, converts
+   * mechanism rotations to meters.
+   *
+   * @return The current position setpoint as a Distance
+   */
+  public Distance getPositionSetpointAsDistance() {
+    return Meters.of(positionSetpoint.in(Rotations) / config.unitRotationsPerMeter);
+  }
+
+  /**
    * Sets the motor to the specified torque current in FOC control.
    *
    * @param current The desired torque current.
@@ -296,6 +298,18 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
         pb.makePath("API", "setTorqueCurrentFoC", "Units"), current.unit().toString());
 
     io.setTorqueCurrentFOC(current);
+  }
+
+  /**
+   * Sets the motor to the specified velocity in FOC control.
+   *
+   * @param velocity The desired velocity.
+   */
+  public void setVelocityTorqueCurrentFOCImpl(AngularVelocity velocity) {
+    Logger.recordOutput(pb.makePath("API", "setVelocityTorqueCurrentFOC", "Velocity"), velocity);
+    Logger.recordOutput(
+        pb.makePath("API", "setVelocityTorqueCurrentFOC", "Units"), velocity.unit().toString());
+    io.setVelocityTorqueCurrentFOC(velocity);
   }
 
   /** Sets the current position of the motor as zero. */
@@ -629,6 +643,15 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
             },
             () -> {})
         .withName(pb.makeName("torqueCurrentFOCCommand"));
+  }
+
+  public Command setVelocityTorqueCurrentFOC(Supplier<AngularVelocity> velocity) {
+    return runEnd(
+            () -> {
+              setVelocityTorqueCurrentFOCImpl(velocity.get());
+            },
+            () -> {})
+        .withName(pb.makeName("velocityTorqueCurrentFOCCommand"));
   }
 
   /**
