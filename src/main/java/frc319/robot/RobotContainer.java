@@ -340,6 +340,7 @@ public class RobotContainer {
       case STOWED:
         intakeExtension.setState(IntakeStates.RETRACTED);
         intakeRollers.setState(IntakeStates.IDLE);
+        ballTunnel.setState(SerializerStates.IDLE);
         flywheels.setState(FlywheelsState.PRESPIN);
         spindexer.setState(SerializerStates.IDLE);
         turret.setState(LauncherStates.STOWED);
@@ -349,6 +350,7 @@ public class RobotContainer {
       case COLLECTING:
         intakeExtension.setState(IntakeStates.EXTENDED);
         intakeRollers.setState(IntakeStates.COLLECT); 
+        ballTunnel.setState(SerializerStates.IDLE);
         flywheels.setState(FlywheelsState.PRESPIN);
         spindexer.setState(SerializerStates.IDLE); // Maybe jostle hopper while collecting?
         turret.setState(LauncherStates.STOWED);
@@ -357,6 +359,7 @@ public class RobotContainer {
 
       case SHOOTING:
         flywheels.setState(FlywheelsState.SHOOT);
+        ballTunnel.setState(SerializerStates.SHOOT);
         spindexer.setState(SerializerStates.SHOOT);
         turret.setState(LauncherStates.TRACKING_TARGET);
         hood.setState(LauncherStates.TRACKING_TARGET);
@@ -365,6 +368,7 @@ public class RobotContainer {
       case SNOWBLOW:
         intakeExtension.setState(IntakeStates.EXTENDED);
         intakeRollers.setState(IntakeStates.COLLECT);
+        ballTunnel.setState(SerializerStates.SHOOT);
         flywheels.setState(FlywheelsState.SHOOT);        
         spindexer.setState(SerializerStates.SHOOT);
         turret.setState(LauncherStates.TRACKING_TARGET);
@@ -375,6 +379,7 @@ public class RobotContainer {
       default:  
         intakeExtension.setState(IntakeStates.IDLE);
         intakeRollers.setState(IntakeStates.IDLE);
+        ballTunnel.setState(SerializerStates.IDLE);
         flywheels.setState(FlywheelsState.IDLE); 
         spindexer.setState(SerializerStates.IDLE);
         turret.setState(LauncherStates.IDLE);

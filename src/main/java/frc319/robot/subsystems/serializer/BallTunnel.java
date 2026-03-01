@@ -6,17 +6,36 @@ import frc319.redhawk_lib.io.MotorInputsAutoLogged;
 import frc319.redhawk_lib.io.TalonFXIO;
 import frc319.redhawk_lib.subsystem.MotorSubsystem;
 import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
+import frc319.robot.subsystems.serializer.SerializerConstants.SerializerStates;
 
 public class BallTunnel extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO> {
+
+  private SerializerStates serializerState = SerializerStates.IDLE;
 
   public BallTunnel(final TalonFXSubsystemConfig config, final TalonFXIO feederMotorIO) {
     super(config, new MotorInputsAutoLogged(), feederMotorIO);
   }
 
+  public void setState(SerializerStates state){
+    this.serializerState = state;
+  }
+
   @Override
   public void periodic() {
     super.periodic();
-    // Additional periodic code for feeder can be added here
+
+    switch(serializerState){
+      case SHOOT:
+          this.setDutyCycle(() -> 1.0);
+        break;
+
+      
+      case IDLE:
+      case JOSTLE:
+      default:
+        this.stop();
+        break;
+    }  
   }
 public void stop() {
    super.setOpenLoopDutyCycleImpl(0.0); 
