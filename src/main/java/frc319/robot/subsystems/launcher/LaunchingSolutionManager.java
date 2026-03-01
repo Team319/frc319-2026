@@ -3,6 +3,8 @@ package frc319.robot.subsystems.launcher;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import java.lang.annotation.Target;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -14,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc319.redhawk_lib.subsystem.KinematicsManager;
 import frc319.robot.FieldConstants;
 import frc319.robot.util.AllianceFlipUtil;
+import frc319.robot.util.FieldUtils;
 
 public class LaunchingSolutionManager extends SubsystemBase {
   private static LaunchingSolutionManager instance;
@@ -21,6 +24,17 @@ public class LaunchingSolutionManager extends SubsystemBase {
   // Target Pose (default to blue origin)
   private Pose3d targetPose = new Pose3d();
   private Pose3d targetOnMovePose = new Pose3d();
+
+  private class TargetPoses {
+    public static final Pose3d hubTopCenter =
+        new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
+
+    public static final Pose3d allianceLeft =
+        new Pose3d(new Translation3d(FieldConstants.LinesVertical.allianceZone/2,3*(FieldConstants.LinesHorizontal.center/2),1), new Rotation3d());
+    public static final Pose3d allianceRight =
+        new Pose3d(new Translation3d(FieldConstants.LinesVertical.allianceZone/2,(FieldConstants.LinesHorizontal.center/2),1), new Rotation3d());
+
+  }
 
   // --- Data Structures ---
   public static record LaunchSolution(
@@ -47,22 +61,39 @@ public class LaunchingSolutionManager extends SubsystemBase {
     return instance;
   }
 
-  @Override
-  public void periodic() {
-    // 1. Get Robot State (ID 0 = Chassis)
+public void calculateCurrentTargets(){
+// 1. Get Robot State (ID 0 = Chassis)
     Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
     Translation3d robotVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
 
     // 2. Solve for the Launch Vector
         // Pick a starting goal based on alliance color
 
-    targetPose = AllianceFlipUtil.apply(new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d()));
-    Logger.recordOutput("LaunchingSolutionManager/targetPose", new Pose3d[] {this.targetPose});
+    if( FieldUtils.isInAllianceZone(robotPose.toPose2d() )){
+      targetPose = AllianceFlipUtil.apply(new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d()));
+    }
+    else{
+      if(FieldUtils.isLeftSide(robotPose.toPose2d())){
+        targetPose = AllianceFlipUtil.apply((TargetPoses.allianceLeft));
+      }
+      else // mens we're on the right side of the field
+      {
+         targetPose = AllianceFlipUtil.apply(TargetPoses.allianceRight);
+      }
+    }
+    
+    Logger.recordOutput("LaunchingSolutionManager/currentTargetPose", new Pose3d[] {this.targetPose});
 
     currentSolution = calculate(robotPose, robotVel, targetPose.getTranslation());
 
     targetOnMovePose = new Pose3d(this.targetPose.getTranslation().minus(robotVel), new Rotation3d());
     Logger.recordOutput("LaunchingSolutionManager/currentSolution/onMoveTargetPose", targetOnMovePose);
+  }
+
+    //==============================================================
+  @Override
+  public void periodic() {
+    calculateCurrentTargets();
 
   }
 

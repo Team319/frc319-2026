@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Rotation;
+import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -37,6 +39,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   public Turret(final TalonFXSubsystemConfig config, final TalonFXIO turretMotorIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO);
+    //setMotionMagicConfigImpl(LauncherConstants.Turret.config.fxConfig.MotionMagic);
   }
 
   public void setState(LauncherConstants.LauncherStates state) {
@@ -44,7 +47,6 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   }
 
   public Command setAngle(Supplier<Angle> desiredAngle) {
-      
     return motionMagicSetpointCommand(
         () -> convertSubsystemPositionToMotorPosition( desiredAngle.get() ));
   }
@@ -85,9 +87,11 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public Transform3d getTransform3d() {
-    Angle rotations = super.getCurrentPosition().div(1/config.unitToRotorRatio);
+    Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
+    Logger.recordOutput(pb.makePath("motor_rotations"), super.getCurrentPosition().in(Rotations));
+    Logger.recordOutput(pb.makePath("turret_rotations"), rotations.in(Rotations));
 
-    Logger.recordOutput(pb.makePath("motor_rotations"), rotations);
+    Logger.recordOutput(pb.makePath("turret_local_radians"), rotations.in(Radians));
     
     return config.initialTransform.plus(
         new Transform3d(new Translation3d(), new Rotation3d(0, 0, rotations.in(Radians))));

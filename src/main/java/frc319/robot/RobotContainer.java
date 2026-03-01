@@ -267,6 +267,10 @@ public class RobotContainer {
             )
           );
 
+
+        driverController.rightTrigger().whileTrue( new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)) )
+         .onFalse( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)) );
+
         driverController.rightBumper()
           .onTrue(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.TRACK_HUB_ON_MOVE)))
           .onFalse(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.IDLE)));
@@ -280,7 +284,7 @@ public class RobotContainer {
         driverController.povUp()
           .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.SNOWBLOW)));
 
-        driverController.povUp()
+        driverController.povLeft()
           .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)));
 
         // driverController.back()

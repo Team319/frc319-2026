@@ -7,6 +7,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.units.measure.Distance;
 import frc319.redhawk_lib.drivers.CANDeviceId;
+import frc319.redhawk_lib.dynamics.MoiUnits;
 import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
 
 public final class IntakeConstants {
@@ -27,13 +28,15 @@ public final class IntakeConstants {
 
     static {
       config.name = "Intake Extension";
-      config.talonCANID = new CANDeviceId(30); // Example CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(30); 
       config.fxConfig.Slot0.kS = 0.01;
-      config.fxConfig.Slot0.kP = 0.2;
+      config.fxConfig.Slot0.kP = 10.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
+      config.fxConfig.Slot0.kD = 10.0;
       config.unitToRotorRatio = 0.1; // TODO
       config.unitRotationsPerMeter = 10.0;
+
+      config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
         // Motion Magic parameters
         config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0; // meters per second

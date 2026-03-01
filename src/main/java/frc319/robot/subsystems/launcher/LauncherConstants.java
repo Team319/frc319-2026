@@ -38,26 +38,21 @@ public final class LauncherConstants {
       config.talonCANID = new CANDeviceId(20); // Example CAN ID, replace with actual ID
       
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-      config.fxConfig.Slot0.kS = 0.4;
-      config.fxConfig.Slot0.kV = 0.0;
-      config.fxConfig.Slot0.kA = 0.0;
+      config.fxConfig.Slot0.kS = 0.15;
+      config.fxConfig.Slot0.kV = 0.12;
+      config.fxConfig.Slot0.kA = 0.01;
       config.fxConfig.Slot0.kP = 10.0; // 6.4
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio = 0.08695;// is now ( 92*3 )/ 24) 
+      config.fxConfig.Slot0.kD = 5.0;
+      config.unitToRotorRatio = 2.0;// is now ( 92*3 )/ 24) 
                                         // was 1/(( 92*3 )/ 24) but i had to swap something elsewhere  // 1/(250/24) = 0.0959;
 
-      config.momentOfInertia = KilogramSquareMeters.of(500); // KgMetersSquared
+      config.momentOfInertia = MoiUnits.PoundSquareInches.of(500);
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 10.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 15.0; // rotations per second^2
-      config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
-
-      // Example From Redhawk:
-      // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
-      // config.unitToRotorRatio = 120.0 / 60.0;
-      // config.momentOfInertia = MoiUnits.PoundSquareInches.of(522.908341);
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 10.0; // rotations per second^2
+      //config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
       config.initialTransform =
           new Transform3d(
@@ -129,11 +124,12 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(23); // Example CAN ID, replace with actual ID
       config.fxConfig.Slot0.kS = 0.5;
-      config.fxConfig.Slot0.kP = 10;
+      config.fxConfig.Slot0.kP = 10.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio =  0.035087; //0.008974359;   //  is this right? (14/50 * 15/24 * 20/390) = 0.008974359
-                                              // comp robot - 28.5 reduction
+      config.fxConfig.Slot0.kD = 10.0;
+      config.unitToRotorRatio =  1.0; //TODO comp robot supposedly has 28.5 reduction
+
+      config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 30.0; // rotations per second

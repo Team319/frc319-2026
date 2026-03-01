@@ -253,6 +253,7 @@ public class DriveCommands {
     String side = FieldUtils.isLeftSide(robotPose) ? "left" : "right";
     String direction;
     String zone;
+    String heading;
     
     if (FieldUtils.isInAllianceZone(robotPose) || FieldUtils.isInOpposingZone(robotPose)) {
       // We want to exit the Current Alliance Zone and enter the neutral zone
@@ -272,7 +273,16 @@ public class DriveCommands {
         zone = AllianceUtils.isRedAlliance() ? "alliance" : "opposing";
       }
     
-    String pathString =  "go_" + direction + "_" + side + "_" + zone; // e.g. "go_exit_left_alliance", "go_enter_right_opposing", etc.;
+    if (Math.abs(drive.getRotation().getDegrees()) > 90 && Math.abs(drive.getRotation().getDegrees()) < 270){
+      heading = "180";
+    }
+    else{
+      heading = "0";
+    }
+
+    System.out.println("Heading angle was " + drive.getRotation().getDegrees() + " degrees, so heading is " + heading + "\n");
+    
+      String pathString =  "go_" + direction + "_" + side + "_" + zone + "_" + heading; // e.g. "go_exit_left_alliance_0", "go_enter_right_opposing_180", etc.;
 
 
     // 3. Execute pathfinding command for chosen path

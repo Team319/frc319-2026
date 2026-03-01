@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 
+
 public class Util {
   public static final double EPSILON = 1e-12;
 
@@ -45,21 +46,4 @@ public class Util {
   //   return modeDependentValue(real, real);
 	// }
   
-  /**
-   * Clamps an angle to be within the specified min and max bounds.
-   * 
-   * @param angle The angle to clamp
-   * @param min The minimum allowed angle
-   * @param max The maximum allowed angle
-   * @return The clamped angle (if angle < min returns min, if angle > max returns max, otherwise returns angle)
-   */
-  public static Angle clampAngle(Angle angle, Angle min, Angle max) {
-    if (angle.lt(min)) {
-      return min;
-    } else if (angle.gt(max)) {
-      return max;
-    } else {
-      return angle;
-    }
-  }
 }

@@ -96,9 +96,16 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
     //Distance distance = Inches.of(Math.sin(Timer.getFPGATimestamp()) + 1).times(6);
 
     Distance distance = getCurrentPositionAsDistance();
-    Logger.recordOutput(pb.makePath("distance"), distance);
 
-    Angle sliderAngle = Degrees.of(-4.479515);
+    //TODO - i probably need to adjust this to represent reality vs some arbitrary motion
+    // Clamp the rotations to a reasonable range to prevent the hood from rotating to an impossible distance
+    if(distance.in(Meters) > Inches.of(12).in(Meters)){
+      distance = Inches.of(12);
+    } else if(distance.in(Meters) < Inches.of(0).in(Meters)){
+      distance = Inches.of(0);
+    }
+
+    Angle sliderAngle = Degrees.of(-12);  // was -4.479515
 
     Distance distanceX = distance.times(Math.cos(sliderAngle.in(Radians)));
     Distance distanceZ = distance.times(Math.sin(sliderAngle.in(Radians)));

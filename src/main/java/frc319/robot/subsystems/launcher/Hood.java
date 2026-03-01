@@ -64,6 +64,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
           aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
           Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);
           this.setAngle(()->aimAngle).schedule();
+          break;
       
       case TRACK_HUB_ON_MOVE:
           // Calculate angle to adjust when Shooting on the Move
@@ -85,6 +86,15 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   @Override
   public Transform3d getTransform3d() {
     Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
+
+    //TODO - i probably need to adjust this to represent reality vs some arbitrary motion
+    // Clamp the rotations to a reasonable range to prevent the hood from rotating to an impossible angle 
+    if(rotations.in(Radians) > Degrees.of(90).in(Radians)){
+      rotations = Degrees.of(30);
+    } else if(rotations.in(Radians) < Degrees.of(0).in(Radians)){
+      rotations = Degrees.of(0);
+    }
+
     Transform3d localTransform =
         new Transform3d(new Translation3d(), new Rotation3d(0, rotations.in(Radians), 0));
 
