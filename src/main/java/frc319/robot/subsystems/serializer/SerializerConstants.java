@@ -6,8 +6,8 @@ import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import frc319.redhawk_lib.drivers.CANDeviceId;
-import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.drivers.CANDeviceId;
+import frc319.lib.subsystem.TalonFXSubsystemConfig;
 
 public final class SerializerConstants {
 
@@ -23,7 +23,8 @@ public final class SerializerConstants {
 
     static {
       config.name = "Spindexer";
-      config.talonCANID = new CANDeviceId(10); // Example CAN ID, replace with actual ID
+      config.tunable = false;
+      config.talonCANID = new CANDeviceId(24); // Example CAN ID, replace with actual ID
       config.fxConfig.Slot0.kP = 0.2;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
@@ -42,7 +43,8 @@ public final class SerializerConstants {
 
     static {
       config.name = "BallTunnel";
-      config.talonCANID = new CANDeviceId(11); // Example CAN ID, replace with actual ID
+      config.tunable = false;
+      config.talonCANID = new CANDeviceId(25); // Example CAN ID, replace with actual ID
       config.fxConfig.Slot0.kP = 0.2;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;

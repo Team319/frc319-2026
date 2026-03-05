@@ -5,20 +5,26 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
-import frc319.redhawk_lib.drivers.CANDeviceId;
-import frc319.redhawk_lib.dynamics.MoiUnits;
-import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
+import edu.wpi.first.units.measure.Time;
+import frc319.lib.drivers.CANDeviceId;
+import frc319.lib.dynamics.MoiUnits;
+import frc319.lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.util.LoggedTunableBoolean;
+import frc319.lib.util.LoggedTunableMeasure;
+import frc319.robot.FieldConstants;
 
 public final class LauncherConstants {
 
@@ -29,12 +35,24 @@ public final class LauncherConstants {
       TRACK_HUB_ON_MOVE
     }
 
+    public static class TargetPoses {
+      public static final Pose3d hub =
+          new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
+      public static final Pose3d allianceLeft =
+          new Pose3d(new Translation3d(FieldConstants.LinesVertical.allianceZone/2,3*(FieldConstants.LinesHorizontal.center/2),1), new Rotation3d());
+      public static final Pose3d allianceRight =
+          new Pose3d(new Translation3d(FieldConstants.LinesVertical.allianceZone/2,(FieldConstants.LinesHorizontal.center/2),1), new Rotation3d());
+    }
+
   public static final class Turret {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
 
+    public static Angle zeroAngleOffset = Degrees.of(-90);
+
     static {
       config.name = "Turret";
+      config.tunable = true;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(20); // Example CAN ID, replace with actual ID
       
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -57,12 +75,13 @@ public final class LauncherConstants {
       config.initialTransform =
           new Transform3d(
               new Translation3d( Inches.of(-4.371627).in(Meters), Inches.of(6.257212).in(Meters), Inches.of(14.008475).in(Meters)),
-              new Rotation3d(0, 0, Units.degreesToRadians(0)));        
+              new Rotation3d(0, 0, Units.degreesToRadians(zeroAngleOffset.in(Degrees))));        
 
     } 
 
     public static int MODEL_INDEX = 3;
     public static int PARENT_INDEX = 0; // drivetrain
+    
 
   } // End of Turret Constants
 
@@ -80,6 +99,7 @@ public final class LauncherConstants {
 
     static {
       leftConfig.name = "Flywheels Left Lead";
+      leftConfig.tunable = true;  // Enable tuning for this subsystem
       leftConfig.talonCANID = new CANDeviceId(21); // Example CAN ID, replace with actual ID
       leftConfig.fxConfig.Slot0.kP = 0.0;
       leftConfig.fxConfig.Slot0.kI = 0.0;
@@ -122,6 +142,7 @@ public final class LauncherConstants {
 
     static {
       config.name = "Hood";
+      config.tunable = true;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(23); // Example CAN ID, replace with actual ID
       config.fxConfig.Slot0.kS = 0.5;
       config.fxConfig.Slot0.kP = 10.0;
@@ -157,4 +178,13 @@ public final class LauncherConstants {
 
 
   } // End of Hood Constants
+
+   public static LoggedTunableMeasure<Time> otfLinearProjectionSeconds =
+      new LoggedTunableMeasure<Time>(
+          "LaunchingSolutionManager/time_to_project_lin", Seconds.of(0.5));
+  public static LoggedTunableMeasure<Time> otfAngularProjectionSeconds =
+      new LoggedTunableMeasure<Time>(
+          "LaunchingSolutionManager/time_to_project_ang", Seconds.of(0.5));
+  public static LoggedTunableBoolean otfFutureProjectionEnabled =
+      new LoggedTunableBoolean("LaunchingSolutionManager/projection_enabled", true);
 }

@@ -6,9 +6,9 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.units.measure.Distance;
-import frc319.redhawk_lib.drivers.CANDeviceId;
-import frc319.redhawk_lib.dynamics.MoiUnits;
-import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.drivers.CANDeviceId;
+import frc319.lib.dynamics.MoiUnits;
+import frc319.lib.subsystem.TalonFXSubsystemConfig;
 
 public final class IntakeConstants {
 
@@ -28,6 +28,7 @@ public final class IntakeConstants {
 
     static {
       config.name = "Intake Extension";
+      config.tunable = false;
       config.talonCANID = new CANDeviceId(30); 
       config.fxConfig.Slot0.kS = 0.01;
       config.fxConfig.Slot0.kP = 10.0;
@@ -56,10 +57,12 @@ public final class IntakeConstants {
     public static TalonFXSubsystemConfig followConfig = new TalonFXSubsystemConfig();
     static {
       leadConfig.name = "Intake Rollers Lead";
+      leadConfig.tunable = false;
       leadConfig.talonCANID = new CANDeviceId(31); // Example CAN ID, replace with actual ID
       leadConfig.unitToRotorRatio = 1.0; // 1:1 ratio
 
       followConfig.name = "Intake Rollers Follow";
+      followConfig.tunable = false;
       followConfig.talonCANID = new CANDeviceId(32); // Example CAN ID, replace with actual ID
       followConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       followConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;

@@ -13,10 +13,11 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc319.redhawk_lib.subsystem.KinematicsManager;
+import frc319.lib.subsystem.KinematicsManager;
+import frc319.lib.util.AllianceFlipUtil;
+import frc319.lib.util.FieldUtils;
 import frc319.robot.FieldConstants;
-import frc319.robot.util.AllianceFlipUtil;
-import frc319.robot.util.FieldUtils;
+import frc319.robot.subsystems.launcher.LauncherConstants.TargetPoses;
 
 public class LaunchingSolutionManager extends SubsystemBase {
   private static LaunchingSolutionManager instance;
@@ -24,17 +25,6 @@ public class LaunchingSolutionManager extends SubsystemBase {
   // Target Pose (default to blue origin)
   private Pose3d targetPose = new Pose3d();
   private Pose3d targetOnMovePose = new Pose3d();
-
-  private class TargetPoses {
-    public static final Pose3d hubTopCenter =
-        new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
-
-    public static final Pose3d allianceLeft =
-        new Pose3d(new Translation3d(FieldConstants.LinesVertical.allianceZone/2,3*(FieldConstants.LinesHorizontal.center/2),1), new Rotation3d());
-    public static final Pose3d allianceRight =
-        new Pose3d(new Translation3d(FieldConstants.LinesVertical.allianceZone/2,(FieldConstants.LinesHorizontal.center/2),1), new Rotation3d());
-
-  }
 
   // --- Data Structures ---
   public static record LaunchSolution(
@@ -70,7 +60,7 @@ public void calculateCurrentTargets(){
         // Pick a starting goal based on alliance color
 
     if( FieldUtils.isInAllianceZone(robotPose.toPose2d() )){
-      targetPose = AllianceFlipUtil.apply(new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d()));
+      targetPose = AllianceFlipUtil.apply(TargetPoses.hub);
     }
     else{
       if(FieldUtils.isLeftSide(robotPose.toPose2d())){

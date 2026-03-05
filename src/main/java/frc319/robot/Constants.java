@@ -10,8 +10,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc319.robot.util.Alert;
-import frc319.robot.util.Alert.*;
+import frc319.lib.util.Alert;
+import frc319.lib.util.Alert.*;
 
 /** Add your docs here. */
 public class Constants {
@@ -20,7 +20,7 @@ public class Constants {
   public static final boolean tuningMode = false;
   public static final double loopPeriodSecs = 0.02;
 
-  private static RobotType robotType = RobotType.LAUNCHER_PROTOTYPE;
+  private static RobotType robotType = RobotType.COMPBOT;
 
   private static FieldType fieldType = FieldType.ANDYMARK;
 

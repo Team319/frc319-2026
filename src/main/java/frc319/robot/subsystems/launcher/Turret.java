@@ -17,13 +17,13 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc319.redhawk_lib.io.ArticulatedComponent;
-import frc319.redhawk_lib.io.MotorInputsAutoLogged;
-import frc319.redhawk_lib.io.TalonFXIO;
-import frc319.redhawk_lib.subsystem.KinematicsManager;
-import frc319.redhawk_lib.subsystem.MotorSubsystem;
-import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
-import frc319.redhawk_lib.util.Util;
+import frc319.lib.io.ArticulatedComponent;
+import frc319.lib.io.TalonFXIO;
+import frc319.lib.subsystem.KinematicsManager;
+import frc319.lib.subsystem.MotorSubsystem;
+import frc319.lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.util.Util;
+import frc319.lib.io.MotorInputsAutoLogged;
 import frc319.robot.FieldConstants;
 
 import java.util.Optional;
@@ -48,7 +48,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
-        () -> convertSubsystemPositionToMotorPosition( desiredAngle.get() ));
+        () -> convertSubsystemPositionToMotorPosition( desiredAngle.get().minus(LauncherConstants.Turret.zeroAngleOffset) ));
   }
 
   @Override
@@ -141,7 +141,14 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
     // 5. Normalize to range (-PI to PI) so the turret takes the shortest path
     // e.g., if result is 350 degrees, this turns it into -10 degrees
-    double normalizedRadians = MathUtil.angleModulus(relativeRadians);
+    //double normalizedRadians = MathUtil.angleModulus(relativeRadians);
+
+    // I want the wrap around to be at a different point to I will clamp it 
+    double wrapAroundPoint = (7*Math.PI / 4); // Wrap around at 90 degrees instead of 180
+    
+    double normalizedRadians = MathUtil.inputModulus(relativeRadians, -2*Math.PI + wrapAroundPoint, wrapAroundPoint);
+
+
 
     return Radians.of(normalizedRadians);
   }

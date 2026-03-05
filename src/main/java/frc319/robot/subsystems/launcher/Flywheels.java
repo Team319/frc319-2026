@@ -17,12 +17,12 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc319.redhawk_lib.io.ArticulatedComponent;
-import frc319.redhawk_lib.io.MotorIO;
-import frc319.redhawk_lib.io.MotorInputsAutoLogged;
-import frc319.redhawk_lib.subsystem.MotorFollowerSubsystem;
-import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
-import frc319.redhawk_lib.util.RobotTime;
+import frc319.lib.io.ArticulatedComponent;
+import frc319.lib.io.MotorIO;
+import frc319.lib.subsystem.MotorFollowerSubsystem;
+import frc319.lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.util.RobotTime;
+import frc319.lib.io.MotorInputsAutoLogged;
 import frc319.robot.FieldConstants;
 import frc319.robot.subsystems.launcher.LauncherConstants.Flywheels.FlywheelsState;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
@@ -125,7 +125,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     Time dt = now.minus(lastUpdateTime);
     fuelTrajectories.update(dt);
     this.lastUpdateTime = now;
-    Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
+    Logger.recordOutput(pb.makePath("fuel_trajectories"), this.fuelTrajectories.getPositions());
 
   }
 

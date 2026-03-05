@@ -16,9 +16,9 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc319.redhawk_lib.io.SimTalonFXIO;
-import frc319.redhawk_lib.io.TalonFXIO;
-import frc319.redhawk_lib.subsystem.KinematicsManager;
+import frc319.lib.io.SimTalonFXIO;
+import frc319.lib.io.TalonFXIO;
+import frc319.lib.subsystem.KinematicsManager;
 import frc319.robot.Constants.DemoMode;
 import frc319.robot.Constants.DriveConstants;
 import frc319.robot.commands.DriveCommands;
@@ -89,7 +89,6 @@ public class RobotContainer {
       switch(Constants.getRobot()){
   
         case COMPBOT:
-        case DEVBOT:
 
           drive =
             new Drive(
@@ -130,6 +129,7 @@ public class RobotContainer {
 
           break;
 
+          case DEVBOT:
           case SIMBOT:
           default:
             // Sim robot, instantiate physics sim IO implementations
@@ -271,9 +271,13 @@ public class RobotContainer {
         driverController.rightTrigger().whileTrue( new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)) )
          .onFalse( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)) );
 
+        // driverController.rightBumper()
+        //   .onTrue(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.TRACK_HUB_ON_MOVE)))
+        //   .onFalse(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.IDLE)));
+
         driverController.rightBumper()
-          .onTrue(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.TRACK_HUB_ON_MOVE)))
-          .onFalse(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.IDLE)));
+          .onTrue(turret.setAngle(()-> Degrees.of(720)))
+          .onFalse(turret.setAngle(()-> Degrees.of(0)));
 
         driverController.povDown()
           .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.IDLE)));

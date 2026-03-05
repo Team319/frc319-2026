@@ -3,10 +3,10 @@ package frc319.robot.subsystems.intake;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc319.redhawk_lib.io.MotorInputsAutoLogged;
-import frc319.redhawk_lib.io.TalonFXIO;
-import frc319.redhawk_lib.subsystem.MotorFollowerSubsystem;
-import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.io.TalonFXIO;
+import frc319.lib.subsystem.MotorFollowerSubsystem;
+import frc319.lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.io.MotorInputsAutoLogged;
 import frc319.robot.subsystems.intake.IntakeConstants.IntakeStates;
 
 public class IntakeRollers extends MotorFollowerSubsystem<MotorInputsAutoLogged, TalonFXIO> {

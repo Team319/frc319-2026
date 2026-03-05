@@ -8,8 +8,9 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
+import frc319.lib.util.BallTrajectorySim.Ball;
 import frc319.robot.FieldConstants;
-import frc319.robot.util.BallTrajectorySim.Ball;
+
 import java.util.ArrayList;
 
 public class FuelTrajectories {

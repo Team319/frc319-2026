@@ -12,11 +12,11 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc319.redhawk_lib.io.ArticulatedComponent;
-import frc319.redhawk_lib.io.MotorInputsAutoLogged;
-import frc319.redhawk_lib.io.TalonFXIO;
-import frc319.redhawk_lib.subsystem.MotorSubsystem;
-import frc319.redhawk_lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.io.ArticulatedComponent;
+import frc319.lib.io.TalonFXIO;
+import frc319.lib.subsystem.MotorSubsystem;
+import frc319.lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.io.MotorInputsAutoLogged;
 import frc319.robot.subsystems.intake.IntakeConstants.IntakeStates;
 
 import java.util.function.Supplier;
