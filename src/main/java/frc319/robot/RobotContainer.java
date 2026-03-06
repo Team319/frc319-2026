@@ -300,8 +300,8 @@ public class RobotContainer {
 
         
         if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos
-
-          driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( DriveCommands.pathfindUnderNearestTrench(drive)) ));
+          driverController.leftBumper().onTrue( new InstantCommand(()-> this.setRobotState(RobotStates.TRENCH)));
+          driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( DriveCommands.pathfindUnderNearestTrench(drive))));
           
         }
 
@@ -336,8 +336,8 @@ public class RobotContainer {
     STOWED,
     COLLECTING,
     SHOOTING,
-    SNOWBLOW // Means collecting while shooting at the desired target. probably want to have some logic when to gracefully switch while shooting
-    // TRENCH ?
+    SNOWBLOW, // Means collecting while shooting at the desired target. probably want to have some logic when to gracefully switch while shooting
+    TRENCH
   }
 
   private void setRobotState(RobotStates state){
@@ -368,8 +368,8 @@ public class RobotContainer {
         flywheels.setState(FlywheelsState.SHOOT);
         ballTunnel.setState(SerializerStates.SHOOT);
         spindexer.setState(SerializerStates.SHOOT);
-        turret.setState(LauncherStates.TRACK_HUB_ON_MOVE);
-        hood.setState(LauncherStates.TRACK_HUB_ON_MOVE);
+        turret.setState(LauncherStates.TRACKING_TARGET);
+        hood.setState(LauncherStates.TRACKING_TARGET);
         break;
 
       case SNOWBLOW:
@@ -378,10 +378,21 @@ public class RobotContainer {
         ballTunnel.setState(SerializerStates.SHOOT);
         flywheels.setState(FlywheelsState.SHOOT);        
         spindexer.setState(SerializerStates.SHOOT);
-        turret.setState(LauncherStates.TRACK_HUB_ON_MOVE);
-        hood.setState(LauncherStates.TRACK_HUB_ON_MOVE);
+        turret.setState(LauncherStates.TRACKING_TARGET);
+        hood.setState(LauncherStates.TRACKING_TARGET);
         break;
-      
+
+      case TRENCH:
+        // Just ensure the turret is STOWED... 
+        hood.setState(LauncherStates.STOWED);
+
+        // Should probably stop shooting too...
+        ballTunnel.setState(SerializerStates.IDLE);
+        flywheels.setState(FlywheelsState.PRESPIN);
+        spindexer.setState(SerializerStates.IDLE);   
+
+        break;
+
       case IDLE:
       default:  
         intakeExtension.setState(IntakeStates.IDLE);

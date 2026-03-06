@@ -157,7 +157,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     // 1. Get the latest solution
     var solution = LaunchingSolutionManager.getInstance().getSolution();
 
-    if (solution.isValid()) {
+    //if (solution.isValid()) {
       // 2. Convert Field-Relative Goal to Robot-Relative Setpoint
 
       // Get Chassis Heading from Kinematics
@@ -168,7 +168,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       Rotation2d localSetpoint = solution.turretFieldRelativeYaw().minus(chassisHeading);
 
       return localSetpoint.getMeasure();
-    }
-    return Degrees.of(0);
+    //}
+   // return Degrees.of(0);
   }
 }

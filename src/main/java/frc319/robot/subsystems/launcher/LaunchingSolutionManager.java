@@ -99,7 +99,7 @@ public void calculateCurrentTargets(){
 
     // B. Check Range
     if (dist > 8.0 || dist < 1.0) {
-      return new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), dist, true); // TODO - this was set false
+      //return new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), dist, true); // TODO - this was set false
     }
 
     // C. Get Ideal Static Launch Params (Ground Relative)

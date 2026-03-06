@@ -169,13 +169,13 @@ public final class LauncherConstants {
 
     static {
       // Distance (m) -> Hood Pitch (Degrees) - Example from Redhawk
-      // angleMap.put(1.0, 15.0);
-      // angleMap.put(1.5, 22.0);
-      // angleMap.put(3.0, 30.0);
-      // angleMap.put(4.0, 40.0);
-
       angleMap.put(1.0, 15.0);
-      angleMap.put(4.0, 30.0);
+      angleMap.put(1.5, 22.0);
+      angleMap.put(3.0, 30.0);
+      angleMap.put(4.0, 40.0);
+
+      // angleMap.put(1.0, 15.0);
+      // angleMap.put(4.0, 30.0);
     }
 
 
