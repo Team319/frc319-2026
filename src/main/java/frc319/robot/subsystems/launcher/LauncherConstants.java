@@ -37,7 +37,7 @@ public final class LauncherConstants {
 
     public static class TargetPoses {
       public static final Pose3d hub =
-          new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
+          new Pose3d(FieldConstants.Hub.innerCenterPoint, new Rotation3d());
       public static final Pose3d allianceLeft =
           new Pose3d(new Translation3d(FieldConstants.LinesVertical.allianceZone/2,3*(FieldConstants.LinesHorizontal.center/2),1), new Rotation3d());
       public static final Pose3d allianceRight =
@@ -62,14 +62,13 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kP = 10.0; // 6.4
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 5.0;
-      config.unitToRotorRatio = 2.0;// is now ( 92*3 )/ 24) 
-                                        // was 1/(( 92*3 )/ 24) but i had to swap something elsewhere  // 1/(250/24) = 0.0959;
+      config.unitToRotorRatio =  28.5; // 28.5 to 1
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(500);
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 10.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 10.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 100.0; // rotations per second^2
       //config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
       config.initialTransform =
@@ -169,11 +168,14 @@ public final class LauncherConstants {
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
 
     static {
-      // Distance (m) -> Hood Pitch (Degrees)
+      // Distance (m) -> Hood Pitch (Degrees) - Example from Redhawk
+      // angleMap.put(1.0, 15.0);
+      // angleMap.put(1.5, 22.0);
+      // angleMap.put(3.0, 30.0);
+      // angleMap.put(4.0, 40.0);
+
       angleMap.put(1.0, 15.0);
-      angleMap.put(1.5, 22.0);
-      angleMap.put(3.0, 30.0);
-      angleMap.put(4.0, 40.0);
+      angleMap.put(4.0, 30.0);
     }
 
 

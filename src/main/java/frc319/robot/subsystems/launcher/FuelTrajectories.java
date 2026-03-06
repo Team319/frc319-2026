@@ -32,7 +32,8 @@ public class FuelTrajectories {
     fuel.removeIf(
         ball -> {
           ball.update(dt);
-          return ball.getPosition().getZ() < FieldConstants.Hub.innerHeight
+          return ((ball.getPosition().getZ() < 0 && ball.getPosition().getX() < FieldConstants.LinesVertical.allianceZone) 
+              || (ball.getPosition().getZ() < FieldConstants.Hub.innerHeight && ball.getPosition().getX() > FieldConstants.LinesVertical.allianceZone) ) 
               && ball.getVelocity().getZ() < 0;
         });
   }

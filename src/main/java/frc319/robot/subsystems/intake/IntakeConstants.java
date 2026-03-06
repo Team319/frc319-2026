@@ -1,6 +1,7 @@
 package frc319.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -26,6 +27,8 @@ public final class IntakeConstants {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
 
+    private static final double gearRatio = 3;
+
     static {
       config.name = "Intake Extension";
       config.tunable = false;
@@ -34,8 +37,18 @@ public final class IntakeConstants {
       config.fxConfig.Slot0.kP = 10.0;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 10.0;
-      config.unitToRotorRatio = 0.1; // TODO
-      config.unitRotationsPerMeter = 10.0;
+
+      
+      config.unitToRotorRatio = 1/gearRatio; 
+                                      // TODO - is this the gearRatio or the inverse of the gear ratio 
+                                      // 6/25 reduction.
+                                      //    (3/1) 1/1 1/1 1/1 lantern is 6/25, so 25/6 = 4.1667, but then we have a 3:1 sprocket reduction after that, so 4.1667*3 = 12.5.
+                                      //     // counting ... 
+                                      // 12.5 motor rations to travel 12 inches
+
+                                      // diameter of lantern gear is 1.25 inches
+      
+      config.unitRotationsPerMeter = gearRatio * ((Inches.of(1.25).times(Math.PI).in(Meters)));
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 

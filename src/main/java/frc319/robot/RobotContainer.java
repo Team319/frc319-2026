@@ -233,6 +233,9 @@ public class RobotContainer {
     kinematicsManager.register(
         hood, LauncherConstants.Hood.MODEL_INDEX, LauncherConstants.Hood.PARENT_INDEX);
 
+    kinematicsManager.register(
+        flywheels, LauncherConstants.Flywheels.MODEL_INDEX, LauncherConstants.Flywheels.PARENT_INDEX);
+
   }
   
     private void configureBindings() {
@@ -365,8 +368,8 @@ public class RobotContainer {
         flywheels.setState(FlywheelsState.SHOOT);
         ballTunnel.setState(SerializerStates.SHOOT);
         spindexer.setState(SerializerStates.SHOOT);
-        turret.setState(LauncherStates.TRACKING_TARGET);
-        hood.setState(LauncherStates.TRACKING_TARGET);
+        turret.setState(LauncherStates.TRACK_HUB_ON_MOVE);
+        hood.setState(LauncherStates.TRACK_HUB_ON_MOVE);
         break;
 
       case SNOWBLOW:
@@ -375,8 +378,8 @@ public class RobotContainer {
         ballTunnel.setState(SerializerStates.SHOOT);
         flywheels.setState(FlywheelsState.SHOOT);        
         spindexer.setState(SerializerStates.SHOOT);
-        turret.setState(LauncherStates.TRACKING_TARGET);
-        hood.setState(LauncherStates.TRACKING_TARGET);
+        turret.setState(LauncherStates.TRACK_HUB_ON_MOVE);
+        hood.setState(LauncherStates.TRACK_HUB_ON_MOVE);
         break;
       
       case IDLE:

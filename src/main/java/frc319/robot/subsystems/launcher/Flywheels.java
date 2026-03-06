@@ -55,7 +55,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         new MotorInputsAutoLogged(),
         leftLauncherMotorIO,
         rightLauncherMotorIO);
-    this.fuelTrajectories = new FuelTrajectories();
+        this.fuelTrajectories = new FuelTrajectories();
   }
 
   public void setState(FlywheelsState newState) {
@@ -94,9 +94,9 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
       case SHOOT:
         this.setVelocity(()->RPM.of(3000)).schedule(); // TODO :  need matching flywheel ANGULAR Velocity
-        if (solution.isValid()) {
+        //if (solution.isValid()) {
           launchFuel(solution);
-        }
+        //}
         break;
 
       case PRESPIN:
@@ -121,9 +121,10 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         new Pose3d[] {
           globalPose, globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
         });
+
     Time now = RobotTime.getTimestamp();
     Time dt = now.minus(lastUpdateTime);
-    fuelTrajectories.update(dt);
+    this.fuelTrajectories.update(dt);
     this.lastUpdateTime = now;
     Logger.recordOutput(pb.makePath("fuel_trajectories"), this.fuelTrajectories.getPositions());
 

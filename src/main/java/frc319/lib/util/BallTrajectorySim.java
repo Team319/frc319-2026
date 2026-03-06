@@ -12,6 +12,7 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
 
 public class BallTrajectorySim {
+  static boolean useMagnus = false;
   public static class Ball {
     // Position is Translation3d (Best for Visualization/Field2d)
     public Translation3d position;
@@ -99,7 +100,10 @@ public class BallTrajectorySim {
 
       // 4. Integration
       // Make sure to UNCOMMENT the magnusForce!
-      Translation3d totalForce = gravityForce.plus(dragForce); // .plus(magnusForce);
+      Translation3d totalForce = gravityForce.plus(dragForce); 
+      if (useMagnus) {
+        totalForce = totalForce.plus(magnusForce);
+      }
       Translation3d acceleration = totalForce.div(massKg);
 
       velocity = velocity.plus(acceleration.times(dt));
