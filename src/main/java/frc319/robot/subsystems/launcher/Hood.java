@@ -31,6 +31,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   public Hood(final TalonFXSubsystemConfig config, final TalonFXIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
+    //super.setCurrentPosition(LauncherConstants.Hood.zeroAngleOffset);
 
   }
 
@@ -46,11 +47,11 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition.minus(LauncherConstants.Hood.zeroAngleOffset).divide(config.unitToRotorRatio);
+    return subsystemPosition.divide(config.unitToRotorRatio);
   }
 
   protected Angle convertMotorPositionToSubsystemPosition(Angle motorPosition) {
-    return motorPosition.times(config.unitToRotorRatio).plus(LauncherConstants.Hood.zeroAngleOffset);
+    return motorPosition.times(config.unitToRotorRatio);
   }
 
   public Command retract() {
@@ -103,6 +104,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   public Transform3d getTransform3d() {
     Angle hoodAngle = this.convertMotorPositionToSubsystemPosition(super.getCurrentPosition());
     Logger.recordOutput(super.pb.makePath("hoodAngle_Degrees"), hoodAngle.in(Degrees));
+
     //TODO - i probably need to adjust this to represent reality vs some arbitrary motion
     // Clamp the hoodAngle to a reasonable range to prevent the hood from rotating to an impossible angle 
     if(hoodAngle.in(Radians) > LauncherConstants.Hood.maximumAngle.in(Radians)){

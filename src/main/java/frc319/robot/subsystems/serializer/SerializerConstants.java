@@ -3,6 +3,8 @@ package frc319.robot.subsystems.serializer;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -28,6 +30,7 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kP = 0.2;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
+      config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.unitToRotorRatio = 1.0; // 1:1 ratio
       config.initialTransform =
           new Transform3d(new Translation3d(0, Inches.of(1.75).in(Meters), 0), new Rotation3d());

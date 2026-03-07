@@ -16,6 +16,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.MotorIO;
@@ -83,6 +84,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   @Override
   public void periodic() {
     Logger.recordOutput(pb.makePath("state"), flywheelsState);
+    Logger.recordOutput(pb.makePath("curretFlywheelRPM"), super.getCurrentVelocity().in(RPM));
+
 
     super.periodic();
     
@@ -103,10 +106,10 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         this.setVelocity(()->RPM.of(3000)).schedule();
         break;
 
-      case TESTING_ENABLED:
+      case TUNING:
         // Use the value from Elastic slider
-        System.out.println("Test Flywheel RPM: " + testFlywheelRPM.getAsDouble()); // Debug print
-        this.setVelocity(() -> RPM.of(testFlywheelRPM.getAsDouble())).schedule();
+        //System.out.println("Test Flywheel RPM: " + testFlywheelRPM.getAsDouble()); // Debug print
+        this.setVelocity(() -> RPM.of(SmartDashboard.getNumber("Tuning_Mode/Flywheel_Tuning_RPM", 0.0))).schedule();
         break;
 
       case IDLE:

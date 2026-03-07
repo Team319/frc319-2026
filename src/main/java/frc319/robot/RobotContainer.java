@@ -284,8 +284,8 @@ public class RobotContainer {
           );
 
 
-        driverController.rightTrigger().whileTrue( new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)) )
-         .onFalse( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)) );
+        // driverController.rightTrigger().whileTrue( new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)) )
+        //  .onFalse( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)) );
 
         // driverController.rightBumper()
         //   .onTrue(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.TRACK_HUB_ON_MOVE)))
@@ -295,28 +295,28 @@ public class RobotContainer {
           .onTrue(turret.setAngle(()-> Degrees.of(720)))
           .onFalse(turret.setAngle(()-> Degrees.of(0)));
 
-        driverController.povDown()
-          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.IDLE)));
+        // driverController.povDown()
+        //   .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.IDLE)));
 
         driverController.povRight()
-          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.COLLECTING)));
+          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING_STOP)));
 
-        driverController.povUp()
-          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.SNOWBLOW)));
+        // driverController.povUp()
+        //   .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.SNOWBLOW)));
 
         driverController.povLeft()
-          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)));
+          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING_SHOOT)));
 
-         driverController.back()
-           .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING)));
+        //  driverController.back()
+        //    .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING)));
         //   .onFalse( new InstantCommand(()->flywheels.setState(LauncherConstants.Flywheels.FlywheelsState.IDLE)));
 
         
-        if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos
-          driverController.leftBumper().onTrue( new InstantCommand(()-> this.setRobotState(RobotStates.TRENCH)));
-          driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( DriveCommands.pathfindUnderNearestTrench(drive))));
+        // if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos
+        //   driverController.leftBumper().onTrue( new InstantCommand(()-> this.setRobotState(RobotStates.TRENCH)));
+        //   driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( DriveCommands.pathfindUnderNearestTrench(drive))));
           
-        }
+        // }
 
         //  ===========================================================================
         //  ============================= Operator Controls ===========================
@@ -351,7 +351,9 @@ public class RobotContainer {
     SHOOTING,
     SNOWBLOW, // Means collecting while shooting at the desired target. probably want to have some logic when to gracefully switch while shooting
     TRENCH,
-    TUNING
+    //TUNING
+    TUNING_SHOOT,
+    TUNING_STOP
   }
 
   private void setRobotState(RobotStates state){
@@ -407,13 +409,24 @@ public class RobotContainer {
 
         break;
 
-      case TUNING:
+      case TUNING_SHOOT:
         // Implement tuning state behavior here
           intakeExtension.setState(IntakeStates.TUNING);
           //intakeRollers.setState(IntakeStates.TUNING);
-          //ballTunnel.setState(SerializerStates.TUNING);
-          //flywheels.setState(FlywheelsState.TESTING_ENABLED); 
-          //spindexer.setState(SerializerStates.TUNING);
+          ballTunnel.setState(SerializerStates.SHOOT);
+          flywheels.setState(FlywheelsState.TUNING); 
+          spindexer.setState(SerializerStates.SHOOT);
+          turret.setState(LauncherStates.TUNING);
+          hood.setState(LauncherStates.TUNING);
+        break;
+
+      case TUNING_STOP:
+        // Implement tuning state behavior here
+          intakeExtension.setState(IntakeStates.TUNING);
+          //intakeRollers.setState(IntakeStates.TUNING);
+          ballTunnel.setState(SerializerStates.IDLE);
+          flywheels.setState(FlywheelsState.TUNING); 
+          spindexer.setState(SerializerStates.IDLE);
           turret.setState(LauncherStates.TUNING);
           hood.setState(LauncherStates.TUNING);
         break;

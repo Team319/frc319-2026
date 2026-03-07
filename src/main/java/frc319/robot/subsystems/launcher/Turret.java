@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc319.lib.geometry.GeometryUtil;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.KinematicsManager;
@@ -47,6 +48,47 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   public void setState(LauncherConstants.LauncherStates state) {
     this.laucherState = state;
   }
+
+  public static Angle convertToClosestBoundedTurretAngleDegrees(Angle desiredAngle, Angle current) {
+    // Normalize target to [-180, 180] first
+    Angle normalizedTarget =
+        GeometryUtil.angleModulus(desiredAngle, Degrees.of(-180), Degrees.of(180));
+
+    // Calculate the shortest path to the target (normalized to [-180, 180])
+
+    Angle diff =
+        GeometryUtil.angleModulus(
+            normalizedTarget.minus(current), Degrees.of(-180), Degrees.of(180));
+
+    // Calculate the final absolute position
+    Angle finalPosition = current.plus(diff);
+
+    // Check if final position is within limits, if not, try the other way around
+    if (finalPosition.gt(LauncherConstants.Turret.forwardSoftLimit)) {
+      finalPosition = finalPosition.minus(Rotations.of(1));
+    } else if (finalPosition.lt(LauncherConstants.Turret.reverseSoftLimit)) {
+      finalPosition = finalPosition.plus(Rotations.of(1));
+    }
+
+    return finalPosition;
+  }
+
+  // /** Input should be robot relative (i.e. encoder-reported angle) */
+  // public Command setAngle(Supplier<Angle> desiredAngle) {
+  //   return motionMagicSetpointCommand(
+  //       () -> {
+
+  //         // Convert the desired angle to a bounded angle that respects turret limits
+  //         Angle boundedAngleDegrees =
+  //             convertToClosestBoundedTurretAngleDegrees(desiredAngle.get(), inputs.position);
+
+  //         Logger.recordOutput(
+  //             pb.makePath("setpoint", "commandedAngle"), desiredAngle.get().in(Degrees));
+  //         Logger.recordOutput(pb.makePath("setpoint", "boundedAngle"), boundedAngleDegrees);
+
+  //         return boundedAngleDegrees;
+  //       });
+  // }
 
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
@@ -95,7 +137,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public Transform3d getTransform3d() {
-    Angle rotations = super.getCurrentPosition();//.times(config.unitToRotorRatio);
+    Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
     Logger.recordOutput(pb.makePath("motor_rotations"), super.getCurrentPosition().in(Rotations));
     Logger.recordOutput(pb.makePath("turret_rotations"), rotations.in(Rotations));
 

@@ -71,7 +71,7 @@ public class TalonFXIO implements MotorIO {
       this.config.fxConfig.OpenLoopRamps = new OpenLoopRampsConfigs();
     }
 
-    this.config.fxConfig.Feedback.SensorToMechanismRatio = config.unitToRotorRatio;
+    //this.config.fxConfig.Feedback.SensorToMechanismRatio = config.unitToRotorRatio;
     CTREUtil.applyConfiguration(this.talon, this.config.fxConfig);
 
     positionSignal = talon.getPosition();

@@ -51,25 +51,29 @@ public final class LauncherConstants {
 
     public static Angle zeroAngleOffset = Degrees.of(-90);
 
+    public static final Angle forwardSoftLimit = Degrees.of(0);
+    public static final Angle reverseSoftLimit = Degrees.of(90);
+
+
     static {
       config.name = "Turret";
-      config.tunable = true;  // Enable tuning for this subsystem
+      config.tunable = false;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(20); // Example CAN ID, replace with actual ID
       
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-      config.fxConfig.Slot0.kS = 0.01;
+      config.fxConfig.Slot0.kS = 0.1;
       config.fxConfig.Slot0.kV = 0.0;//0.12;
       config.fxConfig.Slot0.kA = 0.0;//0.01;
-      config.fxConfig.Slot0.kP = 0.0; // 6.4
+      config.fxConfig.Slot0.kP = 15; // 6.4
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio =  28.5; // 28.5 to 1
+      config.unitToRotorRatio =  1.0/28.5; // 28.5 to 1
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(500);
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 100.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1000.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 500.0; // rotations per second^2
       //config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
       config.initialTransform =
@@ -90,7 +94,7 @@ public final class LauncherConstants {
     public static enum FlywheelsState {
       IDLE,
       PRESPIN,
-      TESTING_ENABLED,
+      TUNING,
       SHOOT
     }
 
@@ -99,16 +103,17 @@ public final class LauncherConstants {
 
     static {
       leftConfig.name = "Flywheels Left Lead";
-      leftConfig.tunable = false;  // Enable tuning for this subsystem
+      leftConfig.tunable = true;  // Enable tuning for this subsystem
       leftConfig.talonCANID = new CANDeviceId(21); // Example CAN ID, replace with actual ID
       leftConfig.fxConfig.Slot0.kP = 0.0;
       leftConfig.fxConfig.Slot0.kI = 0.0;
       leftConfig.fxConfig.Slot0.kD = 0.0;
-      leftConfig.fxConfig.Slot0.kS = 0.15; //0.15
-      leftConfig.fxConfig.Slot0.kV = 0.1; //0.114
+      leftConfig.fxConfig.Slot0.kS = 0.25; 
+      leftConfig.fxConfig.Slot0.kV = 0.12; 
       leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
+      //leftConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       //leftConfig.tunable = true;
 
       rightConfig.name = "Flywheels Right Follower";
@@ -147,17 +152,17 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.tunable = false;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(23); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kS = 0.0;
-      config.fxConfig.Slot0.kP = 0.0;
-      config.fxConfig.Slot0.kI = 0.0;
+      config.fxConfig.Slot0.kS = 0.15;
+      config.fxConfig.Slot0.kP = 10.0;
+      config.fxConfig.Slot0.kI = 5.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio = 1.0/102.0; //102 motor rotations would do 1 rotation of the herringbone if it were a big gear
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 30.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 60.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1000; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 1500; // rotations per second^2
       //config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
       config.initialTransform =
