@@ -26,7 +26,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
-  private final Pigeon2 pigeon = new Pigeon2(0, new CANBus("rio"));
+  private final Pigeon2 pigeon = new Pigeon2(0, new CANBus("swerve")); // Example CAN ID and bus, replace with actual values
   private final StatusSignal<Angle> yaw = pigeon.getYaw();
   private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZDevice(); // Note: There is a device frame and a world frame, device = old implementation, but is world better here? - EKM
 

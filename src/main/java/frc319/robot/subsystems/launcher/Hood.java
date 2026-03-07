@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.TalonFXIO;
@@ -40,6 +41,16 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
         () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
+        
+  }
+
+  @Override
+  protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
+    return subsystemPosition.minus(LauncherConstants.Hood.zeroAngleOffset).divide(config.unitToRotorRatio);
+  }
+
+  protected Angle convertMotorPositionToSubsystemPosition(Angle motorPosition) {
+    return motorPosition.times(config.unitToRotorRatio).plus(LauncherConstants.Hood.zeroAngleOffset);
   }
 
   public Command retract() {
@@ -75,6 +86,11 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
           this.setAngle(()->aimAngle).schedule();
         break;
 
+      case TUNING:
+        aimAngle = Degrees.of(SmartDashboard.getNumber("Tuning_Mode/Hood_Tuning_Position_Degrees", 0.0));
+        this.setAngle(()->aimAngle).schedule();
+        break;
+
       case IDLE:
         //super.stop();
       default:
@@ -85,18 +101,18 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public Transform3d getTransform3d() {
-    Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
-
+    Angle hoodAngle = this.convertMotorPositionToSubsystemPosition(super.getCurrentPosition());
+    Logger.recordOutput(super.pb.makePath("hoodAngle_Degrees"), hoodAngle.in(Degrees));
     //TODO - i probably need to adjust this to represent reality vs some arbitrary motion
-    // Clamp the rotations to a reasonable range to prevent the hood from rotating to an impossible angle 
-    if(rotations.in(Radians) > Degrees.of(90).in(Radians)){
-      rotations = Degrees.of(30);
-    } else if(rotations.in(Radians) < Degrees.of(0).in(Radians)){
-      rotations = Degrees.of(0);
+    // Clamp the hoodAngle to a reasonable range to prevent the hood from rotating to an impossible angle 
+    if(hoodAngle.in(Radians) > LauncherConstants.Hood.maximumAngle.in(Radians)){
+      hoodAngle = LauncherConstants.Hood.maximumAngle;
+    } else if(hoodAngle.in(Radians) < LauncherConstants.Hood.minimumAngle.in(Radians)){
+      hoodAngle = LauncherConstants.Hood.minimumAngle;
     }
 
     Transform3d localTransform =
-        new Transform3d(new Translation3d(), new Rotation3d(0, rotations.in(Radians), 0));
+        new Transform3d(new Translation3d(), new Rotation3d(0, hoodAngle.in(Radians), 0));
 
     return config.initialTransform.plus(localTransform);
   }

@@ -76,11 +76,11 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    logStates();
+    //logStates();
 
-    if(!hasBeenEnabled){
-      SmartDashboard.putString("Dynamic Reading", m_robotContainer.dynamicAutoInput);
-    }
+    // if(!hasBeenEnabled){
+    //   SmartDashboard.putString("Dynamic Reading", m_robotContainer.dynamicAutoInput);
+    // }
   }
 
   @Override

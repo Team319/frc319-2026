@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.TalonFXIO;
@@ -81,6 +82,11 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
 
       case RETRACTED:
         this.retractCommand().schedule();
+        break;
+
+      case TUNING:
+        // Implement tuning state behavior here
+        this.setDistanceCommand(() -> Inches.of(SmartDashboard.getNumber("/Tuning_Mode/Intake_Tuning_Position_Inches", 0.0))).schedule();
         break;
 
       case IDLE:

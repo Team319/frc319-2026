@@ -32,7 +32,8 @@ public final class LauncherConstants {
       STOWED,
       IDLE,
       TRACKING_TARGET,
-      TRACK_HUB_ON_MOVE
+      TRACK_HUB_ON_MOVE,
+      TUNING
     }
 
     public static class TargetPoses {
@@ -56,18 +57,18 @@ public final class LauncherConstants {
       config.talonCANID = new CANDeviceId(20); // Example CAN ID, replace with actual ID
       
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-      config.fxConfig.Slot0.kS = 0.15;
-      config.fxConfig.Slot0.kV = 0.12;
-      config.fxConfig.Slot0.kA = 0.01;
-      config.fxConfig.Slot0.kP = 10.0; // 6.4
+      config.fxConfig.Slot0.kS = 0.01;
+      config.fxConfig.Slot0.kV = 0.0;//0.12;
+      config.fxConfig.Slot0.kA = 0.0;//0.01;
+      config.fxConfig.Slot0.kP = 0.0; // 6.4
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 5.0;
+      config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio =  28.5; // 28.5 to 1
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(500);
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 10.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0; // rotations per second
       config.fxConfig.MotionMagic.MotionMagicAcceleration = 100.0; // rotations per second^2
       //config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
@@ -98,7 +99,7 @@ public final class LauncherConstants {
 
     static {
       leftConfig.name = "Flywheels Left Lead";
-      leftConfig.tunable = true;  // Enable tuning for this subsystem
+      leftConfig.tunable = false;  // Enable tuning for this subsystem
       leftConfig.talonCANID = new CANDeviceId(21); // Example CAN ID, replace with actual ID
       leftConfig.fxConfig.Slot0.kP = 0.0;
       leftConfig.fxConfig.Slot0.kI = 0.0;
@@ -138,16 +139,19 @@ public final class LauncherConstants {
   public final class Hood {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
+    public static Angle zeroAngleOffset = Degrees.of(18); 
+    public static Angle minimumAngle = zeroAngleOffset;
+    public static Angle maximumAngle = Degrees.of(18+28); 
 
     static {
       config.name = "Hood";
-      config.tunable = true;  // Enable tuning for this subsystem
+      config.tunable = false;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(23); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kS = 0.5;
-      config.fxConfig.Slot0.kP = 10.0;
+      config.fxConfig.Slot0.kS = 0.0;
+      config.fxConfig.Slot0.kP = 0.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 10.0;
-      config.unitToRotorRatio =  1.0; //TODO comp robot supposedly has 28.5 reduction
+      config.fxConfig.Slot0.kD = 0.0;
+      config.unitToRotorRatio = 1.0/102.0; //102 motor rotations would do 1 rotation of the herringbone if it were a big gear
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
@@ -161,7 +165,7 @@ public final class LauncherConstants {
               new Translation3d(Inches.of(3.75).in(Meters), 0, Inches.of(1.75).in(Meters)), new Rotation3d());
     }
 
-    public static Angle retractedPosition = Degrees.of(0);
+    public static Angle retractedPosition = minimumAngle;
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 

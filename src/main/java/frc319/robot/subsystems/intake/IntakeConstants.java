@@ -19,7 +19,8 @@ public final class IntakeConstants {
     EXTENDED,
     COLLECT,
     EJECT,
-    JOSTLE // ? is there a better work...
+    JOSTLE, // ? is there a better work...
+    TUNING
 
   }
 
@@ -34,9 +35,9 @@ public final class IntakeConstants {
       config.tunable = false;
       config.talonCANID = new CANDeviceId(30); 
       config.fxConfig.Slot0.kS = 0.01;
-      config.fxConfig.Slot0.kP = 10.0;
+      config.fxConfig.Slot0.kP = 0.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 10.0;
+      config.fxConfig.Slot0.kD = 0.0;
 
       
       config.unitToRotorRatio = 1/gearRatio; 

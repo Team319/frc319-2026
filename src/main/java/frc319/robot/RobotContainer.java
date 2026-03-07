@@ -190,6 +190,19 @@ public class RobotContainer {
       // SmartDashboard.putNumber("Flywheel Test RPM", 0.0);  // Default value
       // SmartDashboard.putNumber("BallTunnel Test DutyCycle", 0.0);  // Default value
       //  SmartDashboard.putNumber("SpindexerTestDutyCycle", 0.0);
+
+      SmartDashboard.putNumber("Tuning_Mode/Flywheel_Tuning_RPM", 0.0);
+      SmartDashboard.putNumber("Tuning_Mode/Hood_Tuning_Position_Degrees", 0.0);
+      SmartDashboard.putNumber("Tuning_Mode/Turret_Tuning_Position_Degrees", 0.0);
+      SmartDashboard.putNumber("Tuning_Mode/Intake_Tuning_Position_Inches", 0.0);
+
+      // DoubleSupplier flywheelTuningRPM = () -> SmartDashboard.getNumber("/Tuning/Flywheel_Tuning_RPM", 0.0);
+      // DoubleSupplier hoodTuningPosition = () -> SmartDashboard.getNumber("/Tuning/Hood_Tuning_Position_Degrees", 0.0);
+      // DoubleSupplier turretTuningPosition = () -> SmartDashboard.getNumber("/Tuning/Turret_Tuning_Position_Degrees", 0.0);
+      // DoubleSupplier intakeTuningPosition = () -> SmartDashboard.getNumber("/Tuning/Intake_Tuning_Position_Inches", 0.0);
+
+
+
       // ==========================================
       // End of Elastic dashboard setup
       // ==========================================
@@ -294,8 +307,8 @@ public class RobotContainer {
         driverController.povLeft()
           .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)));
 
-        // driverController.back()
-        //   .onTrue( new InstantCommand(()->flywheels.setState(LauncherConstants.Flywheels.FlywheelsState.TESTING_ENABLED)))
+         driverController.back()
+           .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING)));
         //   .onFalse( new InstantCommand(()->flywheels.setState(LauncherConstants.Flywheels.FlywheelsState.IDLE)));
 
         
@@ -337,7 +350,8 @@ public class RobotContainer {
     COLLECTING,
     SHOOTING,
     SNOWBLOW, // Means collecting while shooting at the desired target. probably want to have some logic when to gracefully switch while shooting
-    TRENCH
+    TRENCH,
+    TUNING
   }
 
   private void setRobotState(RobotStates state){
@@ -391,6 +405,17 @@ public class RobotContainer {
         flywheels.setState(FlywheelsState.PRESPIN);
         spindexer.setState(SerializerStates.IDLE);   
 
+        break;
+
+      case TUNING:
+        // Implement tuning state behavior here
+          intakeExtension.setState(IntakeStates.TUNING);
+          //intakeRollers.setState(IntakeStates.TUNING);
+          //ballTunnel.setState(SerializerStates.TUNING);
+          //flywheels.setState(FlywheelsState.TESTING_ENABLED); 
+          //spindexer.setState(SerializerStates.TUNING);
+          turret.setState(LauncherStates.TUNING);
+          hood.setState(LauncherStates.TUNING);
         break;
 
       case IDLE:

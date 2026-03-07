@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.TalonFXIO;
@@ -36,6 +37,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   private LauncherConstants.LauncherStates laucherState = LauncherConstants.LauncherStates.IDLE;
 
   private Pose3d currentTargetPose = new Pose3d(); // TODO : Blue origin for now. but use center field or something... 
+  private Angle tuningAngle = Degrees.of(0.0);
 
   public Turret(final TalonFXSubsystemConfig config, final TalonFXIO turretMotorIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO);
@@ -48,7 +50,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
-        () -> convertSubsystemPositionToMotorPosition( desiredAngle.get().minus(LauncherConstants.Turret.zeroAngleOffset) ));
+        () -> convertSubsystemPositionToMotorPosition( desiredAngle.get()/* .minus(LauncherConstants.Turret.zeroAngleOffset)*/ ));
   }
 
   @Override
@@ -71,6 +73,12 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
         Logger.recordOutput(super.pb.makePath("currentTargetPose"), currentTargetPose);
         break;
 
+      case TUNING:
+        tuningAngle = Degrees.of(SmartDashboard.getNumber("Tuning_Mode/Turret_Tuning_Position_Degrees", 0.0));
+        // Implement tuning state behavior here
+        this.setAngle(() -> tuningAngle).schedule();
+        break;
+
       case STOWED:
         this.setAngle(() -> Degrees.of(0)).schedule();
         break;
@@ -87,7 +95,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public Transform3d getTransform3d() {
-    Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
+    Angle rotations = super.getCurrentPosition();//.times(config.unitToRotorRatio);
     Logger.recordOutput(pb.makePath("motor_rotations"), super.getCurrentPosition().in(Rotations));
     Logger.recordOutput(pb.makePath("turret_rotations"), rotations.in(Rotations));
 
