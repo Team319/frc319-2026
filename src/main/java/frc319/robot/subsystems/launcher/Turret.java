@@ -24,9 +24,11 @@ import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.KinematicsManager;
 import frc319.lib.subsystem.MotorSubsystem;
 import frc319.lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.util.EqualsUtil;
 import frc319.lib.util.Util;
 import frc319.lib.io.MotorInputsAutoLogged;
 import frc319.robot.FieldConstants;
+import frc319.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -49,51 +51,63 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     this.laucherState = state;
   }
 
-  public static Angle convertToClosestBoundedTurretAngleDegrees(Angle desiredAngle, Angle current) {
+  public Angle convertToClosestBoundedTurretAngleDegrees(Angle desiredAngle, Angle current) {
     // Normalize target to [-180, 180] first
     Angle normalizedTarget =
-        GeometryUtil.angleModulus(desiredAngle, Degrees.of(-180), Degrees.of(180));
+        GeometryUtil.angleModulus(desiredAngle, LauncherConstants.Turret.reverseSoftLimit, LauncherConstants.Turret.forwardSoftLimit);
 
     // Calculate the shortest path to the target (normalized to [-180, 180])
 
     Angle diff =
         GeometryUtil.angleModulus(
-            normalizedTarget.minus(current), Degrees.of(-180), Degrees.of(180));
+            normalizedTarget.minus(current), LauncherConstants.Turret.reverseSoftLimit, LauncherConstants.Turret.forwardSoftLimit);
 
     // Calculate the final absolute position
-    Angle finalPosition = current.plus(diff);
+    Angle finalPosition = normalizedTarget;//current.plus(diff);
+
+    Angle theoreticaAngle = finalPosition;
 
     // Check if final position is within limits, if not, try the other way around
     if (finalPosition.gt(LauncherConstants.Turret.forwardSoftLimit)) {
-      finalPosition = finalPosition.minus(Rotations.of(1));
+      finalPosition = LauncherConstants.Turret.forwardSoftLimit;//
+      theoreticaAngle = finalPosition.minus(Rotations.of(1));
     } else if (finalPosition.lt(LauncherConstants.Turret.reverseSoftLimit)) {
-      finalPosition = finalPosition.plus(Rotations.of(1));
+      finalPosition = LauncherConstants.Turret.reverseSoftLimit;//
+      theoreticaAngle = finalPosition.plus(Rotations.of(1));
     }
 
-    return finalPosition;
+    Logger.recordOutput(pb.makePath("setpoint", "theoretical_boundedAngle"), theoreticaAngle.in(Degrees));
+
+    //Angle convertedPosition = convertSubsystemPositionToMotorPosition(finalPosition);
+
+    return theoreticaAngle;
   }
 
-  // /** Input should be robot relative (i.e. encoder-reported angle) */
-  // public Command setAngle(Supplier<Angle> desiredAngle) {
-  //   return motionMagicSetpointCommand(
-  //       () -> {
-
-  //         // Convert the desired angle to a bounded angle that respects turret limits
-  //         Angle boundedAngleDegrees =
-  //             convertToClosestBoundedTurretAngleDegrees(desiredAngle.get(), inputs.position);
-
-  //         Logger.recordOutput(
-  //             pb.makePath("setpoint", "commandedAngle"), desiredAngle.get().in(Degrees));
-  //         Logger.recordOutput(pb.makePath("setpoint", "boundedAngle"), boundedAngleDegrees);
-
-  //         return boundedAngleDegrees;
-  //       });
-  // }
-
+  /** Input should be robot relative (i.e. encoder-reported angle) */
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
-        () -> convertSubsystemPositionToMotorPosition( desiredAngle.get()/* .minus(LauncherConstants.Turret.zeroAngleOffset)*/ ));
+        () -> {
+
+          // Convert the desired angle to a bounded angle that respects turret limits
+          Angle boundedAngleDegrees =
+              convertToClosestBoundedTurretAngleDegrees(desiredAngle.get(), inputs.position);
+
+          Logger.recordOutput(
+              pb.makePath("setpoint", "commandedAngle"), desiredAngle.get().in(Degrees));
+          Logger.recordOutput(pb.makePath("setpoint", "boundedAngle"), boundedAngleDegrees.in(Degrees));
+
+          Angle finalConvertedAngle = convertSubsystemPositionToMotorPosition(boundedAngleDegrees);
+          Logger.recordOutput(pb.makePath("setpoint", "boundedAngle"), boundedAngleDegrees.in(Degrees));
+          Logger.recordOutput(pb.makePath("setpoint", "finalConvertedAngle"), finalConvertedAngle.in(Degrees));
+
+          return finalConvertedAngle;//boundedAngleDegrees;
+        });
   }
+
+  // public Command setAngle(Supplier<Angle> desiredAngle) {
+  //   return motionMagicSetpointCommand(
+  //       () -> convertSubsystemPositionToMotorPosition( desiredAngle.get()/* .minus(LauncherConstants.Turret.zeroAngleOffset)*/ ));
+  // }
 
   @Override
   public void periodic() {
@@ -220,5 +234,31 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       return localSetpoint.getMeasure();
     //}
    // return Degrees.of(0);
+  }
+
+  public boolean isAtTargetPosition() {
+    Angle currentAngle = super.getCurrentPosition().times(config.unitToRotorRatio);
+    Angle targetAngle = Degrees.of(0.0);
+
+    Logger.recordOutput(pb.makePath("iat_currentAngle"), currentAngle.in(Degrees));
+    Logger.recordOutput(pb.makePath("iat_targetAngle"), targetAngle.in(Degrees));
+
+    switch (laucherState) {
+
+      case TRACKING_TARGET:
+        targetAngle = getCurrentTargetAngle();
+
+        break;
+      
+      case TRACK_HUB_ON_MOVE:
+       targetAngle = getLauncOnTheFlyAngle();
+
+        break;
+
+      default:
+        return false; // If we're not actively tracking, we can consider ourselves "at target"
+    }
+
+    return EqualsUtil.epsilonEquals(currentAngle.in(Degrees), targetAngle.in(Degrees), 1.5); 
   }
 }

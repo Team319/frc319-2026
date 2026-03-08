@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc319.lib.util.FieldUtils;
+import frc319.robot.subsystems.serializer.SerializerConstants.SerializerStates;
 
 public class Robot extends LoggedRobot {
   
@@ -76,6 +77,28 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+
+    switch(m_robotContainer.getCurrentRobotState()) {
+
+      case SHOOTING:
+      case SNOWBLOW:
+        if(m_robotContainer.flywheels.isAtTargetVelocity() 
+            && m_robotContainer.turret.isAtTargetPosition()
+            && m_robotContainer.hood.isAtTargetPosition()){
+              m_robotContainer.ballTunnel.setState(SerializerStates.SHOOT);
+              m_robotContainer.spindexer.setState(SerializerStates.SHOOT);
+            }
+        else{
+              // m_robotContainer.ballTunnel.setState(SerializerStates.IDLE);
+              // m_robotContainer.spindexer.setState(SerializerStates.IDLE);
+        }
+        break;
+    
+    default:
+      // Do nothing :)
+      break;
+    }
+
     //logStates();
 
     // if(!hasBeenEnabled){
@@ -101,10 +124,10 @@ public class Robot extends LoggedRobot {
     Optional<Alliance> allianceColor = DriverStation.getAlliance();
     allianceColor.ifPresent(alliance -> {
       if (alliance == Alliance.Red) {
-        m_robotContainer.drive.setHeading(0.0);
+        m_robotContainer.drive.setHeading(180.0);
         //System.out.println("Red Alliance: Setting heading to 0 degrees.");
       } else if (alliance == Alliance.Blue) {
-        m_robotContainer.drive.setHeading(180.0);
+        m_robotContainer.drive.setHeading(0.0);
         //System.out.println("Blue Alliance: Setting heading to 180 degrees.");
       }
     });

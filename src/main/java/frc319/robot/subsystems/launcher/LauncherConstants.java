@@ -51,29 +51,31 @@ public final class LauncherConstants {
 
     public static Angle zeroAngleOffset = Degrees.of(-90);
 
-    public static final Angle forwardSoftLimit = Degrees.of(0);
-    public static final Angle reverseSoftLimit = Degrees.of(90);
+    public static final Angle forwardSoftLimit = Degrees.of(325);
+    public static final Angle reverseSoftLimit = Degrees.of(-35);
 
 
     static {
       config.name = "Turret";
-      config.tunable = false;  // Enable tuning for this subsystem
+      config.tunable = true;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(20); // Example CAN ID, replace with actual ID
       
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.Slot0.kS = 0.1;
       config.fxConfig.Slot0.kV = 0.0;//0.12;
       config.fxConfig.Slot0.kA = 0.0;//0.01;
-      config.fxConfig.Slot0.kP = 15; // 6.4
+      config.fxConfig.Slot0.kP = 5;//15; 
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio =  1.0/28.5; // 28.5 to 1
 
+      config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(500);
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1000.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 500.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 150;//1000.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 150;//500.0; // rotations per second^2
       //config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
       config.initialTransform =
@@ -113,12 +115,13 @@ public final class LauncherConstants {
       leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
-      //leftConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+      leftConfig.fxConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
       //leftConfig.tunable = true;
 
       rightConfig.name = "Flywheels Right Follower";
       rightConfig.talonCANID = new CANDeviceId(22); // Example CAN ID, replace with actual ID
       rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+      leftConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     }
 
     public static int MODEL_INDEX = 5;
@@ -139,18 +142,32 @@ public final class LauncherConstants {
       velocityMap.put(4.0, 25.0);
       velocityMap.put(5.17, 28.0);
     }
+
+        public static InterpolatingDoubleTreeMap flywheelRPMMap = new InterpolatingDoubleTreeMap();
+
+    static {
+      // Distance (m) -> Hood Pitch (Degrees) - Example from Redhawk
+      flywheelRPMMap.put(1.7, 2050.0);
+      flywheelRPMMap.put(2.5, 2250.0);
+      flywheelRPMMap.put(2.8, 2250.0);
+      flywheelRPMMap.put(3.25, 2350.0);
+      flywheelRPMMap.put(3.75, 2450.0);
+      flywheelRPMMap.put(4.5, 2600.0);
+
+    }
+
   } // End of Flywheels Constants
 
   public final class Hood {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static Angle zeroAngleOffset = Degrees.of(18); 
-    public static Angle minimumAngle = zeroAngleOffset;
+    public static Angle minimumAngle = Degrees.of(0.0);
     public static Angle maximumAngle = Degrees.of(18+28); 
 
     static {
       config.name = "Hood";
-      config.tunable = false;  // Enable tuning for this subsystem
+      config.tunable = true;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(23); // Example CAN ID, replace with actual ID
       config.fxConfig.Slot0.kS = 0.15;
       config.fxConfig.Slot0.kP = 10.0;
@@ -178,14 +195,15 @@ public final class LauncherConstants {
 
     static {
       // Distance (m) -> Hood Pitch (Degrees) - Example from Redhawk
-      angleMap.put(1.0, 15.0);
-      angleMap.put(1.5, 22.0);
-      angleMap.put(3.0, 30.0);
-      angleMap.put(4.0, 40.0);
-
-      // angleMap.put(1.0, 15.0);
-      // angleMap.put(4.0, 30.0);
+      angleMap.put(1.7, -1.0);
+      angleMap.put(2.5, 4.0);
+      angleMap.put(2.8, 4.0);
+      angleMap.put(3.25, 7.0);
+      angleMap.put(3.75, 8.0);
+      angleMap.put(4.5, 10.0);
     }
+
+
 
 
   } // End of Hood Constants

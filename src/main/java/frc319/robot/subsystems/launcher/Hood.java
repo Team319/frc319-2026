@@ -1,5 +1,6 @@
 package frc319.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
@@ -16,8 +17,11 @@ import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.MotorSubsystem;
 import frc319.lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.util.EqualsUtil;
 import frc319.lib.io.MotorInputsAutoLogged;
 import frc319.robot.FieldConstants;
+import frc319.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
+
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -122,5 +126,24 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   @Override
   public Translation3d getRelativeAngularVelocity() {
     return new Translation3d(0, super.getCurrentVelocity().in(RadiansPerSecond), 0);
+  }
+
+    public boolean isAtTargetPosition() {
+    Angle currentAngle = super.getCurrentPosition().times(config.unitToRotorRatio);
+    Angle targetAngle = Degrees.of(0.0); // Default to current aimAngle, will be updated based on state
+
+    switch (laucherState) {
+
+      case TRACKING_TARGET:      
+      case TRACK_HUB_ON_MOVE:
+       targetAngle = aimAngle;
+
+        break;
+
+      default:
+        return false; // If we're not actively tracking, we can consider ourselves "at target"
+    }
+
+    return EqualsUtil.epsilonEquals(currentAngle.in(Degrees), targetAngle.in(Degrees), 2.0); 
   }
 }

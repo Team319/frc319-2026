@@ -1,7 +1,15 @@
 package frc319.robot.subsystems.serializer;
 
-import java.util.function.DoubleSupplier;
+import static edu.wpi.first.units.Units.RPM;
 
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.MotorSubsystem;
 import frc319.lib.subsystem.TalonFXSubsystemConfig;
@@ -20,20 +28,28 @@ public class BallTunnel extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     this.serializerState = state;
   }
 
+  public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
+    return velocitySetpointCommand(desiredVelocity);
+  }
+
   @Override
   public void periodic() {
     super.periodic();
+        Logger.recordOutput(pb.makePath("curretBallTunnelRPM"), super.getCurrentVelocity().in(RPM));
+
 
     switch(serializerState){
       case SHOOT:
-          this.setDutyCycle(() -> 1.0);
+          //this.velocitySetpointCommand(() -> RPM.of( SmartDashboard.getNumber("Tuning_Mode/BallTunnel_Tuning_RPM", 0.0))).schedule();
+            this.velocitySetpointCommand(() -> RPM.of( 6000.0)).schedule(); // TODO :  need matching ball tunnel ANGULAR Velocity --- IGNORE ---
         break;
 
       
       case IDLE:
       case JOSTLE:
       default:
-        this.stop();
+        this.velocitySetpointCommand(() -> RPM.of( 0.0)).schedule();
+
         break;
     }  
   }

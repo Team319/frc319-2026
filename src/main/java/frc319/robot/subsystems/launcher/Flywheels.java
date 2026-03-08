@@ -22,6 +22,7 @@ import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.MotorIO;
 import frc319.lib.subsystem.MotorFollowerSubsystem;
 import frc319.lib.subsystem.TalonFXSubsystemConfig;
+import frc319.lib.util.EqualsUtil;
 import frc319.lib.util.RobotTime;
 import frc319.lib.io.MotorInputsAutoLogged;
 import frc319.robot.FieldConstants;
@@ -41,6 +42,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   // Elastic slider for testing flywheel speed (0 to 6000 RPM)
   private DoubleSupplier testFlywheelRPM = () -> 0.0;  // Default to 0, will be set from Elastic
+  Distance toGoal = Meters.of(0.0);
 
 
   public Flywheels(
@@ -96,14 +98,19 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     switch (flywheelsState) {
 
       case SHOOT:
-        this.setVelocity(()->RPM.of(3000)).schedule(); // TODO :  need matching flywheel ANGULAR Velocity
+        toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+        Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
+        this.setVelocity(()->RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))).schedule();
+        
+
+        // TODO :  need matching flywheel ANGULAR Velocity
         //if (solution.isValid()) {
           launchFuel(solution);
         //}
         break;
 
       case PRESPIN:
-        this.setVelocity(()->RPM.of(3000)).schedule();
+        this.setVelocity(()->RPM.of(0)).schedule();
         break;
 
       case TUNING:
@@ -186,6 +193,13 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
     // D. Combine: V_ball = V_robot + V_shot
     return structureVel.plus(launchVelGlobal);
+  }
+
+  public boolean isAtTargetVelocity() {
+    double currentRPM = super.getCurrentVelocity().in(RPM);
+    double targetRPM = LauncherConstants.Flywheels.flywheelRPMMap.get(this.getDistance2d(FieldConstants.Hub.innerCenterPoint).in(Meters));
+    Logger.recordOutput(pb.makePath("targetFlywheelRPM"), targetRPM);
+    return EqualsUtil.epsilonEquals(currentRPM, targetRPM, 200); 
   }
 
   // EKM - Is this just simulated???

@@ -72,7 +72,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(1, new CANBus("swerve"));
             turnTalon = new TalonFX(2, new CANBus("swerve"));
             cancoder = new CANcoder(3, new CANBus("swerve"));
-            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0));
+            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(10+5));
             break;
         
           case DEVBOT:
@@ -80,7 +80,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(1, new CANBus("rio"));
             turnTalon = new TalonFX(2, new CANBus("rio"));
             cancoder = new CANcoder(3, new CANBus("rio"));
-            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(75)); // MUST BE CALIBRATED DEVBOT
+            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0.01));
             break;
         }
         break;
@@ -92,7 +92,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(10, new CANBus("swerve"));
             turnTalon = new TalonFX(11, new CANBus("swerve"));
             cancoder = new CANcoder(12, new CANBus("swerve"));
-            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0));
+            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(5.0+3.0-15.0-2.0));
             break;
         
           case DEVBOT:
@@ -100,7 +100,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(10, new CANBus("rio"));
             turnTalon = new TalonFX(11, new CANBus("rio"));
             cancoder = new CANcoder(12, new CANBus("rio"));
-            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(60));
+            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0.01));
             break;
         }
 
@@ -112,7 +112,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(4, new CANBus("swerve"));
             turnTalon = new TalonFX(5, new CANBus("swerve"));
             cancoder = new CANcoder(6, new CANBus("swerve"));
-            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0));
+            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(-90-3.0-4.0-2.0-2.0));
             break;
 
           case DEVBOT:
@@ -120,7 +120,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(4, new CANBus("rio"));
             turnTalon = new TalonFX(5, new CANBus("rio"));
             cancoder = new CANcoder(6, new CANBus("rio"));
-            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(-15));
+            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0.01));
             break;
          }
         break;
@@ -131,7 +131,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(7, new CANBus("swerve"));
             turnTalon = new TalonFX(8, new CANBus("swerve"));
             cancoder = new CANcoder(9, new CANBus("swerve"));
-            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0)); // was 265
+            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(90.0)); 
             break;
         
           case DEVBOT:
@@ -139,7 +139,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(7, new CANBus("rio"));
             turnTalon = new TalonFX(8, new CANBus("rio"));
             cancoder = new CANcoder(9, new CANBus("rio"));
-            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(60)); 
+            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(0.01)); 
             break;
         }
         break;

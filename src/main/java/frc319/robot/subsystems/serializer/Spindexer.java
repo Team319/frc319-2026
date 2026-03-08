@@ -1,9 +1,11 @@
 package frc319.robot.subsystems.serializer;
 
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -11,7 +13,10 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.MotorSubsystem;
@@ -25,6 +30,8 @@ public class Spindexer extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   private SerializerStates serializerState = SerializerStates.IDLE;
 
+  private AngularVelocity spindexerVelocity = RPM.of(0.0);
+
   public Spindexer(final TalonFXSubsystemConfig config, final TalonFXIO indexerMotorIO) {
     super(config, new MotorInputsAutoLogged(), indexerMotorIO);
   }
@@ -33,22 +40,30 @@ public class Spindexer extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     this.serializerState = state;
   }
 
+  public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
+    return velocitySetpointCommand(desiredVelocity);
+  }
+
   @Override
   public void periodic() {
     Logger.recordOutput(pb.makePath("state"), serializerState);
+    Logger.recordOutput(pb.makePath("curretSpindexerRPM"), super.getCurrentVelocity().in(RPM));
+
 
     super.periodic();
     
     switch(serializerState){
       case SHOOT:
-          this.setDutyCycle(1.0);
+          //spindexerVelocity = RPM.of(SmartDashboard.getNumber("Tuning_Mode/Spindexer_Tuning_RPM", 0.0));
+          spindexerVelocity = RPM.of(6000.0);
+          this.setVelocity(()-> spindexerVelocity ).schedule();
         break;
 
       
       case IDLE:
       case JOSTLE:
       default:
-        //super.stop();
+        this.setVelocity(()-> RPM.of(0.0)).schedule();
         break;
     }
   }

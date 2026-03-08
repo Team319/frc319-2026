@@ -97,6 +97,9 @@ public void calculateCurrentTargets(){
     Translation3d rangeVec = targetPos.minus(robotPose.getTranslation());
     double dist = rangeVec.getNorm();
 
+    Logger.recordOutput("LaunchingSolutionManager/calculate/rangeVec", rangeVec);
+    Logger.recordOutput("LaunchingSolutionManager/calculate/dist", dist);
+
     // B. Check Range
     if (dist > 8.0 || dist < 1.0) {
       //return new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), dist, true); // TODO - this was set false

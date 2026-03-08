@@ -82,6 +82,8 @@ public class RobotContainer {
   //Dynamic Auto Routine Input String
   public String dynamicAutoInput = "";
 
+  public RobotStates currentRobotState = RobotStates.IDLE;
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser; // AdvantageKit Dependency
     
@@ -196,6 +198,9 @@ public class RobotContainer {
       SmartDashboard.putNumber("Tuning_Mode/Turret_Tuning_Position_Degrees", 0.0);
       SmartDashboard.putNumber("Tuning_Mode/Intake_Tuning_Position_Inches", 0.0);
 
+      SmartDashboard.putNumber("Tuning_Mode/Spindexer_Tuning_RPM", 0.0);
+      SmartDashboard.putNumber("Tuning_Mode/BallTunnel_Tuning_RPM", 0.0);
+
       // DoubleSupplier flywheelTuningRPM = () -> SmartDashboard.getNumber("/Tuning/Flywheel_Tuning_RPM", 0.0);
       // DoubleSupplier hoodTuningPosition = () -> SmartDashboard.getNumber("/Tuning/Hood_Tuning_Position_Degrees", 0.0);
       // DoubleSupplier turretTuningPosition = () -> SmartDashboard.getNumber("/Tuning/Turret_Tuning_Position_Degrees", 0.0);
@@ -284,16 +289,16 @@ public class RobotContainer {
           );
 
 
-        // driverController.rightTrigger().whileTrue( new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)) )
-        //  .onFalse( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)) );
+        driverController.rightTrigger().whileTrue( new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)) )
+         .onFalse( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)) );
 
         // driverController.rightBumper()
         //   .onTrue(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.TRACK_HUB_ON_MOVE)))
         //   .onFalse(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.IDLE)));
 
-        driverController.rightBumper()
-          .onTrue(turret.setAngle(()-> Degrees.of(720)))
-          .onFalse(turret.setAngle(()-> Degrees.of(0)));
+        // driverController.rightBumper()
+        //   .onTrue(turret.setAngle(()-> Degrees.of(720)))
+        //   .onFalse(turret.setAngle(()-> Degrees.of(0)));
 
         // driverController.povDown()
         //   .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.IDLE)));
@@ -356,7 +361,13 @@ public class RobotContainer {
     TUNING_STOP
   }
 
+  public RobotStates getCurrentRobotState(){
+    return currentRobotState;
+  }
+
   private void setRobotState(RobotStates state){
+
+    currentRobotState = state;
 
     switch(state){
 
@@ -382,8 +393,8 @@ public class RobotContainer {
 
       case SHOOTING:
         flywheels.setState(FlywheelsState.SHOOT);
-        ballTunnel.setState(SerializerStates.SHOOT);
-        spindexer.setState(SerializerStates.SHOOT);
+        // ballTunnel.setState(SerializerStates.SHOOT);
+        // spindexer.setState(SerializerStates.SHOOT);
         turret.setState(LauncherStates.TRACKING_TARGET);
         hood.setState(LauncherStates.TRACKING_TARGET);
         break;
@@ -391,9 +402,9 @@ public class RobotContainer {
       case SNOWBLOW:
         intakeExtension.setState(IntakeStates.EXTENDED);
         intakeRollers.setState(IntakeStates.COLLECT);
-        ballTunnel.setState(SerializerStates.SHOOT);
+        // ballTunnel.setState(SerializerStates.SHOOT);
         flywheels.setState(FlywheelsState.SHOOT);        
-        spindexer.setState(SerializerStates.SHOOT);
+        // spindexer.setState(SerializerStates.SHOOT);
         turret.setState(LauncherStates.TRACKING_TARGET);
         hood.setState(LauncherStates.TRACKING_TARGET);
         break;

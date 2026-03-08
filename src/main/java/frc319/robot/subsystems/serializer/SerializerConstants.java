@@ -25,11 +25,13 @@ public final class SerializerConstants {
 
     static {
       config.name = "Spindexer";
-      config.tunable = false;
+      config.tunable = true;
       config.talonCANID = new CANDeviceId(24); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kP = 0.2;
+      config.fxConfig.Slot0.kP = 0.01;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
+      config.fxConfig.Slot0.kS = 0.01;
+      config.fxConfig.Slot0.kV = 0.1175;
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.unitToRotorRatio = 1.0; // 1:1 ratio
       config.initialTransform =
@@ -46,11 +48,13 @@ public final class SerializerConstants {
 
     static {
       config.name = "BallTunnel";
-      config.tunable = false;
+      config.tunable = true;
       config.talonCANID = new CANDeviceId(25); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kP = 0.2;
+      config.fxConfig.Slot0.kP = 0.01;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
+      config.fxConfig.Slot0.kS = 0.01;
+      config.fxConfig.Slot0.kV = 0.1175;
       config.unitToRotorRatio = 1.0; // 1:1 ratio
     }
   }
