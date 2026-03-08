@@ -32,33 +32,24 @@ public final class IntakeConstants {
 
     static {
       config.name = "Intake Extension";
-      config.tunable = false;
+      config.tunable = true;
       config.talonCANID = new CANDeviceId(30); 
       config.fxConfig.Slot0.kS = 0.01;
-      config.fxConfig.Slot0.kP = 0.0;
-      config.fxConfig.Slot0.kI = 0.0;
+      config.fxConfig.Slot0.kP = 25.0;
+      config.fxConfig.Slot0.kI = 1.0;
       config.fxConfig.Slot0.kD = 0.0;
 
-      
-      config.unitToRotorRatio = 1/gearRatio; 
-                                      // TODO - is this the gearRatio or the inverse of the gear ratio 
-                                      // 6/25 reduction.
-                                      //    (3/1) 1/1 1/1 1/1 lantern is 6/25, so 25/6 = 4.1667, but then we have a 3:1 sprocket reduction after that, so 4.1667*3 = 12.5.
-                                      //     // counting ... 
-                                      // 12.5 motor rations to travel 12 inches
-
-                                      // diameter of lantern gear is 1.25 inches
-      
-      config.unitRotationsPerMeter = gearRatio * ((Inches.of(1.25).times(Math.PI).in(Meters)));
+      // Not perfect but close enough
+      config.unitRotationsPerMeter = 39.36; // 1 motor rotation / 1 inch of travel *  1 meter / 39.36 inches per meter...;
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
         // Motion Magic parameters
-        config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0; // meters per second
-        config.fxConfig.MotionMagic.MotionMagicAcceleration = 2.0; // meters per second^2
+        config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 500.0; 
+        config.fxConfig.MotionMagic.MotionMagicAcceleration = 500.0; 
     }
 
-    public static Distance extendedPosition = Inches.of(12);
+    public static Distance extendedPosition = Inches.of(16);
     public static Distance retractedPosition = Inches.of(0);
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain

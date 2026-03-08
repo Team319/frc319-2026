@@ -2,6 +2,7 @@ package frc319.robot.subsystems.intake;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.MotorFollowerSubsystem;
@@ -12,6 +13,7 @@ import frc319.robot.subsystems.intake.IntakeConstants.IntakeStates;
 public class IntakeRollers extends MotorFollowerSubsystem<MotorInputsAutoLogged, TalonFXIO> {
 
   IntakeStates intakeState = IntakeStates.IDLE;
+  private double currentDutyCycle = 0.0;
 
   public IntakeRollers(
     final TalonFXSubsystemConfig leadConfig, 
@@ -57,11 +59,11 @@ public class IntakeRollers extends MotorFollowerSubsystem<MotorInputsAutoLogged,
     super.periodic();
     switch(intakeState){
       case COLLECT:
-        this.intake().schedule();;
+        this.intake().schedule();
         break;
 
       case EJECT:
-        this.outtake().schedule();;
+        this.outtake().schedule();
         break;
       
       case RETRACTED:
@@ -71,9 +73,18 @@ public class IntakeRollers extends MotorFollowerSubsystem<MotorInputsAutoLogged,
         // may need to keep track of last state. 
         break;
 
+
+      case TUNING:
+         // For now... no change ?
+        // probably want to check if ejecting and stop or something...
+        // may need to keep track of last state. 
+        currentDutyCycle = SmartDashboard.getNumber("Tuning_Mode/IntakeRollers_tuning_DutyCycle", 0.0);
+        this.setIntakeSpeed(currentDutyCycle).schedule();
+        break;
+
       case IDLE:
       default:
-        this.stop();
+        this.stop().schedule();
         break;
     }
     

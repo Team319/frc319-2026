@@ -31,6 +31,8 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
 
       IntakeStates intakeState = IntakeStates.IDLE;
 
+      private Distance intakePosition = Inches.of(0);
+
   public IntakeExtension(
       final TalonFXSubsystemConfig config, final TalonFXIO intakeExtensionMotorIO) {
     super(config, new MotorInputsAutoLogged(), intakeExtensionMotorIO);
@@ -86,7 +88,8 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
 
       case TUNING:
         // Implement tuning state behavior here
-        this.setDistanceCommand(() -> Inches.of(SmartDashboard.getNumber("/Tuning_Mode/Intake_Tuning_Position_Inches", 0.0))).schedule();
+        intakePosition = Inches.of(SmartDashboard.getNumber("Tuning_Mode/Intake_Tuning_Position_Inches", 0.0));
+        this.setDistanceCommand(() -> intakePosition).schedule();
         break;
 
       case IDLE:
@@ -102,6 +105,8 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
     //Distance distance = Inches.of(Math.sin(Timer.getFPGATimestamp()) + 1).times(6);
 
     Distance distance = getCurrentPositionAsDistance();
+
+    Logger.recordOutput(pb.makePath("currentDistanceInches"), distance.in(Inches));
 
     //TODO - i probably need to adjust this to represent reality vs some arbitrary motion
     // Clamp the rotations to a reasonable range to prevent the hood from rotating to an impossible distance

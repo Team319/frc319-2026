@@ -57,7 +57,7 @@ public final class LauncherConstants {
 
     static {
       config.name = "Turret";
-      config.tunable = true;  // Enable tuning for this subsystem
+      config.tunable = false;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(20); // Example CAN ID, replace with actual ID
       
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -105,7 +105,7 @@ public final class LauncherConstants {
 
     static {
       leftConfig.name = "Flywheels Left Lead";
-      leftConfig.tunable = true;  // Enable tuning for this subsystem
+      leftConfig.tunable = false;  // Enable tuning for this subsystem
       leftConfig.talonCANID = new CANDeviceId(21); // Example CAN ID, replace with actual ID
       leftConfig.fxConfig.Slot0.kP = 0.0;
       leftConfig.fxConfig.Slot0.kI = 0.0;
@@ -167,7 +167,7 @@ public final class LauncherConstants {
 
     static {
       config.name = "Hood";
-      config.tunable = true;  // Enable tuning for this subsystem
+      config.tunable = false;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(23); // Example CAN ID, replace with actual ID
       config.fxConfig.Slot0.kS = 0.15;
       config.fxConfig.Slot0.kP = 10.0;

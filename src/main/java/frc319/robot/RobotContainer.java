@@ -84,6 +84,9 @@ public class RobotContainer {
 
   public RobotStates currentRobotState = RobotStates.IDLE;
 
+  private boolean isCollecting = false;
+  private boolean isShooting = false;
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser; // AdvantageKit Dependency
     
@@ -196,10 +199,12 @@ public class RobotContainer {
       SmartDashboard.putNumber("Tuning_Mode/Flywheel_Tuning_RPM", 0.0);
       SmartDashboard.putNumber("Tuning_Mode/Hood_Tuning_Position_Degrees", 0.0);
       SmartDashboard.putNumber("Tuning_Mode/Turret_Tuning_Position_Degrees", 0.0);
-      SmartDashboard.putNumber("Tuning_Mode/Intake_Tuning_Position_Inches", 0.0);
 
       SmartDashboard.putNumber("Tuning_Mode/Spindexer_Tuning_RPM", 0.0);
       SmartDashboard.putNumber("Tuning_Mode/BallTunnel_Tuning_RPM", 0.0);
+
+      SmartDashboard.putNumber("Tuning_Mode/Intake_Tuning_Position_Inches", 0.0);
+      SmartDashboard.putNumber("Tuning_Mode/IntakeRollers_tuning_DutyCycle", 0.0);
 
       // DoubleSupplier flywheelTuningRPM = () -> SmartDashboard.getNumber("/Tuning/Flywheel_Tuning_RPM", 0.0);
       // DoubleSupplier hoodTuningPosition = () -> SmartDashboard.getNumber("/Tuning/Hood_Tuning_Position_Degrees", 0.0);
@@ -289,8 +294,16 @@ public class RobotContainer {
           );
 
 
-        driverController.rightTrigger().whileTrue( new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)) )
-         .onFalse( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)) );
+        // driverController.rightTrigger().whileTrue( new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)) )
+        //  .onFalse( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)) );
+
+        driverController.leftBumper()
+          .toggleOnTrue(new InstantCommand(()->this.setRobotState(RobotStates.COLLECTING)))
+          .toggleOnFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_COLLECTING)));
+
+        driverController.rightBumper()
+          .toggleOnTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)))
+          .toggleOnFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_SHOOTING)));
 
         // driverController.rightBumper()
         //   .onTrue(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.TRACK_HUB_ON_MOVE)))
@@ -303,14 +316,14 @@ public class RobotContainer {
         // driverController.povDown()
         //   .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.IDLE)));
 
-        driverController.povRight()
-          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING_STOP)));
+        // driverController.povRight()
+        //   .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING)));
 
         // driverController.povUp()
         //   .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.SNOWBLOW)));
 
         driverController.povLeft()
-          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING_SHOOT)));
+          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.IDLE)));
 
         //  driverController.back()
         //    .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING)));
@@ -352,11 +365,18 @@ public class RobotContainer {
   public enum RobotStates{
     IDLE,
     STOWED,
+
     COLLECTING,
+    STOP_COLLECTING, 
+    
     SHOOTING,
-    SNOWBLOW, // Means collecting while shooting at the desired target. probably want to have some logic when to gracefully switch while shooting
+    STOP_SHOOTING, 
+    
+    SNOWBLOW, 
+    
     TRENCH,
-    //TUNING
+    
+    TUNING,
     TUNING_SHOOT,
     TUNING_STOP
   }
@@ -372,7 +392,7 @@ public class RobotContainer {
     switch(state){
 
       case STOWED:
-        intakeExtension.setState(IntakeStates.RETRACTED);
+        //intakeExtension.setState(IntakeStates.RETRACTED);
         intakeRollers.setState(IntakeStates.IDLE);
         ballTunnel.setState(SerializerStates.IDLE);
         flywheels.setState(FlywheelsState.PRESPIN);
@@ -391,6 +411,13 @@ public class RobotContainer {
         hood.setState(LauncherStates.STOWED);
         break;
 
+      case STOP_COLLECTING:
+        // Stay extended
+        intakeExtension.setState(IntakeStates.EXTENDED);
+        // Stop the rollers from collecting game pieces
+        intakeRollers.setState(IntakeStates.IDLE); 
+        break;
+
       case SHOOTING:
         flywheels.setState(FlywheelsState.SHOOT);
         // ballTunnel.setState(SerializerStates.SHOOT);
@@ -398,6 +425,18 @@ public class RobotContainer {
         turret.setState(LauncherStates.TRACKING_TARGET);
         hood.setState(LauncherStates.TRACKING_TARGET);
         break;
+
+        case STOP_SHOOTING:
+          // Keep shooter ready
+          flywheels.setState(FlywheelsState.PRESPIN);
+          // Stop feeding balls into the shooter
+          ballTunnel.setState(SerializerStates.IDLE);
+          spindexer.setState(SerializerStates.IDLE);
+          // Keep pointing at target
+          turret.setState(LauncherStates.TRACKING_TARGET);
+          // Keep the hood safe
+          hood.setState(LauncherStates.STOWED);
+          break;
 
       case SNOWBLOW:
         intakeExtension.setState(IntakeStates.EXTENDED);
@@ -418,6 +457,17 @@ public class RobotContainer {
         flywheels.setState(FlywheelsState.PRESPIN);
         spindexer.setState(SerializerStates.IDLE);   
 
+        break;
+
+      case TUNING:
+        // Implement tuning state behavior here
+          intakeExtension.setState(IntakeStates.TUNING);
+          intakeRollers.setState(IntakeStates.TUNING);
+          ballTunnel.setState(SerializerStates.IDLE);
+          flywheels.setState(FlywheelsState.IDLE); 
+          spindexer.setState(SerializerStates.IDLE);
+          turret.setState(LauncherStates.IDLE);
+          hood.setState(LauncherStates.IDLE);
         break;
 
       case TUNING_SHOOT:
