@@ -49,7 +49,7 @@ public final class LauncherConstants {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
 
-    public static Angle zeroAngleOffset = Degrees.of(-90);
+    public static Angle zeroAngleOffset = Degrees.of(0);
 
     public static final Angle forwardSoftLimit = Degrees.of(325);
     public static final Angle reverseSoftLimit = Degrees.of(-35);
@@ -71,7 +71,7 @@ public final class LauncherConstants {
 
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-      config.momentOfInertia = MoiUnits.PoundSquareInches.of(500);
+      config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 150;//1000.0; // rotations per second

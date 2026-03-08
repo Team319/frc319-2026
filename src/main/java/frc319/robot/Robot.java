@@ -29,7 +29,7 @@ public class Robot extends LoggedRobot {
   
   private Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  public static RobotContainer m_robotContainer;
 
   public boolean hasBeenEnabled = false;
 

@@ -11,10 +11,20 @@ import java.util.Optional;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc319.lib.util.AllianceFlipUtil;
+import frc319.robot.Constants.DriveConstants;
+import frc319.robot.commands.DriveCommands;
+import frc319.robot.FieldConstants;
+import frc319.robot.Robot;
+import frc319.robot.RobotContainer.RobotStates;
 import frc319.robot.subsystems.drive.Drive;
 
 
@@ -23,6 +33,24 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
 
     String m_instruction = "";
     Drive m_drive;
+
+    public class AutoConstants {
+        public static class TargetLocations {
+
+            // These are all for blue origin, blue alliance case. We apply a flip when used for red alliance. 
+
+            public static final Translation2d LEFT_TRENCH = new Translation2d(FieldConstants.LinesVertical.starting, 7.5 ); // we can grab these from pathplanner too...
+            public static final Translation2d LEFT_BUMP = new Translation2d(FieldConstants.LinesVertical.starting, 5.5);
+            
+            public static final Translation2d CENTER_HUB = new Translation2d(FieldConstants.LinesVertical.starting, FieldConstants.LinesHorizontal.center);
+
+            public static final Translation2d RIGHT_BUMP = new Translation2d(FieldConstants.LinesVertical.starting, 2.5);
+            public static final Translation2d RIGHT_TRENCH = new Translation2d(FieldConstants.LinesVertical.starting, 0.575);
+            
+        }
+    }
+    
+    private double startingHeadingDegrees = 0.0;
 
 public DynamicAutoRoutine(Drive a_drive){
     // Constructor
@@ -41,7 +69,12 @@ public DynamicAutoRoutine(Drive a_drive){
 
     // Reset robot pose to starting position.
 
+    Optional<Alliance> allianceColor = DriverStation.getAlliance();
+    boolean isBlueAlliance = true;
 
+    if(allianceColor.isPresent()){
+        isBlueAlliance = allianceColor.get() == Alliance.Blue;
+    }
 
     for (Pair<String, Integer> pair : parsedInstructions) {
         String command = pair.getFirst().toLowerCase();
@@ -49,77 +82,262 @@ public DynamicAutoRoutine(Drive a_drive){
 
         switch (command) 
         {
+            case "h":
+
+                // This is a starting heading to seed into the pigeon at the start of auto
+                switch (modifier) 
+                {
+                    case 0:
+                        startingHeadingDegrees = isBlueAlliance ? 0.0 : 180.0;
+                        break;
+                    
+                    case 1:
+                    default:
+                        startingHeadingDegrees = isBlueAlliance ? 180.0 : 0.0;
+                        break;
+                }
+
+                for (int i = 0; i < 10; i++) {
+                    //m_drive.resetGyro();
+                    m_drive.setHeading(startingHeadingDegrees);
+                }
+                
+                break;
+
             case "x":
                 // This is a starting point. Reset the robot pose to some starting position
                 
-                Pose2d startingPose = new Pose2d(0, 0, new Rotation2d(0));
+                Translation2d startingPose = new Translation2d(0, 0);
 
-                Optional<Alliance> allianceColor = DriverStation.getAlliance();
-                boolean isBlueAlliance = true;
-
-                if(allianceColor.isPresent()){
-                    isBlueAlliance = allianceColor.get() == Alliance.Blue;
-                }
 
                 switch (modifier) 
                 {
                     case 1:
-                        //startingPose = isBlueAlliance ? Constants.TargetLocations.BLUE_START_LEFT : Constants.TargetLocations.RED_START_LEFT;
+                        startingPose = AutoConstants.TargetLocations.LEFT_TRENCH;
                         break;
                     
                     case 2:
-                    default:
-                        //startingPose = isBlueAlliance ? Constants.TargetLocations.BLUE_START_CENTER : Constants.TargetLocations.RED_START_CENTER;
+                        startingPose = AutoConstants.TargetLocations.LEFT_BUMP;
                         break;
                 
                     case 3:
-                        //startingPose = isBlueAlliance ? Constants.TargetLocations.BLUE_START_RIGHT : Constants.TargetLocations.RED_START_RIGHT;
+                        startingPose = AutoConstants.TargetLocations.CENTER_HUB;
+                        break;
+                    
+                    case 4:
+                        startingPose = AutoConstants.TargetLocations.RIGHT_BUMP;
+                        break;
+
+                    case 5:
+                        startingPose = AutoConstants.TargetLocations.RIGHT_TRENCH;
                         break;
 
                 }
 
-                m_drive.setPose(startingPose);
+                startingPose = AllianceFlipUtil.apply(startingPose);
+                Pose2d startingPoseWithHeading = new Pose2d(startingPose, Rotation2d.fromDegrees(startingHeadingDegrees));
+                m_drive.setPose(startingPoseWithHeading);
                 
                 break;
 
-            case "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" :
-                // This is a reef position.
-                // Add commands based on position and level
-               /*  addCommands(
-                    m_drive.pathfindThenFollowPath(DriveConstants.autoPathingConstraints,"goto_" + command),
-                    new SafelyMoveToScoringPosition(m_superstructure, modifier),
-                    //new WaitCommand(1.0),
-                    new AutoScoreCoral(m_superstructure),
-                    new GoHome(a_superstructure)
-                    //new WaitCommand(1)// TODO : scoreAtLevel(level)
-                    );
-
-                    */
+            // Go "and" do something 
+            // 0 is nothing
+            // 1 is collect
+            // 2 is shoot
+            // 3 is collect and shoot
+            case "l":
+                switch(modifier){
+                    case 0:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_left_greedy"
+                                )
+                            )
+                        );
+                        break;
+                    case 1:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_left_greedy"
+                                )
+                            )
+                        );
+                        break;
+                    case 2:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_left_greedy"
+                                )
+                            )
+                        );
+                        break;
+                    case 3:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_left_greedy"
+                                )
+                            )
+                        );
+                    break;
+                }
                 break;
 
-            case "p"  :
-                // This is a left (PORT) coral station / collect position.
-                // Add commands based on position and level
-                /*
+            case "r":
+                switch(modifier){
+                    case 0:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_right_greedy"
+                                )
+                            )
+                        );
+                        break;
+                    case 1:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_right_greedy"
+                                )
+                            )
+                        );
+                        break;
+                    case 2:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_right_greedy"
+                                )
+                            )
+                        );
+                        break;
+                    case 3:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_right_greedy"
+                                )
+                            )
+                        );
+                    break;
+                }
+                break;
+
+
+                // Go To Depot and do something
+                case "d":
+                switch(modifier){
+                    case 0:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_depot"
+                                )
+                            )
+                        );
+                        break;
+                    case 1:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_depot"
+                                )
+                            )
+                        );
+                        break;
+                    case 2:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_depot"
+                                )
+                            )
+                        );
+                        break;
+                    case 3:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_depot"
+                                )
+                            )
+                        );
+                    break;
+                }
+                break;
+
+                // Go To Outpost and do something
+                case "o":
+                switch(modifier){
+                    case 0:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_outpost"
+                                )
+                            )
+                        );
+                        break;
+                    case 1:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_outpost"
+                                )
+                            )
+                        );
+                        break;
+                    case 2:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_outpost"
+                                )
+                            )
+                        );
+                        break;
+                    case 3:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_outpost"
+                                )
+                            )
+                        );
+                    break;
+                }
+                break;
+
+            // Shoot for Time n seconds
+            case "s":
                 addCommands(
-                    Commands.parallel(                    
-                        m_drive.pathfindThenFollowPath(DriveConstants.autoPathingConstraints,"goto_" + "left"+ "_" + modifier),
-                        Commands.sequence(new GoHome(m_superstructure),new CollectCoral(a_superstructure))
+                    new InstantCommand( 
+                        ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
+                            .withDeadline(new WaitCommand(modifier)
                     )
                 );
-                */
                 break;
 
-            case "s" :
-                // This is a right (STARBORD) coral station / collect position.
-                // Add commands based on position and level
-                /* 
-                addCommands(
-                    Commands.parallel(
-                        m_drive.pathfindThenFollowPath(DriveConstants.autoPathingConstraints,"goto_" + "right"+ "_" + modifier),
-                    //new WaitCommand(1) // TODO : collectFromCoralStation()
-                    );*/
-                break;
         
             default:
                 // Invalid command

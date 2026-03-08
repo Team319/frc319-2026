@@ -365,7 +365,7 @@ public class RobotContainer {
     return currentRobotState;
   }
 
-  private void setRobotState(RobotStates state){
+  public void setRobotState(RobotStates state){
 
     currentRobotState = state;
 
