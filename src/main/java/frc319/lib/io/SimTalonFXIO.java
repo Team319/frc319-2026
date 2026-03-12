@@ -50,10 +50,10 @@ public class SimTalonFXIO extends TalonFXIO {
         config,
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX60Foc(1),
+                DCMotor.getKrakenX60(1),
                 config.momentOfInertia.in(KilogramSquareMeters),
                 /*config.unitToRotorRatio*/1.0),
-            DCMotor.getKrakenX60Foc(1),
+            DCMotor.getKrakenX60(1),
             0.001,
             0.001));
 

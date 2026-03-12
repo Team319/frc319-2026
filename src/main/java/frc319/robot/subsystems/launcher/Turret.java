@@ -38,6 +38,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     implements ArticulatedComponent {
 
   private LauncherConstants.LauncherStates laucherState = LauncherConstants.LauncherStates.IDLE;
+  private Angle manualNudgeAngle = Degrees.of(0.0);
 
   private Pose3d currentTargetPose = new Pose3d(); // TODO : Blue origin for now. but use center field or something... 
   private Angle tuningAngle = Degrees.of(0.0);
@@ -49,6 +50,10 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   public void setState(LauncherConstants.LauncherStates state) {
     this.laucherState = state;
+  }
+
+  public void updateManualNudgeAngle(Angle angle) {
+    this.manualNudgeAngle = this.manualNudgeAngle.plus(angle);
   }
 
   public Angle convertToClosestBoundedTurretAngleDegrees(Angle desiredAngle, Angle current) {
@@ -88,10 +93,12 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     return motionMagicSetpointCommand(
         () -> {
 
+          // Apply manual nudge angle
+          Angle nudgedAngle = desiredAngle.get().plus(manualNudgeAngle);
+
           // Convert the desired angle to a bounded angle that respects turret limits
           Angle boundedAngleDegrees =
-              convertToClosestBoundedTurretAngleDegrees(desiredAngle.get(), inputs.position);
-
+              convertToClosestBoundedTurretAngleDegrees(nudgedAngle, inputs.position);
           Logger.recordOutput(
               pb.makePath("setpoint", "commandedAngle"), desiredAngle.get().in(Degrees));
           Logger.recordOutput(pb.makePath("setpoint", "boundedAngle"), boundedAngleDegrees.in(Degrees));
@@ -151,6 +158,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public Transform3d getTransform3d() {
+    
     Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
     Logger.recordOutput(pb.makePath("motor_rotations"), super.getCurrentPosition().in(Rotations));
     Logger.recordOutput(pb.makePath("turret_rotations"), rotations.in(Rotations));

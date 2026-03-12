@@ -277,8 +277,8 @@ public class RobotContainer {
         drive.setDefaultCommand(
           DriveCommands.joystickDrive(
               drive,
-              () -> -driverController.getLeftY(), // Note : This is X supplier because the field's X axis is down field long
-              () -> -driverController.getLeftX(), // Note this is Y supplier because the field's Y axis is across the field 
+              () -> -driverController.getLeftY(), 
+              () -> -driverController.getLeftX(), 
               () -> -driverController.getRightY(), 
               () -> -driverController.getRightX(),
               () -> driverController.getLeftTriggerAxis()));
@@ -297,44 +297,32 @@ public class RobotContainer {
         // driverController.rightTrigger().whileTrue( new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)) )
         //  .onFalse( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)) );
 
+        driverController.leftTrigger()
+          .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.COLLECTING)))
+          .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_COLLECTING)));
+
+        driverController.rightTrigger()
+          .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)))
+          .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_SHOOTING)));
+
         driverController.leftBumper()
-          .toggleOnTrue(new InstantCommand(()->this.setRobotState(RobotStates.COLLECTING)))
-          .toggleOnFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_COLLECTING)));
+          .onTrue(intakeExtension.setDistanceCommand(() -> IntakeConstants.Extension.retractedPosition))
+          .onFalse(intakeExtension.setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition));
 
-        driverController.rightBumper()
-          .toggleOnTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)))
-          .toggleOnFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_SHOOTING)));
 
-        // driverController.rightBumper()
-        //   .onTrue(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.TRACK_HUB_ON_MOVE)))
-        //   .onFalse(new InstantCommand(()->turret.setState(LauncherConstants.LauncherStates.IDLE)));
-
-        // driverController.rightBumper()
-        //   .onTrue(turret.setAngle(()-> Degrees.of(720)))
-        //   .onFalse(turret.setAngle(()-> Degrees.of(0)));
-
-        // driverController.povDown()
-        //   .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.IDLE)));
-
-        // driverController.povRight()
-        //   .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING)));
-
-        // driverController.povUp()
-        //   .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.SNOWBLOW)));
+        driverController.povRight()
+          .onTrue( new InstantCommand(()->turret.updateManualNudgeAngle(Degrees.of(10))));
 
         driverController.povLeft()
-          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.IDLE)));
-
-        //  driverController.back()
-        //    .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING)));
-        //   .onFalse( new InstantCommand(()->flywheels.setState(LauncherConstants.Flywheels.FlywheelsState.IDLE)));
+          .onTrue( new InstantCommand(()->turret.updateManualNudgeAngle(Degrees.of(-10))));
 
         
-        // if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos
-        //   driverController.leftBumper().onTrue( new InstantCommand(()-> this.setRobotState(RobotStates.TRENCH)));
-        //   driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( DriveCommands.pathfindUnderNearestTrench(drive))));
+        if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos
+          driverController.leftBumper().onTrue( new InstantCommand(()-> this.setRobotState(RobotStates.TRENCH)));
+          driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( 
+            DriveCommands.pathfindUnderNearestTrenchSafely( drive, driverController )))); 
           
-        // }
+        }
 
         //  ===========================================================================
         //  ============================= Operator Controls ===========================

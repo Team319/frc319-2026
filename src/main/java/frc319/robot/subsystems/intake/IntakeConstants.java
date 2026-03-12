@@ -28,7 +28,7 @@ public final class IntakeConstants {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
 
-    private static final double gearRatio = 3;
+    private static final double gearRatio = 3.0;
 
     static {
       config.name = "Intake Extension";
@@ -50,6 +50,7 @@ public final class IntakeConstants {
     }
 
     public static Distance extendedPosition = Inches.of(16);
+    public static Distance flushDistance = Inches.of(10);
     public static Distance retractedPosition = Inches.of(0);
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain

@@ -47,8 +47,8 @@ public class TalonFXIO implements MotorIO {
   private final StatusSignal<Angle> positionSignal;
   private final StatusSignal<AngularVelocity> velocitySignal;
   private final StatusSignal<Voltage> voltageSignal;
-  // private final StatusSignal<Current> currentStatorSignal;
-  // private final StatusSignal<Current> currentSupplySignal;
+  private final StatusSignal<Current> currentStatorSignal;
+  private final StatusSignal<Current> currentSupplySignal;
   // private final StatusSignal<Current> currentTorqueSignal;
   private final StatusSignal<Angle> rawRotorPositionSignal;
   private final StatusSignal<Double> closedLoopErrorSignal;
@@ -77,8 +77,8 @@ public class TalonFXIO implements MotorIO {
     positionSignal = talon.getPosition();
     velocitySignal = talon.getVelocity();
     voltageSignal = talon.getMotorVoltage();
-    //currentStatorSignal = talon.getStatorCurrent();
-    //currentSupplySignal = talon.getSupplyCurrent();
+    currentStatorSignal = talon.getStatorCurrent();
+    currentSupplySignal = talon.getSupplyCurrent();
     //currentTorqueSignal = talon.getTorqueCurrent();
     rawRotorPositionSignal = talon.getRotorPosition();
     closedLoopErrorSignal = talon.getClosedLoopError();
@@ -112,8 +112,8 @@ public class TalonFXIO implements MotorIO {
     inputs.position = positionSignal.getValue();
     inputs.velocity = velocitySignal.getValue();
     inputs.appliedVolts = voltageSignal.getValue();
-    //inputs.currentStatorAmps = currentStatorSignal.getValue();
-    //inputs.currentSupplyAmps = currentSupplySignal.getValue();
+    inputs.currentStatorAmps = currentStatorSignal.getValue();
+    inputs.currentSupplyAmps = currentSupplySignal.getValue();
     //inputs.currenTorqueAmps = currentTorqueSignal.getValue();
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
     inputs.closedLoopError = closedLoopErrorSignal.getValue();

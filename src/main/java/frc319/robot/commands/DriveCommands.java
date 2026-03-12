@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc319.lib.util.AllianceUtils;
 import frc319.lib.util.FieldUtils;
 import frc319.robot.Constants;
@@ -289,6 +290,30 @@ public class DriveCommands {
     System.out.println("[pathfindUnderNearestTrench]: "+ pathString);
     return pathfindThenFollowPath(DriveConstants.pathingConstraints, pathString);
 
+  }
+
+  // Stop pathing if the user provides input on the joystick
+  //  This is important for safety, if unintentional path execution is triggered, 
+  //  the driver can simply provide input on the joystick to stop the robot from moving.
+  public static Command pathfindUnderNearestTrenchSafely(Drive drive, CommandXboxController commandXboxController
+                                                          )
+  {
+
+    return pathfindUnderNearestTrench(drive).until(
+      () -> {
+        // If the driver provides input above the deadband on any of the joysticks, we want to cancel the pathfinding command and return control to the driver
+        boolean isDriverTryingToControl = 
+            MathUtil.applyDeadband(Math.hypot(commandXboxController.getLeftY(), commandXboxController.getLeftX()), DEADBAND) > 0 ||
+            MathUtil.applyDeadband(commandXboxController.getRightX(), HEADING_DEADBAND) > 0 ||
+            MathUtil.applyDeadband(commandXboxController.getRightY(), HEADING_DEADBAND) > 0;
+
+        if (isDriverTryingToControl){
+          System.out.println("Cancelling pathfindUnderNearestTrench command because driver input was detected");
+        }
+
+        return isDriverTryingToControl;
+      }
+    );
   }
 
 }
