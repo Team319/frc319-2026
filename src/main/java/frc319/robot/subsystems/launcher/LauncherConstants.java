@@ -57,26 +57,28 @@ public final class LauncherConstants {
 
     static {
       config.name = "Turret";
-      config.tunable = false;  // Enable tuning for this subsystem
+      config.tunable = true;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(20); 
       
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.Slot0.kS = 0.1;
-      config.fxConfig.Slot0.kV = 0.0;//0.12;
-      config.fxConfig.Slot0.kA = 0.0;//0.01;
-      config.fxConfig.Slot0.kP = 5;//15; 
+      config.fxConfig.Slot0.kV = 0.15;
+      config.fxConfig.Slot0.kA = 0.0;
+      config.fxConfig.Slot0.kP = 1.0;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio =  1.0/28.5; // 28.5 to 1
+
+      
+      config.unitToRotorRatio =  1.0/(28.5*3.0); // (28.5*3.0) to 1
 
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 150;//1000.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 150;//500.0; // rotations per second^2
-      //config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1500.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 750.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicJerk = 3000.0; // limit jerk for smooth motion
 
       config.initialTransform =
           new Transform3d(
@@ -162,15 +164,16 @@ public final class LauncherConstants {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static Angle zeroAngleOffset = Degrees.of(18); 
-    public static Angle minimumAngle = Degrees.of(0.0);
-    public static Angle maximumAngle = Degrees.of(18+28); 
+    public static Angle minimumAngle = Degrees.of(1.0);
+    public static Angle maximumAngle = Degrees.of(28); 
 
     static {
       config.name = "Hood";
-      config.tunable = false;  // Enable tuning for this subsystem
+      config.tunable = true;  // Enable tuning for this subsystem
       config.talonCANID = new CANDeviceId(23); 
       config.fxConfig.Slot0.kS = 0.15;
-      config.fxConfig.Slot0.kP = 10.0;
+      config.fxConfig.Slot0.kS = 0.05;
+      config.fxConfig.Slot0.kP = 5.0;
       config.fxConfig.Slot0.kI = 5.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio = 1.0/102.0; //102 motor rotations would do 1 rotation of the herringbone if it were a big gear
@@ -180,7 +183,7 @@ public final class LauncherConstants {
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1000; // rotations per second
       config.fxConfig.MotionMagic.MotionMagicAcceleration = 1500; // rotations per second^2
-      //config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
+      config.fxConfig.MotionMagic.MotionMagicJerk = 5000; // limit jerk for smooth motion
 
       config.initialTransform =
           new Transform3d(

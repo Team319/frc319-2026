@@ -129,8 +129,7 @@ public class RobotContainer {
 
           intakeRollers =
             new IntakeRollers(
-              IntakeConstants.Rollers.leadConfig, IntakeConstants.Rollers.followConfig,
-              new TalonFXIO(IntakeConstants.Rollers.leadConfig), new TalonFXIO(IntakeConstants.Rollers.followConfig));
+              IntakeConstants.Rollers.config, new SimTalonFXIO(IntakeConstants.Rollers.config));
 
           break;
 
@@ -173,8 +172,7 @@ public class RobotContainer {
 
           intakeRollers =
             new IntakeRollers(
-              IntakeConstants.Rollers.leadConfig, IntakeConstants.Rollers.followConfig,
-              new SimTalonFXIO(IntakeConstants.Rollers.leadConfig), new SimTalonFXIO(IntakeConstants.Rollers.followConfig));
+              IntakeConstants.Rollers.config, new SimTalonFXIO(IntakeConstants.Rollers.config));
             
             break;
       } // End of robot-specific subsystem instantiation switch statement
@@ -306,8 +304,8 @@ public class RobotContainer {
           .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_SHOOTING)));
 
         driverController.leftBumper()
-          .onTrue(intakeExtension.setDistanceCommand(() -> IntakeConstants.Extension.retractedPosition))
-          .onFalse(intakeExtension.setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition));
+          .onTrue(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.RETRACTED)))
+          .onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.EXTENDED)));
 
 
         driverController.povRight()
@@ -316,10 +314,13 @@ public class RobotContainer {
         driverController.povLeft()
           .onTrue( new InstantCommand(()->turret.updateManualNudgeAngle(Degrees.of(-10))));
 
+                driverController.back()
+          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING)));
+
         
         if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos
-          driverController.leftBumper().onTrue( new InstantCommand(()-> this.setRobotState(RobotStates.TRENCH)));
-          driverController.leftBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( 
+          driverController.rightBumper().onTrue( new InstantCommand(()-> this.setRobotState(RobotStates.TRENCH)));
+          driverController.rightBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( 
             DriveCommands.pathfindUnderNearestTrenchSafely( drive, driverController )))); 
           
         }
@@ -392,11 +393,11 @@ public class RobotContainer {
       case COLLECTING:
         intakeExtension.setState(IntakeStates.EXTENDED);
         intakeRollers.setState(IntakeStates.COLLECT); 
-        ballTunnel.setState(SerializerStates.IDLE);
+        // ballTunnel.setState(SerializerStates.IDLE);
         flywheels.setState(FlywheelsState.PRESPIN);
-        spindexer.setState(SerializerStates.IDLE); // Maybe jostle hopper while collecting?
-        turret.setState(LauncherStates.STOWED);
-        hood.setState(LauncherStates.STOWED);
+        // spindexer.setState(SerializerStates.IDLE); // Maybe jostle hopper while collecting?
+        // turret.setState(LauncherStates.STOWED);
+        // hood.setState(LauncherStates.STOWED);
         break;
 
       case STOP_COLLECTING:
@@ -408,6 +409,8 @@ public class RobotContainer {
 
       case SHOOTING:
         flywheels.setState(FlywheelsState.SHOOT);
+
+        // This is handled in Robot.java
         // ballTunnel.setState(SerializerStates.SHOOT);
         // spindexer.setState(SerializerStates.SHOOT);
         turret.setState(LauncherStates.TRACKING_TARGET);
@@ -454,8 +457,8 @@ public class RobotContainer {
           ballTunnel.setState(SerializerStates.IDLE);
           flywheels.setState(FlywheelsState.IDLE); 
           spindexer.setState(SerializerStates.IDLE);
-          turret.setState(LauncherStates.IDLE);
-          hood.setState(LauncherStates.IDLE);
+          turret.setState(LauncherStates.TUNING);
+          hood.setState(LauncherStates.TUNING);
         break;
 
       case TUNING_SHOOT:

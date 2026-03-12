@@ -44,8 +44,18 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   }
 
   public Command setAngle(Supplier<Angle> desiredAngle) {
+
+    final Supplier<Angle> clampedAngle;
+    if (desiredAngle.get().in(Degrees) > LauncherConstants.Hood.maximumAngle.in(Degrees)) {
+      clampedAngle = () -> LauncherConstants.Hood.maximumAngle;
+    } else if (desiredAngle.get().in(Degrees) < LauncherConstants.Hood.minimumAngle.in(Degrees)) {
+      clampedAngle = () -> LauncherConstants.Hood.minimumAngle;
+    } else {
+      clampedAngle = desiredAngle;
+    }
+
     return motionMagicSetpointCommand(
-        () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
+        () -> convertSubsystemPositionToMotorPosition(clampedAngle.get()));
         
   }
 

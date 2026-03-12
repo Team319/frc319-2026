@@ -68,7 +68,7 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
    * @return
    */
   public Command retractCommand() {
-    return setDistanceCommand(() -> IntakeConstants.Extension.retractedPosition);
+    return setDistanceCommand(() -> IntakeConstants.Extension.flushPosition);
   }
 
   @Override
