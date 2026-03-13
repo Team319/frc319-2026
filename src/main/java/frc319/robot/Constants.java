@@ -134,7 +134,8 @@ public class Constants {
 
   public static class LimelightConstants{
     public static enum Device{
-      DRIVETRAIN,
+      DRIVETRAIN_BACK,
+      DRIVETRAIN_RIGHT,
       TURRET,
       COLLECTOR
     }

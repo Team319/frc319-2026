@@ -287,19 +287,19 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         Logger.recordOutput("Odometry/Robot", getPose());
  
         // Update / Correct the pose using Localization from Vision (using the 'Reef' Limelight) 
-        if(Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN) /*&& DriverStation.isTeleop()*/ )
+        if(Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN_BACK) /*&& DriverStation.isTeleop()*/ )
         {
           doRejectVisionUpdate = false;
 
-          double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.DRIVETRAIN);
+          double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.DRIVETRAIN_BACK);
           Pose3d visionPose = new Pose3d(
                                 new Translation3d(poseBuf[0],poseBuf[1],poseBuf[2]), 
                                 new Rotation3d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]),Units.degreesToRadians(poseBuf[5]))
                               );
-          Logger.recordOutput("Odometry/VisionPoseDrivetrain", visionPose.toPose2d());
+          Logger.recordOutput("Odometry/limelight-drive/VisionPoseDrivetrain", visionPose.toPose2d());
  
           double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
-          Logger.recordOutput("/Drive/poseDifference", poseDifference);
+          Logger.recordOutput("/Odometry/limelight-drive/poseDifference", poseDifference);
 
           LimelightHelpers.SetRobotOrientation("limelight-drive", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-drive");
@@ -309,7 +309,56 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
             doRejectVisionUpdate = true;
           }
           
-          Logger.recordOutput("Odometry/mt2PoseDrive", mt2.pose);
+          Logger.recordOutput("Odometry/limelight-back/mt2PoseDrive", mt2.pose);
+
+          // If the robot is spinning too fast, ignore vision updates
+          if(Math.abs(rawGyroVelocityRadPerSec) > Units.degreesToRadians(720) ) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+          {
+            doRejectVisionUpdate = true;
+          }
+          if(mt2.tagCount == 0)
+          {
+            doRejectVisionUpdate = true;
+          }
+          if(mt2.pose == new Pose2d())
+          {
+            doRejectVisionUpdate = true;
+          }
+          if(!doRejectVisionUpdate)
+          {
+            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
+            poseEstimator.addVisionMeasurement(
+                mt2.pose,
+                mt2.timestampSeconds);
+          }
+          doRejectVisionUpdate = false;
+          
+        }
+
+        // Update / Correct the pose using Localization from Vision (using the 'Reef' Limelight) 
+        if(Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN_RIGHT) /*&& DriverStation.isTeleop()*/ )
+        {
+          doRejectVisionUpdate = false;
+
+          double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.DRIVETRAIN_RIGHT);
+          Pose3d visionPose = new Pose3d(
+                                new Translation3d(poseBuf[0],poseBuf[1],poseBuf[2]), 
+                                new Rotation3d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]),Units.degreesToRadians(poseBuf[5]))
+                              );
+          Logger.recordOutput("Odometry/limelight-right/VisionPoseDrivetrainRight", visionPose.toPose2d());
+ 
+          double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
+          Logger.recordOutput("Odometry/limelight-right/poseDifferenceRight", poseDifference);
+
+          LimelightHelpers.SetRobotOrientation("limelight-right", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+          LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-right");
+          
+          if(mt2.pose == null){
+            mt2.pose = new Pose2d();
+            doRejectVisionUpdate = true;
+          }
+          
+          Logger.recordOutput("Odometry/limelight-right/mt2PoseDrive", mt2.pose);
 
           // If the robot is spinning too fast, ignore vision updates
           if(Math.abs(rawGyroVelocityRadPerSec) > Units.degreesToRadians(720) ) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
@@ -364,28 +413,14 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           }
           if(!doRejectVisionUpdate)
           {
-            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
-            poseEstimator.addVisionMeasurement(
-                mt2.pose,
-                mt2.timestampSeconds);
+            // poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
+            // poseEstimator.addVisionMeasurement(
+            //     mt2.pose,
+            //     mt2.timestampSeconds);
           }
           doRejectVisionUpdate = false;
-
-
           
         }
-
-        // ============ Get Closest Tag of interest... (Used for driver assistance) ============
-
-        // String closestTagID = getClosestReefIdPairing();
-        // if( closestTagID != "xx" )
-        // {
-        //   nearTheTrench = true;
-        // }
-        // else
-        // {
-        //   nearTheTrench = false;
-        // }
 
         break; // End of Swerve logic
     
@@ -580,7 +615,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   public double snapToTarget() {
     // ===================  Thank you 4481 for the help ! =======================
     double theta = 0.0;
-    boolean isTargetVisible = Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN);
+    boolean isTargetVisible = Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN_BACK);
 
    /*  if(false/*isTargetVisible){
       //System.out.println("Target Visible, use limelight data to automatically control heading");

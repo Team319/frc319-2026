@@ -36,6 +36,15 @@ public class Limelight {
   private static NetworkTableEntry m_tl_drivetrain = m_drivetrainTable.getEntry("tl");
   private static NetworkTableEntry m_cl_drivetrain = m_drivetrainTable.getEntry("cl");
 
+  private static final NetworkTable m_drivetrainRightTable = NetworkTableInstance.getDefault().getTable("limelight-drive-right"); // Makes the Limelight data table.
+  private static NetworkTableEntry m_botPose_drivetrainRight = m_drivetrainRightTable.getEntry("botpose_wpiblue"); // Makes a double array to hold the robot pose.
+  private static NetworkTableEntry m_tv_drivetrainRight = m_drivetrainRightTable.getEntry("tv");
+  private static NetworkTableEntry m_tx_drivetrainRight = m_drivetrainRightTable.getEntry("tx");
+  private static NetworkTableEntry m_ty_drivetrainRight = m_drivetrainRightTable.getEntry("ty");
+  private static NetworkTableEntry m_ta_drivetrainRight = m_drivetrainRightTable.getEntry("ta");
+  private static NetworkTableEntry m_tl_drivetrainRight = m_drivetrainRightTable.getEntry("tl");
+  private static NetworkTableEntry m_cl_drivetrainRight = m_drivetrainTable.getEntry("cl");
+
  // private NetworkTableEntry m_
 
   /** Creates a new Limelight. */
@@ -46,10 +55,12 @@ public class Limelight {
     switch(device){
       case TURRET:
         return m_tl_turret.getDouble(0.0); 
-      case DRIVETRAIN:
-      default:
+      case DRIVETRAIN_BACK:
         return m_tl_drivetrain.getDouble(0.0);
-
+      case DRIVETRAIN_RIGHT:
+        return m_tl_drivetrainRight.getDouble(0.0);
+      default:
+        return 0.0;
     }
   }
 
@@ -58,9 +69,12 @@ public class Limelight {
     switch(device){
       case TURRET:
         return m_cl_turret.getDouble(0.0); 
-      case DRIVETRAIN:
-      default:
+      case DRIVETRAIN_BACK:
         return m_cl_drivetrain.getDouble(0.0);
+      case DRIVETRAIN_RIGHT:
+        return m_cl_drivetrainRight.getDouble(0.0);
+      default:
+        return 0.0;
     }
    }
 
@@ -69,9 +83,12 @@ public class Limelight {
     switch(device){
       case TURRET:
         return m_ta_turret.getDouble(0.0); 
-      case DRIVETRAIN:
-      default:
+      case DRIVETRAIN_BACK:
         return m_ta_drivetrain.getDouble(0.0); 
+      case DRIVETRAIN_RIGHT:
+        return m_ta_drivetrainRight.getDouble(0.0);
+      default:
+        return 0.0;
     }
     
   }
@@ -81,9 +98,12 @@ public class Limelight {
     switch(device){
       case TURRET:
         return m_tx_turret.getDouble(0.0); 
-      case DRIVETRAIN:
-      default:
+      case DRIVETRAIN_BACK:
         return m_tx_drivetrain.getDouble(0.0); 
+      case DRIVETRAIN_RIGHT:
+        return m_tx_drivetrainRight.getDouble(0.0);
+      default:
+        return 0.0;
     }
   }
 
@@ -92,9 +112,12 @@ public class Limelight {
     switch(device){
       case TURRET:
         return m_ty_turret.getDouble(0.0); 
-      case DRIVETRAIN:
-      default:
+      case DRIVETRAIN_BACK:
         return m_ty_drivetrain.getDouble(0.0); 
+      case DRIVETRAIN_RIGHT:
+        return m_ty_drivetrainRight.getDouble(0.0);
+      default:
+        return 0.0;
     }
   }
 
@@ -104,10 +127,11 @@ public class Limelight {
       case TURRET:
       return 0.0;
         //return (Constants.kTargetHeight - Constants.kCameraHeight) / Math.tan(Math.toRadians(Constants.kCameraAngle + getVerticalOffset(LimelightConstants.Device.TURRET))); 
-      case DRIVETRAIN:
+      case DRIVETRAIN_BACK:
+      case DRIVETRAIN_RIGHT:
       default:
       return 0.0;
-        //return (Constants.kTargetHeight - Constants.kCameraHeight) / Math.tan(Math.toRadians(Constants.kCameraAngle + getVerticalOffset(LimelightConstants.Device.DRIVETRAIN))); 
+        //return (Constants.kTargetHeight - Constants.kCameraHeight) / Math.tan(Math.toRadians(Constants.kCameraAngle + getVerticalOffset(LimelightConstants.Device.DRIVETRAIN_BACK))); 
     }
   }
 
@@ -118,9 +142,14 @@ public class Limelight {
       case TURRET:
         result = m_tv_turret.getDouble(0.0); 
         break;
-      case DRIVETRAIN:
-      default:
+      case DRIVETRAIN_BACK:
         result = m_tv_drivetrain.getDouble(0.0); 
+        break;
+      case DRIVETRAIN_RIGHT:
+        result = m_tv_drivetrainRight.getDouble(0.0);
+        break;
+      default:
+        result = 0.0;
         break;
     }
 
@@ -135,14 +164,19 @@ public class Limelight {
           return m_botPose_turret.getDoubleArray(new double[7]);
         }
         return  m_botPose_turret.getDoubleArray(new double[7]); 
-      case DRIVETRAIN:
-      default:
+      case DRIVETRAIN_BACK:
         if (m_botPose_drivetrain.getDoubleArray(new double[7]).length >= 7){
           return m_botPose_drivetrain.getDoubleArray(new double[7]);
         }
+        return m_botPose_drivetrain.getDoubleArray(new double[7]);
+      case DRIVETRAIN_RIGHT:
+        if (m_botPose_drivetrainRight.getDoubleArray(new double[7]).length >= 7){
+          return m_botPose_drivetrainRight.getDoubleArray(new double[7]);
+        }
+        return m_botPose_drivetrainRight.getDoubleArray(new double[7]);
+      default:
+        return new double[7];
     }
-    // Fallback case
-    return new double[7];
 
   }
 

@@ -1,16 +1,21 @@
 package frc319.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc319.lib.subsystem.KinematicsManager;
 import frc319.lib.util.LimelightHelpers;
 import frc319.robot.Constants.LimelightConstants;
 import frc319.robot.Robot;
 import frc319.robot.subsystems.vision.Limelight;
+
+import org.littletonrobotics.junction.Logger;
 
 public class LauncherVisionManager extends SubsystemBase {
     private static LauncherVisionManager instance;
@@ -31,6 +36,38 @@ public class LauncherVisionManager extends SubsystemBase {
     public void periodic() {
         // Update the Limelight's heading based on the turret's current pose
         updateLimelightHeading();
+
+        Logger.recordOutput("LaunchingVisionManager/2dDistance", get2dDistance(LaunchingSolutionManager.getInstance().getTargetPose().getTranslation()));
+
+    }
+
+    public boolean isTargetVisible(){
+        return Limelight.isValidTargetSeen(LimelightConstants.Device.TURRET);
+    }
+
+    public Distance get2dDistanceToCurrentTarget(){
+        return get2dDistance(LaunchingSolutionManager.getInstance().getTargetPose().getTranslation());
+    }
+
+    public Distance get2dDistance(Translation3d target){
+        
+        if(!isTargetVisible()){
+
+            return Robot.m_robotContainer.turret.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+        }
+        else{
+
+            double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.TURRET);
+            Pose3d visionPose = new Pose3d(
+                                new Translation3d(poseBuf[0],poseBuf[1],poseBuf[2]), 
+                                new Rotation3d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]),Units.degreesToRadians(poseBuf[5]))
+                              );
+
+            Translation3d myTrans = visionPose.getTranslation();
+
+            return Meters.of(Math.hypot(target.getX() - myTrans.getX(), target.getY() - myTrans.getY()));
+            
+        }
     }
 
     public Pose3d getGlobalPoseFromVision(){
