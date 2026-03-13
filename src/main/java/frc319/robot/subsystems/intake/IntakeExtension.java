@@ -30,6 +30,8 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
     implements ArticulatedComponent {
 
       IntakeStates intakeState = IntakeStates.IDLE;
+      boolean shouldExtend = false;
+      
 
       private Distance intakePosition = Inches.of(0);
 
@@ -90,6 +92,40 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
         // Implement tuning state behavior here
         intakePosition = Inches.of(SmartDashboard.getNumber("Tuning_Mode/Intake_Tuning_Position_Inches", 0.0));
         this.setDistanceCommand(() -> intakePosition).schedule();
+        break;
+
+      case JOSTLE:
+
+      if(this.isMotionMagicAtTarget() )
+      {
+        if(getCurrentPositionAsDistance().gt(IntakeConstants.Extension.extendedPosition.minus(Inches.of(2.0)))){
+          this.setDistanceCommand(() -> IntakeConstants.Extension.flushPosition).schedule();
+        }
+        else
+        {
+          this.setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition).schedule();
+        }
+
+
+      }
+
+        // if(getCurrentPositionAsDistance().gt(IntakeConstants.Extension.extendedPosition.minus(Inches.of(0.5)))) {
+        //   shouldExtend = false;
+        // }
+        // else {
+        //   shouldExtend = true;
+        // }
+
+        // if(shouldExtend){
+        //   intakePosition = intakePosition.plus(Inches.of(0.25));
+        // }
+        // else
+        // {
+        //   intakePosition = intakePosition.minus(Inches.of(0.25));
+        // }
+        
+        
+
         break;
 
       case IDLE:

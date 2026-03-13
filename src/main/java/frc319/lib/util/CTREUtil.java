@@ -12,10 +12,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import java.util.function.Supplier;
 
 public class CTREUtil {
-  public static final int MAX_RETRIES = 10;
+  public static final int MAX_RETRIES = 3;
 
   public static StatusCode tryUntilOK(Supplier<StatusCode> function, int deviceId) {
-    final int max_num_retries = 10;
+    final int max_num_retries = 3;
     StatusCode statusCode = StatusCode.OK;
     for (int i = 0; i < max_num_retries; ++i) {
       statusCode = function.get();

@@ -36,7 +36,7 @@ public class Limelight {
   private static NetworkTableEntry m_tl_drivetrain = m_drivetrainTable.getEntry("tl");
   private static NetworkTableEntry m_cl_drivetrain = m_drivetrainTable.getEntry("cl");
 
-  private static final NetworkTable m_drivetrainRightTable = NetworkTableInstance.getDefault().getTable("limelight-drive-right"); // Makes the Limelight data table.
+  private static final NetworkTable m_drivetrainRightTable = NetworkTableInstance.getDefault().getTable("limelight-right"); // Makes the Limelight data table.
   private static NetworkTableEntry m_botPose_drivetrainRight = m_drivetrainRightTable.getEntry("botpose_wpiblue"); // Makes a double array to hold the robot pose.
   private static NetworkTableEntry m_tv_drivetrainRight = m_drivetrainRightTable.getEntry("tv");
   private static NetworkTableEntry m_tx_drivetrainRight = m_drivetrainRightTable.getEntry("tx");

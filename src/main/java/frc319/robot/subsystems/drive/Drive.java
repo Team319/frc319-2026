@@ -301,7 +301,9 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
           Logger.recordOutput("/Odometry/limelight-drive/poseDifference", poseDifference);
 
-          LimelightHelpers.SetRobotOrientation("limelight-drive", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+          //LimelightHelpers.SetRobotOrientation("limelight-drive", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+          LimelightHelpers.SetRobotOrientation("limelight-drive", rawGyroRotation.getDegrees(), 0, 0, 0, 0, 0);
+
           LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-drive");
           
           if(mt2.pose == null){
@@ -309,7 +311,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
             doRejectVisionUpdate = true;
           }
           
-          Logger.recordOutput("Odometry/limelight-back/mt2PoseDrive", mt2.pose);
+          Logger.recordOutput("Odometry/limelight-drive/mt2PoseDrive", mt2.pose);
 
           // If the robot is spinning too fast, ignore vision updates
           if(Math.abs(rawGyroVelocityRadPerSec) > Units.degreesToRadians(720) ) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
@@ -350,7 +352,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
           Logger.recordOutput("Odometry/limelight-right/poseDifferenceRight", poseDifference);
 
-          LimelightHelpers.SetRobotOrientation("limelight-right", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+          //LimelightHelpers.SetRobotOrientation("limelight-right", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+          LimelightHelpers.SetRobotOrientation("limelight-right", rawGyroRotation.getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-right");
           
           if(mt2.pose == null){
@@ -486,6 +489,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
+    gyroIO.setHeading(pose.getRotation().getDegrees());
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 
@@ -502,7 +506,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   /** Sets the current gyro heading to a desired value */
   public void setHeading(double heading){
     gyroIO.setHeading(heading);
-    rawGyroRotation = new Rotation2d(heading);
+    rawGyroRotation = new Rotation2d(Units.degreesToRadians(heading));
 
   }
 

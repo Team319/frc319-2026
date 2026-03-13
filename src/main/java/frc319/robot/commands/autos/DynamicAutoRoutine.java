@@ -97,10 +97,10 @@ public DynamicAutoRoutine(Drive a_drive){
                         break;
                 }
 
-                for (int i = 0; i < 10; i++) {
+                //for (int i = 0; i < 10; i++) {
                     //m_drive.resetGyro();
                     m_drive.setHeading(startingHeadingDegrees);
-                }
+                //}
                 
                 break;
 

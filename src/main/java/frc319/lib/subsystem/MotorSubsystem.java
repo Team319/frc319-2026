@@ -240,6 +240,10 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
     io.setVelocitySetpoint(setpoint, slot);
   }
 
+  public boolean isMotionMagicAtTarget(){
+    return inputs.isMotionMagicAtTarget;
+  }
+
   // Getters
   /**
    * Gets the current position of the motor.

@@ -78,6 +78,10 @@ public class Robot extends LoggedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
 
+    Logger.recordOutput("Debug/flywheel/isAtTarget", m_robotContainer.flywheels.isAtTargetVelocity());
+    Logger.recordOutput("Debug/turret/isAtTarget", m_robotContainer.turret.isAtTargetPosition());
+    Logger.recordOutput("Debug/hood/isAtTarget", m_robotContainer.hood.isAtTargetPosition());
+
     switch(m_robotContainer.getCurrentRobotState()) {
 
       case SHOOTING:
@@ -121,8 +125,10 @@ public class Robot extends LoggedRobot {
 
     //System.out.println("DynamicAuto Input :" +m_robotContainer.dynamicAutoInput);
 
-   if (!hasBeenEnabled) {
     Optional<Alliance> allianceColor = DriverStation.getAlliance();
+  
+   if (!hasBeenEnabled) {
+    
     allianceColor.ifPresent(alliance -> {
       if (alliance == Alliance.Red) {
         m_robotContainer.drive.setHeading(180.0);
@@ -132,6 +138,7 @@ public class Robot extends LoggedRobot {
         //System.out.println("Blue Alliance: Setting heading to 180 degrees.");
       }
     });
+
 
      if(!allianceColor.isPresent()){
        System.out.println("Alliance color is not set yet.");

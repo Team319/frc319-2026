@@ -108,13 +108,14 @@ public final class LauncherConstants {
 
     static {
       leftConfig.name = "Flywheels Left Lead";
-      leftConfig.tunable = false;  // Enable tuning for this subsystem
+      leftConfig.tunable = true;  // Enable tuning for this subsystem
       leftConfig.talonCANID = new CANDeviceId(21); 
-      leftConfig.fxConfig.Slot0.kP = 0.0;
+      leftConfig.fxConfig.Slot0.kP = 0.1;
       leftConfig.fxConfig.Slot0.kI = 0.0;
       leftConfig.fxConfig.Slot0.kD = 0.0;
       leftConfig.fxConfig.Slot0.kS = 0.25; 
       leftConfig.fxConfig.Slot0.kV = 0.12; 
+      leftConfig.fxConfig.Slot0.kA = 0.01; 
       leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
@@ -156,6 +157,7 @@ public final class LauncherConstants {
       flywheelRPMMap.put(3.25, 2350.0);
       flywheelRPMMap.put(3.75, 2450.0);
       flywheelRPMMap.put(4.5, 2600.0);
+      flywheelRPMMap.put(7.0, 2800.0);
 
     }
 
@@ -205,6 +207,9 @@ public final class LauncherConstants {
       angleMap.put(3.25, 7.0);
       angleMap.put(3.75, 8.0);
       angleMap.put(4.5, 10.0);
+      angleMap.put(7.0, 24.0);
+
+      //angleMap.put(8.0, 20.0);
     }
 
 

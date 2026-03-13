@@ -154,6 +154,6 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
         return false; // If we're not actively tracking, we can consider ourselves "at target"
     }
 
-    return EqualsUtil.epsilonEquals(currentAngle.in(Degrees), targetAngle.in(Degrees), 2.5); 
+    return true;//EqualsUtil.epsilonEquals(currentAngle.in(Degrees), targetAngle.in(Degrees), 2.5); 
   }
 }

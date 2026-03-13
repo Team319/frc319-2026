@@ -267,6 +267,6 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
         return false; // If we're not actively tracking, we can consider ourselves "at target"
     }
 
-    return EqualsUtil.epsilonEquals(currentAngle.in(Degrees), targetAngle.in(Degrees), 5.0); 
+    return EqualsUtil.epsilonEquals(currentAngle.in(Degrees), targetAngle.in(Degrees), 10.0); 
   }
 }

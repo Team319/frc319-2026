@@ -122,7 +122,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         break;
 
       case PRESPIN:
-        this.setVelocity(()->RPM.of(0)).schedule();
+        this.setVelocity(()->RPM.of(1800.0)).schedule();
         break;
 
       case TUNING:
@@ -209,9 +209,11 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   public boolean isAtTargetVelocity() {
     double currentRPM = super.getCurrentVelocity().in(RPM);
-    double targetRPM = LauncherConstants.Flywheels.flywheelRPMMap.get(this.getDistance2d(FieldConstants.Hub.innerCenterPoint).in(Meters));
-    Logger.recordOutput(pb.makePath("targetFlywheelRPM"), targetRPM);
-    return EqualsUtil.epsilonEquals(currentRPM, targetRPM, 250); 
+    Distance toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+    double targetRPM = LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters));
+    AngularVelocity targetVelocity = RPM.of(targetRPM) ;
+    Logger.recordOutput(pb.makePath("targetFlywheelRPM"), targetVelocity);
+    return  currentRPM >= targetRPM - 100.0;//EqualsUtil.epsilonEquals(currentRPM, targetRPM, 250); 
   }
 
   // EKM - Is this just simulated???

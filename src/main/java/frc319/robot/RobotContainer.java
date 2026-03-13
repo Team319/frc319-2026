@@ -322,7 +322,8 @@ public class RobotContainer {
           .onTrue( new InstantCommand(()->turret.updateManualNudgeAngle(Degrees.of(-10))));
 
                 driverController.back()
-          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING)));
+          .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING_SHOOT)))
+          .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.TUNING_STOP)));
 
         
         if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos
@@ -417,6 +418,7 @@ public class RobotContainer {
 
       case SHOOTING:
         flywheels.setState(FlywheelsState.SHOOT);
+        intakeExtension.setState(IntakeStates.JOSTLE);
 
         // This is handled in Robot.java
         // ballTunnel.setState(SerializerStates.SHOOT);
@@ -445,6 +447,8 @@ public class RobotContainer {
           turret.setState(LauncherStates.TRACKING_TARGET);
           // Keep the hood safe
           hood.setState(LauncherStates.STOWED);
+
+          intakeExtension.setState(IntakeStates.EXTENDED);
           break;
 
       case SNOWBLOW:
@@ -470,7 +474,7 @@ public class RobotContainer {
 
       case TUNING:
         // Implement tuning state behavior here
-          intakeExtension.setState(IntakeStates.TUNING);
+          intakeExtension.setState(IntakeStates.IDLE);
           intakeRollers.setState(IntakeStates.TUNING);
           ballTunnel.setState(SerializerStates.IDLE);
           flywheels.setState(FlywheelsState.IDLE); 
@@ -481,7 +485,7 @@ public class RobotContainer {
 
       case TUNING_SHOOT:
         // Implement tuning state behavior here
-          intakeExtension.setState(IntakeStates.TUNING);
+          intakeExtension.setState(IntakeStates.IDLE);
           //intakeRollers.setState(IntakeStates.TUNING);
           ballTunnel.setState(SerializerStates.SHOOT);
           flywheels.setState(FlywheelsState.TUNING); 
@@ -492,7 +496,7 @@ public class RobotContainer {
 
       case TUNING_STOP:
         // Implement tuning state behavior here
-          intakeExtension.setState(IntakeStates.TUNING);
+          intakeExtension.setState(IntakeStates.IDLE);
           //intakeRollers.setState(IntakeStates.TUNING);
           ballTunnel.setState(SerializerStates.IDLE);
           flywheels.setState(FlywheelsState.TUNING); 
