@@ -81,6 +81,7 @@ public class Robot extends LoggedRobot {
     switch(m_robotContainer.getCurrentRobotState()) {
 
       case SHOOTING:
+      case SHOOTING_ON_MOVE:
       case SNOWBLOW:
         if(m_robotContainer.flywheels.isAtTargetVelocity() 
             && m_robotContainer.turret.isAtTargetPosition()

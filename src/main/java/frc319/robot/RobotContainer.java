@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc319.lib.io.SimTalonFXIO;
 import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.KinematicsManager;
+import frc319.lib.util.AllianceUtils;
 import frc319.robot.Constants.DemoMode;
 import frc319.robot.Constants.DriveConstants;
 import frc319.robot.commands.DriveCommands;
@@ -284,9 +285,15 @@ public class RobotContainer {
         break;
       }
   
-        driverController.start().whileTrue(Commands.runOnce(
+        driverController.start().onTrue(Commands.runOnce(
             ()-> { 
-              drive.resetHeading();
+              if(AllianceUtils.isBlueAlliance()){
+                drive.setHeading(0);
+              }
+              else
+              {
+                drive.setHeading(180);
+              }
             }
             )
           );
@@ -359,6 +366,7 @@ public class RobotContainer {
     STOP_COLLECTING, 
     
     SHOOTING,
+    SHOOTING_ON_MOVE,
     STOP_SHOOTING, 
     
     SNOWBLOW, 
@@ -415,6 +423,16 @@ public class RobotContainer {
         // spindexer.setState(SerializerStates.SHOOT);
         turret.setState(LauncherStates.TRACKING_TARGET);
         hood.setState(LauncherStates.TRACKING_TARGET);
+        break;
+
+      case SHOOTING_ON_MOVE:
+        flywheels.setState(FlywheelsState.SHOOT_ON_MOVE);
+
+        // This is handled in Robot.java
+        // ballTunnel.setState(SerializerStates.SHOOT);
+        // spindexer.setState(SerializerStates.SHOOT);
+        turret.setState(LauncherStates.TRACK_HUB_ON_MOVE);
+        hood.setState(LauncherStates.TRACK_HUB_ON_MOVE);
         break;
 
         case STOP_SHOOTING:

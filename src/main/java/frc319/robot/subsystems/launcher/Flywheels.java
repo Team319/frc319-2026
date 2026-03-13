@@ -109,6 +109,18 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         //}
         break;
 
+      case SHOOT_ON_MOVE:
+        toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetOnMovePose());
+        Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
+        this.setVelocity(()->RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))).schedule();
+        
+
+        // TODO :  need matching flywheel ANGULAR Velocity
+        //if (solution.isValid()) {
+          launchFuel(solution);
+        //}
+        break;
+
       case PRESPIN:
         this.setVelocity(()->RPM.of(0)).schedule();
         break;
@@ -199,7 +211,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     double currentRPM = super.getCurrentVelocity().in(RPM);
     double targetRPM = LauncherConstants.Flywheels.flywheelRPMMap.get(this.getDistance2d(FieldConstants.Hub.innerCenterPoint).in(Meters));
     Logger.recordOutput(pb.makePath("targetFlywheelRPM"), targetRPM);
-    return EqualsUtil.epsilonEquals(currentRPM, targetRPM, 200); 
+    return EqualsUtil.epsilonEquals(currentRPM, targetRPM, 250); 
   }
 
   // EKM - Is this just simulated???

@@ -98,7 +98,7 @@ public class Constants {
     public static final double DRIVE_BASE_RADIUS =
         Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
-    public static final int currentLimit = 80; // was 60
+    public static final int currentLimit = 60; // was 60
     public static final double wheelRadiusMeters = Units.inchesToMeters(3.875); 
     public static final double robotMassKg = 52.16312; // TODO: UPDATE for 2026
     public static final double robotMOI = 6.883; // TODO: UPDATE for 2026

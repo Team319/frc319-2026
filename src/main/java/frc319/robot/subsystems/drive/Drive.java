@@ -467,6 +467,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   /** Sets the current gyro heading to a desired value */
   public void setHeading(double heading){
     gyroIO.setHeading(heading);
+    rawGyroRotation = new Rotation2d(heading);
+
   }
 
   // ========================= SysId Helpers =========================

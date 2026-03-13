@@ -190,6 +190,51 @@ public DynamicAutoRoutine(Drive a_drive){
                 }
                 break;
 
+            case "f":
+                switch(modifier){
+                    case 0:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_left_close"
+                                )
+                            )
+                        );
+                        break;
+                    case 1:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_left_close"
+                                )
+                            )
+                        );
+                        break;
+                    case 2:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_left_close"
+                                )
+                            )
+                        );
+                        break;
+                    case 3:
+                        addCommands(
+                            new InstantCommand( 
+                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
+                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                        DriveConstants.autoPathingConstraints,"go_left_close"
+                                )
+                            )
+                        );
+                    break;
+                }
+                break;
+
             case "r":
                 switch(modifier){
                     case 0:

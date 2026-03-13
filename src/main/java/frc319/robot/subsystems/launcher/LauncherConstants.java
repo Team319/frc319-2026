@@ -99,7 +99,8 @@ public final class LauncherConstants {
       IDLE,
       PRESPIN,
       TUNING,
-      SHOOT
+      SHOOT,
+      SHOOT_ON_MOVE
     }
 
     public static TalonFXSubsystemConfig leftConfig = new TalonFXSubsystemConfig();

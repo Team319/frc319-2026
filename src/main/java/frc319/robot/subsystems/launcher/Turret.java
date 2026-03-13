@@ -245,7 +245,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   }
 
   public boolean isAtTargetPosition() {
-    Angle currentAngle = super.getCurrentPosition().times(config.unitToRotorRatio);
+    Angle currentAngle = super.getCurrentPosition().times(config.unitToRotorRatio).plus(manualNudgeAngle);
     Angle targetAngle = Degrees.of(0.0);
 
     Logger.recordOutput(pb.makePath("iat_currentAngle"), currentAngle.in(Degrees));
@@ -267,6 +267,6 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
         return false; // If we're not actively tracking, we can consider ourselves "at target"
     }
 
-    return EqualsUtil.epsilonEquals(currentAngle.in(Degrees), targetAngle.in(Degrees), 1.5); 
+    return EqualsUtil.epsilonEquals(currentAngle.in(Degrees), targetAngle.in(Degrees), 5.0); 
   }
 }
