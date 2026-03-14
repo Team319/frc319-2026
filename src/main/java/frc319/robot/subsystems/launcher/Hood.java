@@ -84,6 +84,11 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
           this.retract().schedule();
         break;
 
+      case DUMB_SHOT:
+        aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(1.7));
+        this.setAngle(()->aimAngle).schedule();
+      break;
+
       case TRACKING_TARGET:
           toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
           Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);

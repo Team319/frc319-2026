@@ -125,6 +125,10 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         this.setVelocity(()->RPM.of(1800.0)).schedule();
         break;
 
+      case DUMB_SHOT:
+        this.setVelocity(() -> RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(1.7))).schedule();
+        break;
+
       case TUNING:
         // Use the value from Elastic slider
         //System.out.println("Test Flywheel RPM: " + testFlywheelRPM.getAsDouble()); // Debug print

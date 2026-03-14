@@ -306,14 +306,17 @@ public class RobotContainer {
           .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.COLLECTING)))
           .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_COLLECTING)));
 
-        driverController.rightTrigger()
-          .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)))
-          .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_SHOOTING)));
-
         driverController.leftBumper()
           .onTrue(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.RETRACTED)))
           .onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.EXTENDED)));
 
+        driverController.rightTrigger()
+          .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)))
+          .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_SHOOTING)));
+
+        driverController.rightBumper()
+          .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING_DUMB)))
+          .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_SHOOTING)));
 
         driverController.povRight()
           .onTrue( new InstantCommand(()->turret.updateManualNudgeAngle(Degrees.of(10))));
@@ -326,12 +329,12 @@ public class RobotContainer {
           .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.TUNING_STOP)));
 
         
-        if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos
-          driverController.rightBumper().onTrue( new InstantCommand(()-> this.setRobotState(RobotStates.TRENCH)));
-          driverController.rightBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( 
-            DriveCommands.pathfindUnderNearestTrenchSafely( drive, driverController )))); 
+        // if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos
+        //   driverController.rightBumper().onTrue( new InstantCommand(()-> this.setRobotState(RobotStates.TRENCH)));
+        //   driverController.rightBumper().whileTrue( new InstantCommand(()-> CommandScheduler.getInstance().schedule( 
+        //     DriveCommands.pathfindUnderNearestTrenchSafely( drive, driverController )))); 
           
-        }
+        // }
 
         //  ===========================================================================
         //  ============================= Operator Controls ===========================
@@ -367,6 +370,7 @@ public class RobotContainer {
     STOP_COLLECTING, 
     
     SHOOTING,
+    SHOOTING_DUMB,
     SHOOTING_ON_MOVE,
     STOP_SHOOTING, 
     
@@ -419,12 +423,22 @@ public class RobotContainer {
       case SHOOTING:
         flywheels.setState(FlywheelsState.SHOOT);
         intakeExtension.setState(IntakeStates.JOSTLE);
+        intakeRollers.setState(IntakeStates.COLLECT); 
 
         // This is handled in Robot.java
         // ballTunnel.setState(SerializerStates.SHOOT);
         // spindexer.setState(SerializerStates.SHOOT);
         turret.setState(LauncherStates.TRACKING_TARGET);
         hood.setState(LauncherStates.TRACKING_TARGET);
+        break;
+
+      case SHOOTING_DUMB:
+        flywheels.setState(FlywheelsState.DUMB_SHOT);
+        intakeExtension.setState(IntakeStates.JOSTLE);
+
+        turret.setState(LauncherStates.STOWED);
+        hood.setState(LauncherStates.DUMB_SHOT);
+
         break;
 
       case SHOOTING_ON_MOVE:

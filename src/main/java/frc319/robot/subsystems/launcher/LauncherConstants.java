@@ -31,6 +31,7 @@ public final class LauncherConstants {
     public static enum LauncherStates {
       STOWED,
       IDLE,
+      DUMB_SHOT,
       TRACKING_TARGET,
       TRACK_HUB_ON_MOVE,
       TUNING
@@ -98,6 +99,7 @@ public final class LauncherConstants {
     public static enum FlywheelsState {
       IDLE,
       PRESPIN,
+      DUMB_SHOT,
       TUNING,
       SHOOT,
       SHOOT_ON_MOVE
