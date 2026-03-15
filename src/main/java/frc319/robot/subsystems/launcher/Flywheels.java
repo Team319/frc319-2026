@@ -3,6 +3,7 @@ package frc319.robot.subsystems.launcher;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
+import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
@@ -37,6 +38,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
+
+  private boolean useTurretLimelight = false;
 
   private FlywheelsState flywheelsState = LauncherConstants.Flywheels.FlywheelsState.IDLE;
 
@@ -98,7 +101,13 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     switch (flywheelsState) {
 
       case SHOOT:
-        toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+          if(useTurretLimelight){
+            toGoal = LauncherVisionManager.getInstance().get2dDistanceToCurrentTarget();
+          }
+          else{
+            toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+          }
+
         Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
         this.setVelocity(()->RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))).schedule();
         
@@ -126,7 +135,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         break;
 
       case DUMB_SHOT:
-        this.setVelocity(() -> RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(1.7))).schedule();
+        toGoal = Meters.of(1.7);
+        this.setVelocity(() -> RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))).schedule();
         break;
 
       case TUNING:
@@ -213,10 +223,11 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   public boolean isAtTargetVelocity() {
     double currentRPM = super.getCurrentVelocity().in(RPM);
-    Distance toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+   // Distance toGoal ;//= this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
     double targetRPM = LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters));
     AngularVelocity targetVelocity = RPM.of(targetRPM) ;
     Logger.recordOutput(pb.makePath("targetFlywheelRPM"), targetVelocity);
+    Logger.recordOutput(pb.makePath("currentFlywheelRPM"), currentRPM);
     return  currentRPM >= targetRPM - 100.0;//EqualsUtil.epsilonEquals(currentRPM, targetRPM, 250); 
   }
 

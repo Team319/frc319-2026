@@ -23,6 +23,9 @@ import frc319.robot.FieldConstants;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 
 import java.util.function.Supplier;
+
+import javax.lang.model.util.ElementScanner14;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
@@ -32,6 +35,8 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   Angle aimAngle = Degrees.of(0.0);
   Distance toGoal = Meters.of(0.0);
+
+  boolean useTurretLimelight = false;
 
   public Hood(final TalonFXSubsystemConfig config, final TalonFXIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
@@ -90,7 +95,13 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       break;
 
       case TRACKING_TARGET:
-          toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+          if(useTurretLimelight){
+            toGoal = LauncherVisionManager.getInstance().get2dDistanceToCurrentTarget();
+          }
+          else{
+            toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+          }
+          
           Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
           aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
           Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);
@@ -151,6 +162,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
       case TRACKING_TARGET:      
       case TRACK_HUB_ON_MOVE:
+      case DUMB_SHOT:
        targetAngle = aimAngle;
 
         break;

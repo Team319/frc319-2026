@@ -33,9 +33,14 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kS = 0.01;
       config.fxConfig.Slot0.kV = 0.1175;
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+      config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 35.0;
+
       config.unitToRotorRatio = 1.0; // 1:1 ratio
       config.initialTransform =
           new Transform3d(new Translation3d(0, Inches.of(1.75).in(Meters), 0), new Rotation3d());
+      
     }
 
     public static int MODEL_INDEX = 2;
@@ -55,6 +60,10 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kD = 0.0;
       config.fxConfig.Slot0.kS = 0.01;
       config.fxConfig.Slot0.kV = 0.1175;
+
+      config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 35.0;
+
       config.unitToRotorRatio = 1.0; // 1:1 ratio
     }
   }

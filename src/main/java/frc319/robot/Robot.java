@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc319.lib.util.FieldUtils;
+import frc319.robot.RobotContainer.RobotStates;
 import frc319.robot.subsystems.serializer.SerializerConstants.SerializerStates;
 
 public class Robot extends LoggedRobot {
@@ -36,6 +37,8 @@ public class Robot extends LoggedRobot {
   public String dynamicAutoInput = "";
 
   double manualClimbSetpoint = 0.0;
+
+  String gameData;
 
   @Override
   public void robotInit() {
@@ -85,6 +88,7 @@ public class Robot extends LoggedRobot {
     switch(m_robotContainer.getCurrentRobotState()) {
 
       case SHOOTING:
+      case SHOOTING_DUMB:
       case SHOOTING_ON_MOVE:
       case SNOWBLOW:
         if(m_robotContainer.flywheels.isAtTargetVelocity() 
@@ -104,6 +108,26 @@ public class Robot extends LoggedRobot {
       break;
     }
 
+
+    gameData = DriverStation.getGameSpecificMessage();
+    if(gameData.length() > 0)
+    {
+      switch (gameData.charAt(0))
+      {
+        case 'B' :
+          //Blue case code
+          break;
+        case 'R' :
+          //Red case code
+          break;
+        default :
+          //This is corrupt data
+          break;
+      }
+    } else {
+      //Code for no data received yet
+    }
+
     //logStates();
 
     // if(!hasBeenEnabled){
@@ -114,6 +138,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledInit() {
     m_robotContainer.driverController.setRumble(RumbleType.kBothRumble, 0.0);
+    m_robotContainer.setRobotState(RobotStates.IDLE);
    }
   
 
@@ -179,10 +204,19 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    m_robotContainer.setRobotState(RobotStates.IDLE);
   }
 
   @Override
   public void teleopPeriodic() {
+
+    if (isHubActive()){
+      m_robotContainer.driverController.setRumble(RumbleType.kBothRumble, 0.25);
+    }
+    else
+    {
+      m_robotContainer.driverController.setRumble(RumbleType.kBothRumble, 0.0);
+    }
 
     // TODO add Trench / Autopilot rumble feedback
 
@@ -253,6 +287,66 @@ public class Robot extends LoggedRobot {
   Logger.recordOutput("FieldStates/isRightSideOfField", isRightSideOfField);
 
   }
+
+  public boolean isHubActive() {
+  Optional<Alliance> alliance = DriverStation.getAlliance();
+  // If we have no alliance, we cannot be enabled, therefore no hub.
+  if (alliance.isEmpty()) {
+    return false;
+  }
+  // Hub is always enabled in autonomous.
+  if (DriverStation.isAutonomousEnabled()) {
+    return true;
+  }
+  // At this point, if we're not teleop enabled, there is no hub.
+  if (!DriverStation.isTeleopEnabled()) {
+    return false;
+  }
+
+  // We're teleop enabled, compute.
+  double matchTime = DriverStation.getMatchTime();
+  String gameData = DriverStation.getGameSpecificMessage();
+  // If we have no game data, we cannot compute, assume hub is active, as its likely early in teleop.
+  if (gameData.isEmpty()) {
+    return true;
+  }
+  boolean redInactiveFirst = false;
+  switch (gameData.charAt(0)) {
+    case 'R' -> redInactiveFirst = true;
+    case 'B' -> redInactiveFirst = false;
+    default -> {
+      // If we have invalid game data, assume hub is active.
+      return true;
+    }
+  }
+
+  // Shift was is active for blue if red won auto, or red if blue won auto.
+  boolean shift1Active = switch (alliance.get()) {
+    case Red -> !redInactiveFirst;
+    case Blue -> redInactiveFirst;
+  };
+
+  if (matchTime > 130) {
+    // Transition shift, hub is active.
+    return true;
+  } else if (matchTime > 105) {
+    // Shift 1
+    return shift1Active;
+  } else if (matchTime > 80) {
+    // Shift 2
+    return !shift1Active;
+  } else if (matchTime > 55) {
+    // Shift 3
+    return shift1Active;
+  } else if (matchTime > 30) {
+    // Shift 4
+    return !shift1Active;
+  } else {
+    // End game, hub always active.
+    return true;
+  }
+}
+
 }
 
 

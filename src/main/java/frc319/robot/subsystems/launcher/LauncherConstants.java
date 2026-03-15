@@ -69,6 +69,9 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
 
+      config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 35.0;
+
       
       config.unitToRotorRatio =  1.0/(28.5*3.0); // (28.5*3.0) to 1
 
@@ -118,16 +121,24 @@ public final class LauncherConstants {
       leftConfig.fxConfig.Slot0.kS = 0.25; 
       leftConfig.fxConfig.Slot0.kV = 0.12; 
       leftConfig.fxConfig.Slot0.kA = 0.01; 
+
+      leftConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = false;
+      // leftConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 80.0;
+
       leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
-      leftConfig.fxConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+      leftConfig.fxConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;  // uuuuuh... i don't like this.. but it works... () look below @ left being set again
       //leftConfig.tunable = true;
 
       rightConfig.name = "Flywheels Right Follower";
       rightConfig.talonCANID = new CANDeviceId(22); 
       rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+
       leftConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+      rightConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      rightConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 35.0;
     }
 
     public static int MODEL_INDEX = 5;
@@ -141,7 +152,7 @@ public final class LauncherConstants {
     public static InterpolatingDoubleTreeMap velocityMap = new InterpolatingDoubleTreeMap();
 
     static {
-      // Distance (m) -> Ball Velocity (ft/s)
+      // Distance (m) -> Ball Velocity (ft/s)  // We dont use this one. This is for the Launching solution calculations
       velocityMap.put(1.0, 20.0);
       velocityMap.put(1.5, 20.0);
       velocityMap.put(3.0, 23.0);
@@ -149,17 +160,18 @@ public final class LauncherConstants {
       velocityMap.put(5.17, 28.0);
     }
 
-        public static InterpolatingDoubleTreeMap flywheelRPMMap = new InterpolatingDoubleTreeMap();
+      public static InterpolatingDoubleTreeMap flywheelRPMMap = new InterpolatingDoubleTreeMap();
+      private static double modifier = -50.0;
 
     static {
-      // Distance (m) -> Hood Pitch (Degrees) - Example from Redhawk
-      flywheelRPMMap.put(1.7, 2050.0);
-      flywheelRPMMap.put(2.5, 2250.0);
-      flywheelRPMMap.put(2.8, 2250.0);
-      flywheelRPMMap.put(3.25, 2350.0);
-      flywheelRPMMap.put(3.75, 2450.0);
-      flywheelRPMMap.put(4.5, 2600.0);
-      flywheelRPMMap.put(7.0, 2800.0);
+      // Distance (m) -> Hood Pitch (Degrees)
+      flywheelRPMMap.put(1.7, 2050.0+modifier);
+      flywheelRPMMap.put(2.5, 2250.0+modifier);
+      flywheelRPMMap.put(2.8, 2300.0+modifier);
+      flywheelRPMMap.put(3.25, 2350.0+modifier);
+      flywheelRPMMap.put(3.75, 2450.0+modifier);
+      flywheelRPMMap.put(4.5, 2635.0+50.0+modifier); 
+      flywheelRPMMap.put(7.0, 2800.0+modifier);
 
     }
 
@@ -182,6 +194,9 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kI = 5.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio = 1.0/102.0; //102 motor rotations would do 1 rotation of the herringbone if it were a big gear
+
+      config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 35.0;
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 

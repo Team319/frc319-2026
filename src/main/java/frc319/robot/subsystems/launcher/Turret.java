@@ -142,8 +142,10 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
         this.setAngle(() -> tuningAngle).schedule();
         break;
 
+      case DUMB_SHOT:
       case STOWED:
-        this.setAngle(() -> Degrees.of(0)).schedule();
+        tuningAngle = Degrees.of(0);
+        this.setAngle(() -> tuningAngle ).schedule();
         break;
       
       case IDLE:
@@ -260,6 +262,9 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       
       case TRACK_HUB_ON_MOVE:
        targetAngle = getLauncOnTheFlyAngle();
+
+      case DUMB_SHOT:
+      targetAngle = Degrees.of(0);
 
         break;
 

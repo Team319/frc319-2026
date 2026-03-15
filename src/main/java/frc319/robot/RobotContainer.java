@@ -436,7 +436,7 @@ public class RobotContainer {
         flywheels.setState(FlywheelsState.DUMB_SHOT);
         intakeExtension.setState(IntakeStates.JOSTLE);
 
-        turret.setState(LauncherStates.STOWED);
+        turret.setState(LauncherStates.DUMB_SHOT);
         hood.setState(LauncherStates.DUMB_SHOT);
 
         break;
