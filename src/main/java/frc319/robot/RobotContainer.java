@@ -302,13 +302,17 @@ public class RobotContainer {
         // driverController.rightTrigger().whileTrue( new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)) )
         //  .onFalse( new InstantCommand(()->this.setRobotState(RobotStates.STOWED)) );
 
+        driverController.b()
+          .onTrue(new InstantCommand(()->this.intakeRollers.setState(IntakeConstants.IntakeStates.EJECT)))
+          .onFalse(new InstantCommand(()->this.intakeRollers.setState(IntakeConstants.IntakeStates.IDLE)));
+
         driverController.leftTrigger()
           .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.COLLECTING)))
           .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_COLLECTING)));
 
         driverController.leftBumper()
-          .onTrue(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.RETRACTED)))
-          .onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.EXTENDED)));
+          .onTrue(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.FLUSH)));
+          //.onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.EXTENDED)));
 
         driverController.rightTrigger()
           .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)))

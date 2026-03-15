@@ -50,7 +50,7 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
 
     if (isReal()) {
-        Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
+        //Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
         //new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging  
     } else if(isSimulation()){
@@ -130,9 +130,9 @@ public class Robot extends LoggedRobot {
 
     //logStates();
 
-    // if(!hasBeenEnabled){
-    //   SmartDashboard.putString("Dynamic Reading", m_robotContainer.dynamicAutoInput);
-    // }
+    if(!hasBeenEnabled){
+      SmartDashboard.putString("Dynamic Reading", m_robotContainer.dynamicAutoInput);
+    }
   }
 
   @Override
@@ -168,6 +168,9 @@ public class Robot extends LoggedRobot {
      if(!allianceColor.isPresent()){
        System.out.println("Alliance color is not set yet.");
      }
+
+     SmartDashboard.putString("DynamicAutoInput", m_robotContainer.dynamicAutoInput);
+
    }
 
   

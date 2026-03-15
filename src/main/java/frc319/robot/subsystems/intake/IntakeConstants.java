@@ -16,6 +16,7 @@ public final class IntakeConstants {
   public enum IntakeStates{
     IDLE,
     RETRACTED,
+    FLUSH,
     EXTENDED,
     COLLECT,
     EJECT,

@@ -85,6 +85,10 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
         CommandScheduler.getInstance().schedule(this.extendCommand());
         break;
 
+      case FLUSH:
+        CommandScheduler.getInstance().schedule(this.setDistanceCommand(() -> IntakeConstants.Extension.flushPosition));
+        break;
+
       case RETRACTED:
         CommandScheduler.getInstance().schedule(this.retractCommand());
         break;
