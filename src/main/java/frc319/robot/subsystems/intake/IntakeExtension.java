@@ -13,6 +13,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.MotorSubsystem;
@@ -81,17 +82,17 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
 
     switch(intakeState){
       case EXTENDED:
-        this.extendCommand().schedule();
+        CommandScheduler.getInstance().schedule(this.extendCommand());
         break;
 
       case RETRACTED:
-        this.retractCommand().schedule();
+        CommandScheduler.getInstance().schedule(this.retractCommand());
         break;
 
       case TUNING:
         // Implement tuning state behavior here
         intakePosition = Inches.of(SmartDashboard.getNumber("Tuning_Mode/Intake_Tuning_Position_Inches", 0.0));
-        this.setDistanceCommand(() -> intakePosition).schedule();
+        CommandScheduler.getInstance().schedule(this.setDistanceCommand(() -> intakePosition));
         break;
 
       case JOSTLE:
@@ -99,11 +100,11 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
       if(this.isMotionMagicAtTarget() )
       {
         if(getCurrentPositionAsDistance().gt(IntakeConstants.Extension.extendedPosition.minus(Inches.of(2.0)))){
-          this.setDistanceCommand(() -> IntakeConstants.Extension.flushPosition).schedule();
+          CommandScheduler.getInstance().schedule(this.setDistanceCommand(() -> IntakeConstants.Extension.flushPosition));
         }
         else
         {
-          this.setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition).schedule();
+          CommandScheduler.getInstance().schedule(this.setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition));
         }
 
 

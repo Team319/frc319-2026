@@ -21,6 +21,7 @@ public class AdvantageScopePathBuilder {
    * @param pathSegments The path segments to append to the subsystem name.
    * @return A concatenated path string.
    */
+  @SuppressWarnings("unchecked")
   public String makePath(String... pathSegments) {
     if (pathSegments.length == 0) {
       return basePath;

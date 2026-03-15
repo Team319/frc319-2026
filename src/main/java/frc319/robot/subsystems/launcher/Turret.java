@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc319.lib.geometry.GeometryUtil;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.TalonFXIO;
@@ -125,13 +126,13 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     switch (laucherState) {
 
       case TRACKING_TARGET:
-        this.setAngle(() -> getCurrentTargetAngle()).schedule();
+        CommandScheduler.getInstance().schedule(this.setAngle(() -> getCurrentTargetAngle()));
         currentTargetPose = LaunchingSolutionManager.getInstance().getTargetPose();
         Logger.recordOutput(super.pb.makePath("currentTargetPose"), currentTargetPose);
         break;
       
       case TRACK_HUB_ON_MOVE:
-        this.setAngle(() -> getLauncOnTheFlyAngle()).schedule();
+        CommandScheduler.getInstance().schedule(this.setAngle(() -> getLauncOnTheFlyAngle()));
         currentTargetPose = LaunchingSolutionManager.getInstance().getTargetOnMovePose();
         Logger.recordOutput(super.pb.makePath("currentTargetPose"), currentTargetPose);
         break;
@@ -139,13 +140,13 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       case TUNING:
         tuningAngle = Degrees.of(SmartDashboard.getNumber("Tuning_Mode/Turret_Tuning_Position_Degrees", 0.0));
         // Implement tuning state behavior here
-        this.setAngle(() -> tuningAngle).schedule();
+        CommandScheduler.getInstance().schedule(this.setAngle(() -> tuningAngle));
         break;
 
       case DUMB_SHOT:
       case STOWED:
         tuningAngle = Degrees.of(0);
-        this.setAngle(() -> tuningAngle ).schedule();
+        CommandScheduler.getInstance().schedule(this.setAngle(() -> tuningAngle));
         break;
       
       case IDLE:

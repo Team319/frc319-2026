@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.MotorIO;
 import frc319.lib.subsystem.MotorFollowerSubsystem;
@@ -109,7 +110,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
           }
 
         Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
-        this.setVelocity(()->RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))).schedule();
+        CommandScheduler.getInstance().schedule(this.setVelocity(()->RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))));
         
 
         // TODO :  need matching flywheel ANGULAR Velocity
@@ -121,7 +122,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
       case SHOOT_ON_MOVE:
         toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetOnMovePose());
         Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
-        this.setVelocity(()->RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))).schedule();
+        CommandScheduler.getInstance().schedule(this.setVelocity(()->RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))));
         
 
         // TODO :  need matching flywheel ANGULAR Velocity
@@ -131,23 +132,23 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         break;
 
       case PRESPIN:
-        this.setVelocity(()->RPM.of(1800.0)).schedule();
+        CommandScheduler.getInstance().schedule(this.setVelocity(()->RPM.of(1800.0)));
         break;
 
       case DUMB_SHOT:
         toGoal = Meters.of(1.7);
-        this.setVelocity(() -> RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))).schedule();
+        CommandScheduler.getInstance().schedule(this.setVelocity(() -> RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))));
         break;
 
       case TUNING:
         // Use the value from Elastic slider
         //System.out.println("Test Flywheel RPM: " + testFlywheelRPM.getAsDouble()); // Debug print
-        this.setVelocity(() -> RPM.of(SmartDashboard.getNumber("Tuning_Mode/Flywheel_Tuning_RPM", 0.0))).schedule();
+        CommandScheduler.getInstance().schedule(this.setVelocity(() -> RPM.of(SmartDashboard.getNumber("Tuning_Mode/Flywheel_Tuning_RPM", 0.0))));
         break;
 
       case IDLE:
       default:
-        this.setVelocity(() -> RPM.of(0)).schedule();
+        CommandScheduler.getInstance().schedule(this.setVelocity(() -> RPM.of(0)));
         break;
     }
 

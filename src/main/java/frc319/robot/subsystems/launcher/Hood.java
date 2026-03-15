@@ -13,6 +13,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.MotorSubsystem;
@@ -66,7 +67,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition.divide(config.unitToRotorRatio);
+    return subsystemPosition.div(config.unitToRotorRatio);
   }
 
   protected Angle convertMotorPositionToSubsystemPosition(Angle motorPosition) {
@@ -86,12 +87,12 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       case STOWED:
           aimAngle = Degrees.of(0.0);
           Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);
-          this.retract().schedule();
+          CommandScheduler.getInstance().schedule(this.retract());
         break;
 
       case DUMB_SHOT:
         aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(1.7));
-        this.setAngle(()->aimAngle).schedule();
+        CommandScheduler.getInstance().schedule(this.setAngle(()->aimAngle));
       break;
 
       case TRACKING_TARGET:
@@ -105,7 +106,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
           Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
           aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
           Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);
-          this.setAngle(()->aimAngle).schedule();
+          CommandScheduler.getInstance().schedule(this.setAngle(()->aimAngle));
           break;
       
       case TRACK_HUB_ON_MOVE:
@@ -114,12 +115,12 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
           Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
           aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
           Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);
-          this.setAngle(()->aimAngle).schedule();
+          CommandScheduler.getInstance().schedule(this.setAngle(()->aimAngle));
         break;
 
       case TUNING:
         aimAngle = Degrees.of(SmartDashboard.getNumber("Tuning_Mode/Hood_Tuning_Position_Degrees", 0.0));
-        this.setAngle(()->aimAngle).schedule();
+        CommandScheduler.getInstance().schedule(this.setAngle(()->aimAngle));
         break;
 
       case IDLE:

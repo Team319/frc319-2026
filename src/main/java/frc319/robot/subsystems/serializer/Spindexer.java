@@ -17,6 +17,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc319.lib.io.ArticulatedComponent;
 import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.MotorSubsystem;
@@ -56,14 +57,14 @@ public class Spindexer extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       case SHOOT:
           //spindexerVelocity = RPM.of(SmartDashboard.getNumber("Tuning_Mode/Spindexer_Tuning_RPM", 0.0));
           spindexerVelocity = RPM.of(6000.0);
-          this.setVelocity(()-> spindexerVelocity ).schedule();
+          CommandScheduler.getInstance().schedule(this.setVelocity(()-> spindexerVelocity));
         break;
 
       
       case IDLE:
       case JOSTLE:
       default:
-        this.setVelocity(()-> RPM.of(0.0)).schedule();
+        CommandScheduler.getInstance().schedule(this.setVelocity(()-> RPM.of(0.0)));
         break;
     }
   }

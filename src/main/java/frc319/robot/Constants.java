@@ -142,21 +142,4 @@ public class Constants {
   
   } // End of LimelightConstants
 
-// =========================================================================
-//                          LAUNCHER CONSTANTS
-// =========================================================================
-
-  public static class LauncherConstants{
-
-    public static final double TURRET_MIN_ANGLE_RADIANS = Units.degreesToRadians(-180);
-    public static final double TURRET_MAX_ANGLE_RADIANS = Units.degreesToRadians(180);
-
-    public static final double HOOD_MIN_ANGLE_RADIANS = Units.degreesToRadians(0);
-    public static final double HOOD_MAX_ANGLE_RADIANS = Units.degreesToRadians(60);
-
-    public static final double FLYWHEEL_MAX_VELOCITY_RPM = 5000.0;
-    public static final double KICKER_MAX_VELOCITY_RPM = 5000.0;
-  
-  } // End of LauncherConstants
-
 } // End of Constants

@@ -79,7 +79,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return The position to send to the motor controller (same as input)
    */
   protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition.divide(config.unitToRotorRatio);
+    return subsystemPosition.div(config.unitToRotorRatio);
   }
 
   /**

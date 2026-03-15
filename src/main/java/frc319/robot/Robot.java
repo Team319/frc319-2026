@@ -56,7 +56,7 @@ public class Robot extends LoggedRobot {
     } else if(isSimulation()){
         Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
     }
-    else{
+    else{ // Replay
         setUseTiming(false); // Run as fast as possible
         String logPath = LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
         Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
