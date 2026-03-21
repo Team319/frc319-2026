@@ -37,7 +37,8 @@ public class LauncherVisionManager extends SubsystemBase {
         // Update the Limelight's heading based on the turret's current pose
         updateLimelightHeading();
 
-        Logger.recordOutput("LaunchingVisionManager/2dDistance", get2dDistance(LaunchingSolutionManager.getInstance().getTargetPose().getTranslation()));
+        Logger.recordOutput("LaunchingVisionManager/2dDistanceToCurrentTarget", get2dDistanceToCurrentTarget());
+        Logger.recordOutput("LaunchingVisionManager/GlobalPoseFromVision", getGlobalPoseFromVision());
 
     }
 

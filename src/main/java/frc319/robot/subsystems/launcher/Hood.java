@@ -20,6 +20,7 @@ import frc319.lib.subsystem.MotorSubsystem;
 import frc319.lib.subsystem.TalonFXSubsystemConfig;
 import frc319.lib.util.EqualsUtil;
 import frc319.lib.io.MotorInputsAutoLogged;
+import frc319.robot.Constants;
 import frc319.robot.FieldConstants;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 
@@ -96,7 +97,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       break;
 
       case TRACKING_TARGET:
-          if(useTurretLimelight){
+          if(Constants.useTurretLimelight){
             toGoal = LauncherVisionManager.getInstance().get2dDistanceToCurrentTarget();
           }
           else{

@@ -43,6 +43,7 @@ import frc319.robot.subsystems.serializer.SerializerConstants;
 import frc319.robot.subsystems.serializer.Spindexer;
 import frc319.robot.subsystems.serializer.SerializerConstants.SerializerStates;
 import frc319.robot.subsystems.launcher.LauncherConstants;
+import frc319.robot.subsystems.launcher.LauncherVisionManager;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager;
 
 import static edu.wpi.first.units.Units.Degree;
@@ -66,7 +67,7 @@ public class RobotContainer {
 
   private final KinematicsManager kinematicsManager = new KinematicsManager();
   private final LaunchingSolutionManager launchingSolutionManager = new LaunchingSolutionManager();
-
+  private final LauncherVisionManager launcherVisionManager = new LauncherVisionManager();
   // Subsystems
   public final Drive drive;  
   public final Turret turret;
@@ -462,7 +463,8 @@ public class RobotContainer {
           // Keep the hood safe
           hood.setState(LauncherStates.STOWED);
 
-          intakeExtension.setState(IntakeStates.EXTENDED);
+          intakeExtension.setState(IntakeStates.RETRACTED);
+          intakeRollers.setState(IntakeStates.IDLE);
           break;
 
       case SNOWBLOW:

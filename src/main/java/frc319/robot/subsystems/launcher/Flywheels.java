@@ -27,6 +27,7 @@ import frc319.lib.subsystem.TalonFXSubsystemConfig;
 import frc319.lib.util.EqualsUtil;
 import frc319.lib.util.RobotTime;
 import frc319.lib.io.MotorInputsAutoLogged;
+import frc319.robot.Constants;
 import frc319.robot.FieldConstants;
 import frc319.robot.subsystems.launcher.LauncherConstants.Flywheels.FlywheelsState;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
@@ -40,7 +41,6 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
 
-  private boolean useTurretLimelight = false;
 
   private FlywheelsState flywheelsState = LauncherConstants.Flywheels.FlywheelsState.IDLE;
 
@@ -102,7 +102,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     switch (flywheelsState) {
 
       case SHOOT:
-          if(useTurretLimelight){
+          if(Constants.useTurretLimelight){
             toGoal = LauncherVisionManager.getInstance().get2dDistanceToCurrentTarget();
           }
           else{

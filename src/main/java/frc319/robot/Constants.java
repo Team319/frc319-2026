@@ -28,6 +28,9 @@ public class Constants {
 
   public static boolean disableHAL = false;
 
+  public static boolean useTurretLimelight = true;
+
+
   public static void disableHAL() {
     disableHAL = true;
   }

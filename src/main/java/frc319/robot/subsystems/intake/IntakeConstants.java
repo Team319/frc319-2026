@@ -53,8 +53,8 @@ public final class IntakeConstants {
     }
 
     public static Distance extendedPosition = Inches.of(34.0); // fake
-    public static Distance flushPosition = Inches.of(22); // fake
-    public static Distance retractedPosition = Inches.of(0);
+    public static Distance flushPosition = Inches.of(2.0);//Inches.of(22); // fake
+    public static Distance retractedPosition = Inches.of(2.0);
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain
 

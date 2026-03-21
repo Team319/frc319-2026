@@ -328,8 +328,17 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           }
           if(!doRejectVisionUpdate)
           {
-            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
-            poseEstimator.addVisionMeasurement(
+            // Calculate dynamic standard deviations based on distance
+            double xyStdDev = 0.5 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
+            double thetaStdDev = 999999; // Still keep rotation very uncertain
+
+            // Optionally, also scale based on number of tags (more tags = more confident)
+            if (mt2.tagCount >= 2) {
+                xyStdDev *= 0.5; // Cut uncertainty in half with 2+ tags
+            }
+
+            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev));
+                        poseEstimator.addVisionMeasurement(
                 mt2.pose,
                 mt2.timestampSeconds);
           }
@@ -378,7 +387,16 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           }
           if(!doRejectVisionUpdate)
           {
-            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
+            // Calculate dynamic standard deviations based on distance
+            double xyStdDev = 0.5 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
+            double thetaStdDev = 999999; // Still keep rotation very uncertain
+
+            // Optionally, also scale based on number of tags (more tags = more confident)
+            if (mt2.tagCount >= 2) {
+                xyStdDev *= 0.5; // Cut uncertainty in half with 2+ tags
+            }
+
+            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev));
             poseEstimator.addVisionMeasurement(
                 mt2.pose,
                 mt2.timestampSeconds);
@@ -416,7 +434,17 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           }
           if(!doRejectVisionUpdate)
           {
-            // poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
+            // // Calculate dynamic standard deviations based on distance
+            // double xyStdDev = 0.5 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
+            // double thetaStdDev = 999999; // Still keep rotation very uncertain
+
+            // // Optionally, also scale based on number of tags (more tags = more confident)
+            // if (mt2.tagCount >= 2) {
+            //     xyStdDev *= 0.5; // Cut uncertainty in half with 2+ tags
+            // }
+
+            // poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev));
+            
             // poseEstimator.addVisionMeasurement(
             //     mt2.pose,
             //     mt2.timestampSeconds);
