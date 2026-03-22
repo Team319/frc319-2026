@@ -17,7 +17,7 @@ import frc319.lib.util.Alert.*;
 public class Constants {
 
   // Enable this for Tunable Values
-  public static final boolean tuningMode = true;
+  public static final boolean tuningMode = false;
   public static final double loopPeriodSecs = 0.02;
 
   private static RobotType robotType = RobotType.COMPBOT;

@@ -427,7 +427,7 @@ public class RobotContainer {
 
       case SHOOTING:
         flywheels.setState(FlywheelsState.SHOOT);
-        intakeExtension.setState(IntakeStates.JOSTLE);
+        //intakeExtension.setState(IntakeStates.JOSTLE);
         intakeRollers.setState(IntakeStates.COLLECT); 
 
         // This is handled in Robot.java

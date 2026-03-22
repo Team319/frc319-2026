@@ -44,6 +44,8 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   private Pose3d currentTargetPose = new Pose3d(); // TODO : Blue origin for now. but use center field or something... 
   private Angle tuningAngle = Degrees.of(0.0);
 
+  private Angle targetAngle = Degrees.of(0.0);
+
   public Turret(final TalonFXSubsystemConfig config, final TalonFXIO turretMotorIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO);
     //setMotionMagicConfigImpl(LauncherConstants.Turret.config.fxConfig.MotionMagic);
@@ -125,10 +127,21 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     
     switch (laucherState) {
 
+      // case TRACKING_TARGET:
+      //   CommandScheduler.getInstance().schedule(this.setAngle(() -> getCurrentTargetAngleWithVisionCorrection()));
+      //   currentTargetPose = LaunchingSolutionManager.getInstance().getTargetPose();
+      //   Logger.recordOutput(super.pb.makePath("currentTargetPose"), currentTargetPose);
+      //   break;
+
       case TRACKING_TARGET:
-        CommandScheduler.getInstance().schedule(this.setAngle(() -> getCurrentTargetAngleWithVisionCorrection()));
-        currentTargetPose = LaunchingSolutionManager.getInstance().getTargetPose();
-        Logger.recordOutput(super.pb.makePath("currentTargetPose"), currentTargetPose);
+        if (LauncherVisionManager.getInstance().isTargetVisible()) { // add leniency if the last vision measurement was recent fpga timestamp
+            CommandScheduler.getInstance().schedule(this.setAngle(() -> getTurretAngleFromVision()));
+            targetAngle = getTurretAngleFromVision();
+        } else {
+            // Fall back to drive base pose until LL acquires
+            CommandScheduler.getInstance().schedule(this.setAngle(() -> getCurrentTargetAngle()));
+            targetAngle = getCurrentTargetAngle();
+        }
         break;
       
       case TRACK_HUB_ON_MOVE:
@@ -228,40 +241,62 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     return Radians.of(normalizedRadians);
   }
 
-  public Angle getCurrentTargetAngleWithVisionCorrection() {
-    Translation3d diff = this.getTranslationTo(LaunchingSolutionManager.getInstance().getTargetPose().getTranslation());
-    //  Calculate the Global Yaw needed to face the target
-    // Math.atan2(y, x) handles all quadrants correctly
-    double globalTargetRadians = Math.atan2(diff.getY(), diff.getX());
+  // In Turret — replaces getCurrentTargetAngleWithVisionCorrection()
+public Angle getTurretAngleFromVision() {
+    Pose3d camPose = LauncherVisionManager.getInstance().getTurretCameraPoseInField();
+    Translation3d camPos = camPose.getTranslation();
+    double cameraYawField = camPose.getRotation().getZ();
 
-    //  Get the Chassis Heading (Global)
-    Rotation3d chassisRotation = KinematicsManager.getInstance().getGlobalPose(0).getRotation();
-    double chassisHeadingRadians = chassisRotation.getZ();
-    //  Calculate Relative Angle (Target - Chassis)
-    double relativeRadians = globalTargetRadians - chassisHeadingRadians;
+    Translation3d target = LaunchingSolutionManager.getInstance().getTargetPose().getTranslation();
+    double fieldAngleToTarget = Math.atan2(
+        target.getY() - camPos.getY(),
+        target.getX() - camPos.getX()
+    );
 
-    // Get vision measurement and apply correction if available
-    if (LauncherVisionManager.getInstance().isTargetVisible()) {
-      double turretHeadingRadians = LauncherVisionManager.getInstance().getGlobalPoseFromVision().getRotation().getZ();
-      globalTargetRadians = Math.atan2(diff.getY(), diff.getX());//-= visionYawCorrectionRadians;
-      
-      relativeRadians = globalTargetRadians - turretHeadingRadians;
-      
-      Logger.recordOutput(pb.makePath("globalTargetRadians"), globalTargetRadians);
-      Logger.recordOutput(pb.makePath("turretHeadingRadians"), turretHeadingRadians);
+    // Delta in camera frame, applied to current encoder position
+    double delta = fieldAngleToTarget - cameraYawField;
+    double currentTurretAngle = getCurrentPosition().times(config.unitToRotorRatio).in(Radians);
+    double newSetpoint = currentTurretAngle + delta;
+
+    double wrapAroundPoint = (7*Math.PI / 4); // Wrap around at 90 degrees instead of 180
+
+    Logger.recordOutput(pb.makePath("vision/fieldAngleToTarget"), Math.toDegrees(fieldAngleToTarget));
+    Logger.recordOutput(pb.makePath("vision/cameraYawField"), Math.toDegrees(cameraYawField));
+    Logger.recordOutput(pb.makePath("vision/delta"), Math.toDegrees(delta));
+    Logger.recordOutput(pb.makePath("vision/newSetpoint"), Math.toDegrees(newSetpoint));
+
+    return Radians.of(MathUtil.inputModulus(newSetpoint, -2*Math.PI + wrapAroundPoint, wrapAroundPoint));
+}
+
+public Angle getCurrentTargetAngleWithVisionCorrection() {
+    // Fall back to pose-based if vision not ready
+    if (!LauncherVisionManager.getInstance().isTurretPoseValid()) {
+        return getCurrentTargetAngle();
     }
 
+    Pose3d camPose = LauncherVisionManager.getInstance().getTurretCameraPoseInField();
+    Translation3d camPos = camPose.getTranslation();
+    double cameraFieldYaw = camPose.getRotation().getZ();
 
+    Translation3d target = LaunchingSolutionManager.getInstance().getTargetPose().getTranslation();
+    double fieldAngleToTarget = Math.atan2(
+        target.getY() - camPos.getY(),
+        target.getX() - camPos.getX()
+    );
 
-    // I want the wrap around to be at a different point to I will clamp it 
-    double wrapAroundPoint = (7*Math.PI / 4); // Wrap around at 90 degrees instead of 180
-    
-    double normalizedRadians = MathUtil.inputModulus(relativeRadians, -2*Math.PI + wrapAroundPoint, wrapAroundPoint);
+    double currentTurretAngle = getCurrentPosition().times(config.unitToRotorRatio).in(Radians);
+    double newSetpoint = currentTurretAngle + (fieldAngleToTarget - cameraFieldYaw);
 
+    double wrapAroundPoint = (7 * Math.PI / 4);
+    double normalizedSetpoint = MathUtil.inputModulus(newSetpoint, -2 * Math.PI + wrapAroundPoint, wrapAroundPoint);
 
+    Logger.recordOutput(pb.makePath("vision/fieldAngleToTarget"), Math.toDegrees(fieldAngleToTarget));
+    Logger.recordOutput(pb.makePath("vision/cameraFieldYaw"), Math.toDegrees(cameraFieldYaw));
+    Logger.recordOutput(pb.makePath("vision/delta"), Math.toDegrees(fieldAngleToTarget - cameraFieldYaw));
+    Logger.recordOutput(pb.makePath("vision/normalizedSetpoint"), Math.toDegrees(normalizedSetpoint));
 
-    return Radians.of(normalizedRadians);
-  }
+    return Radians.of(normalizedSetpoint);
+}
 
   public Angle getLauncOnTheFlyAngle() {
     // 1. Get the latest solution
@@ -284,7 +319,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   public boolean isAtTargetPosition() {
     Angle currentAngle = super.getCurrentPosition().times(config.unitToRotorRatio).plus(manualNudgeAngle);
-    Angle targetAngle = Degrees.of(0.0);
+    //Angle targetAngle = Degrees.of(0.0);
 
     Logger.recordOutput(pb.makePath("iat_currentAngle"), currentAngle.in(Degrees));
     Logger.recordOutput(pb.makePath("iat_targetAngle"), targetAngle.in(Degrees));
@@ -292,7 +327,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     switch (laucherState) {
 
       case TRACKING_TARGET:
-        targetAngle = getCurrentTargetAngle();
+        //targetAngle = getCurrentTargetAngle();
 
         break;
       

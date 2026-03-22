@@ -1,12 +1,16 @@
 package frc319.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc319.lib.subsystem.KinematicsManager;
@@ -45,6 +49,18 @@ public class LauncherVisionManager extends SubsystemBase {
     public boolean isTargetVisible(){
         return Limelight.isValidTargetSeen(LimelightConstants.Device.TURRET);
     }
+
+    public boolean isTurretPoseValid() {
+    if (!isTargetVisible()) return false;
+    
+    // Require at least 2 tags for unambiguous 6DOF solve
+    boolean tagVisable = NetworkTableInstance.getDefault()
+        .getTable("limelight-turret")
+        .getEntry("tv")  
+        .getBoolean(false);
+    
+    return tagVisable ;
+}
 
     public Distance get2dDistanceToCurrentTarget(){
         return get2dDistance(LaunchingSolutionManager.getInstance().getTargetPose().getTranslation());
@@ -88,6 +104,23 @@ public class LauncherVisionManager extends SubsystemBase {
             return new Pose3d();//KinematicsManager.getInstance().getGlobalPoseFor(Robot.m_robotContainer.turret);
         }
     }
+
+    // In LauncherVisionManager
+public Pose3d getTurretCameraPoseInField() {
+    double[] buf = NetworkTableInstance.getDefault()
+        .getTable("limelight-turret")
+        .getEntry("botpose_wpiblue")
+        .getDoubleArray(new double[6]);
+    return new Pose3d(
+        new Translation3d(buf[0], buf[1], buf[2]),
+        new Rotation3d(
+            Units.degreesToRadians(buf[3]),
+            Units.degreesToRadians(buf[4]),
+            Units.degreesToRadians(buf[5])
+        )
+    );
+}
+
 
     private void updateLimelightHeading(){
 
