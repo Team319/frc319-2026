@@ -319,15 +319,19 @@ public class RobotContainer {
           .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING_DUMB)))
           .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_SHOOTING)));
 
-        driverController.povRight()
-          .onTrue( new InstantCommand(()->turret.updateManualNudgeAngle(Degrees.of(10))));
+        // driverController.povRight()
+        //   .onTrue( new InstantCommand(()->turret.updateManualNudgeAngle(Degrees.of(10))));
 
-        driverController.povLeft()
-          .onTrue( new InstantCommand(()->turret.updateManualNudgeAngle(Degrees.of(-10))));
+        // driverController.povLeft()
+        //   .onTrue( new InstantCommand(()->turret.updateManualNudgeAngle(Degrees.of(-10))));
 
-                driverController.back()
+        driverController.back()
           .onTrue( new InstantCommand(()->this.setRobotState(RobotStates.TUNING_SHOOT)))
           .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.TUNING_STOP)));
+
+        driverController.b()
+          .onTrue( new InstantCommand(()->intakeRollers.setState(IntakeStates.EJECT)))
+          .onFalse(new InstantCommand(()->intakeRollers.setState(IntakeStates.IDLE)));
 
         
         // if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos

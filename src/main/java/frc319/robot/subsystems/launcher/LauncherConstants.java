@@ -135,7 +135,7 @@ public final class LauncherConstants {
       rightConfig.talonCANID = new CANDeviceId(22); 
       rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
 
-      leftConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+      leftConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // uuuuuh... i don't like this.. but it works... 
 
       rightConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
       rightConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 35.0;

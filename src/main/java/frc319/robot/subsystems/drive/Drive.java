@@ -176,8 +176,6 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
       // ================= Gather Apriltag info =================
 
-
-
       switch (Constants.getFieldType()) {
         case ANDYMARK:
           // Load the field layout

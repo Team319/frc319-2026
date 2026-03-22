@@ -126,7 +126,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     switch (laucherState) {
 
       case TRACKING_TARGET:
-        CommandScheduler.getInstance().schedule(this.setAngle(() -> getCurrentTargetAngle()));
+        CommandScheduler.getInstance().schedule(this.setAngle(() -> getCurrentTargetAngleWithVisionCorrection()));
         currentTargetPose = LaunchingSolutionManager.getInstance().getTargetPose();
         Logger.recordOutput(super.pb.makePath("currentTargetPose"), currentTargetPose);
         break;
@@ -217,6 +217,41 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     // 5. Normalize to range (-PI to PI) so the turret takes the shortest path
     // e.g., if result is 350 degrees, this turns it into -10 degrees
     //double normalizedRadians = MathUtil.angleModulus(relativeRadians);
+
+    // I want the wrap around to be at a different point to I will clamp it 
+    double wrapAroundPoint = (7*Math.PI / 4); // Wrap around at 90 degrees instead of 180
+    
+    double normalizedRadians = MathUtil.inputModulus(relativeRadians, -2*Math.PI + wrapAroundPoint, wrapAroundPoint);
+
+
+
+    return Radians.of(normalizedRadians);
+  }
+
+  public Angle getCurrentTargetAngleWithVisionCorrection() {
+    Translation3d diff = this.getTranslationTo(LaunchingSolutionManager.getInstance().getTargetPose().getTranslation());
+    //  Calculate the Global Yaw needed to face the target
+    // Math.atan2(y, x) handles all quadrants correctly
+    double globalTargetRadians = Math.atan2(diff.getY(), diff.getX());
+
+    //  Get the Chassis Heading (Global)
+    Rotation3d chassisRotation = KinematicsManager.getInstance().getGlobalPose(0).getRotation();
+    double chassisHeadingRadians = chassisRotation.getZ();
+    //  Calculate Relative Angle (Target - Chassis)
+    double relativeRadians = globalTargetRadians - chassisHeadingRadians;
+
+    // Get vision measurement and apply correction if available
+    if (LauncherVisionManager.getInstance().isTargetVisible()) {
+      double turretHeadingRadians = LauncherVisionManager.getInstance().getGlobalPoseFromVision().getRotation().getZ();
+      globalTargetRadians = Math.atan2(diff.getY(), diff.getX());//-= visionYawCorrectionRadians;
+      
+      relativeRadians = globalTargetRadians - turretHeadingRadians;
+      
+      Logger.recordOutput(pb.makePath("globalTargetRadians"), globalTargetRadians);
+      Logger.recordOutput(pb.makePath("turretHeadingRadians"), turretHeadingRadians);
+    }
+
+
 
     // I want the wrap around to be at a different point to I will clamp it 
     double wrapAroundPoint = (7*Math.PI / 4); // Wrap around at 90 degrees instead of 180

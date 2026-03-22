@@ -1,0 +1,25 @@
+{
+  "NetworkTables": {
+    "transitory": {
+      "limelight-turret": {
+        "double[]##v_/limelight-turret/robot_orientation_set": {
+          "open": true
+        },
+        "open": true
+      }
+    },
+    "types": {
+      "/AdvantageKit/RealOutputs/PathPlanner": "Alerts",
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Auto Choices": "String Chooser",
+      "/SmartDashboard/PathPlanner": "Alerts"
+    }
+  },
+  "NetworkTables Info": {
+    "visible": true
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT4)",
+    "serverTeam": "319"
+  }
+}

@@ -85,7 +85,7 @@ public class LauncherVisionManager extends SubsystemBase {
         }
         else
         {
-            return KinematicsManager.getInstance().getGlobalPoseFor(Robot.m_robotContainer.turret);
+            return new Pose3d();//KinematicsManager.getInstance().getGlobalPoseFor(Robot.m_robotContainer.turret);
         }
     }
 
