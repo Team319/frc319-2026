@@ -212,14 +212,75 @@ public class DriveCommands {
     }
   }
 
+    public static Command followPathCommand(String pathName, boolean mirrorPath ) {
+    try{
+        PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+        if(mirrorPath ){
+          path = path.mirrorPath();
+        }
+      return AutoBuilder.followPath(path);
+
+    } catch (Exception e) {
+        DriverStation.reportError("Something went wrong while following a path (1): " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
+  }
+
   public static Command pathFindToPose(PathConstraints constraints, Pose2d targetPose) {
     return AutoBuilder.pathfindToPose(targetPose, constraints);
+  }
+
+    public static Command pathfindThenFollowPath(String pathName ) {
+    try{
+      
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+    return AutoBuilder.pathfindThenFollowPath(path, Constants.DriveConstants.autoPathingConstraints);
+
+    } catch (Exception e) {
+        DriverStation.reportError("Something went wrong while following a path (2): " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
+
+  }
+
+      public static Command pathfindThenFollowPath(String pathName, boolean mirrorPath ) {
+    try{
+      
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+      if(mirrorPath ){
+        path = path.mirrorPath();
+      }
+
+    return AutoBuilder.pathfindThenFollowPath(path, Constants.DriveConstants.autoPathingConstraints);
+
+    } catch (Exception e) {
+        DriverStation.reportError("Something went wrong while following a path (2): " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
+
   }
 
   public static Command pathfindThenFollowPath(PathConstraints constraints,String pathName ) {
     try{
       PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
 
+    return AutoBuilder.pathfindThenFollowPath(path, constraints);
+
+    } catch (Exception e) {
+        DriverStation.reportError("Something went wrong while following a path (2): " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
+
+  }
+
+    public static Command pathfindThenFollowPath(PathConstraints constraints,String pathName, boolean mirrorPath ) {
+    try{
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+      if(mirrorPath ){
+        path = path.mirrorPath();
+      }
+    
     return AutoBuilder.pathfindThenFollowPath(path, constraints);
 
     } catch (Exception e) {

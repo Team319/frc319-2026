@@ -52,345 +52,428 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
     
     private double startingHeadingDegrees = 0.0;
 
-public DynamicAutoRoutine(Drive a_drive){
-    // Constructor
-    m_drive = a_drive;
-    //Populate some string from Dashboard with format <ReefPosition><ReefLevel>..." ( ie - A1B2C3D4 ; A4B4C4D4 ; etc )
-    m_instruction = SmartDashboard.getString("DynamicAutoInput", "");
-
-    if (m_instruction == null || m_instruction.isEmpty()) {
-
-        System.out.println("request is empty or unexpected... instruction = " + m_instruction);
-        m_instruction = "";
+    public DynamicAutoRoutine(Drive a_drive) {
+        this(a_drive, SmartDashboard.getString("DynamicAutoInput", ""));
     }
 
-    List<Pair<String, Integer>> parsedInstructions = parseInstruction(m_instruction);
-    // TODO : Break down instruction
+    public DynamicAutoRoutine(Drive a_drive, String instruction) {
+        // Constructor
+        m_drive = a_drive;
+        //Populate some string from Dashboard with format <ReefPosition><ReefLevel>..." ( ie - A1B2C3D4 ; A4B4C4D4 ; etc )
+        m_instruction = instruction;
 
-    // Reset robot pose to starting position.
+        if (m_instruction == null || m_instruction.isEmpty()) {
 
-    Optional<Alliance> allianceColor = DriverStation.getAlliance();
-    boolean isBlueAlliance = true;
-
-    if(allianceColor.isPresent()){
-        isBlueAlliance = allianceColor.get() == Alliance.Blue;
-    }
-
-    for (Pair<String, Integer> pair : parsedInstructions) {
-        String command = pair.getFirst().toLowerCase();
-        int modifier = pair.getSecond();
-
-        switch (command) 
-        {
-            case "h":
-
-                // This is a starting heading to seed into the pigeon at the start of auto
-                switch (modifier) 
-                {
-                    case 0:
-                        startingHeadingDegrees = isBlueAlliance ? 0.0 : 180.0;
-                        break;
-                    
-                    case 1:
-                    default:
-                        startingHeadingDegrees = isBlueAlliance ? 180.0 : 0.0;
-                        break;
-                }
-
-                //for (int i = 0; i < 10; i++) {
-                    //m_drive.resetGyro();
-                    m_drive.setHeading(startingHeadingDegrees);
-                //}
-                
-                break;
-
-            case "x":
-                // This is a starting point. Reset the robot pose to some starting position
-                
-                Translation2d startingPose = new Translation2d(0, 0);
-
-
-                switch (modifier) 
-                {
-                    case 1:
-                        startingPose = AutoConstants.TargetLocations.LEFT_TRENCH;
-                        break;
-                    
-                    case 2:
-                        startingPose = AutoConstants.TargetLocations.LEFT_BUMP;
-                        break;
-                
-                    case 3:
-                        startingPose = AutoConstants.TargetLocations.CENTER_HUB;
-                        break;
-                    
-                    case 4:
-                        startingPose = AutoConstants.TargetLocations.RIGHT_BUMP;
-                        break;
-
-                    case 5:
-                        startingPose = AutoConstants.TargetLocations.RIGHT_TRENCH;
-                        break;
-
-                }
-
-                startingPose = AllianceFlipUtil.apply(startingPose);
-                Pose2d startingPoseWithHeading = new Pose2d(startingPose, Rotation2d.fromDegrees(startingHeadingDegrees));
-                m_drive.setPose(startingPoseWithHeading);
-                
-                break;
-
-            // Go "and" do something 
-            // 0 is nothing
-            // 1 is collect
-            // 2 is shoot
-            // 3 is collect and shoot
-            case "l":
-                switch(modifier){
-                    case 0:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_left_greedy"
-                                )
-                            )
-                        );
-                        break;
-                    case 1:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_left_greedy"
-                                )
-                            )
-                        );
-                        break;
-                    case 2:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_left_greedy"
-                                )
-                            )
-                        );
-                        break;
-                    case 3:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_left_greedy"
-                                )
-                            )
-                        );
-                    break;
-                }
-                break;
-
-            case "f":
-                switch(modifier){
-                    case 0:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_left_close"
-                                )
-                            )
-                        );
-                        break;
-                    case 1:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_left_close"
-                                )
-                            )
-                        );
-                        break;
-                    case 2:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_left_close"
-                                )
-                            )
-                        );
-                        break;
-                    case 3:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_left_close"
-                                )
-                            )
-                        );
-                    break;
-                }
-                break;
-
-            case "r":
-                switch(modifier){
-                    case 0:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_right_greedy"
-                                )
-                            )
-                        );
-                        break;
-                    case 1:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_right_greedy"
-                                )
-                            )
-                        );
-                        break;
-                    case 2:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_right_greedy"
-                                )
-                            )
-                        );
-                        break;
-                    case 3:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_right_greedy"
-                                )
-                            )
-                        );
-                    break;
-                }
-                break;
-
-
-                // Go To Depot and do something
-                case "d":
-                switch(modifier){
-                    case 0:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_depot"
-                                )
-                            )
-                        );
-                        break;
-                    case 1:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_depot"
-                                )
-                            )
-                        );
-                        break;
-                    case 2:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_depot"
-                                )
-                            )
-                        );
-                        break;
-                    case 3:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_depot"
-                                )
-                            )
-                        );
-                    break;
-                }
-                break;
-
-                // Go To Outpost and do something
-                case "o":
-                switch(modifier){
-                    case 0:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_outpost"
-                                )
-                            )
-                        );
-                        break;
-                    case 1:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_outpost"
-                                )
-                            )
-                        );
-                        break;
-                    case 2:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_outpost"
-                                )
-                            )
-                        );
-                        break;
-                    case 3:
-                        addCommands(
-                            new InstantCommand( 
-                                ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
-                                    .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                        DriveConstants.autoPathingConstraints,"go_outpost"
-                                )
-                            )
-                        );
-                    break;
-                }
-                break;
-
-            // Shoot for Time n seconds
-            case "s":
-                addCommands(
-                    new InstantCommand( 
-                        ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
-                            .withDeadline(new WaitCommand(modifier)
-                    )
-                );
-                break;
-
-        
-            default:
-                // Invalid command
-                System.out.println("Unexpected character entry: " + command + modifier);
-                break;
+            System.out.println("request is empty or unexpected... instruction = " + m_instruction);
+            m_instruction = "";
         }
-    
-    }
+
+        List<Pair<String, Integer>> parsedInstructions = parseInstruction(m_instruction);
+        // TODO : Break down instruction
+
+        // Reset robot pose to starting position.
+
+        Optional<Alliance> allianceColor = DriverStation.getAlliance();
+        boolean isBlueAlliance = true;
+
+        if(allianceColor.isPresent()){
+            isBlueAlliance = allianceColor.get() == Alliance.Blue;
+        }
+
+        for (Pair<String, Integer> pair : parsedInstructions) {
+            String command = pair.getFirst();//.toLowerCase();  Using upper case because multiple L and Rs
+            int modifier = pair.getSecond();
+
+            double waitBeforeStateTime = 2.0;
+
+            switch (command) 
+            {
+                case "h":
+
+                    // This is a starting heading to seed into the pigeon at the start of auto
+                    switch (modifier) 
+                    {
+                        case 0: // North
+                            startingHeadingDegrees = isBlueAlliance ? 0.0 : 180.0;
+                            break;
+                        
+                        case 1: // South
+                        
+                            startingHeadingDegrees = isBlueAlliance ? 180.0 : 0.0;
+                            break;
+
+                        case 2: //East
+                            startingHeadingDegrees = isBlueAlliance ? 90.0 : 270.0;
+                            break;
+
+                        case 3: //West
+                            startingHeadingDegrees = isBlueAlliance ? 270.0 : 90.0;
+                            break;
+                    }
+
+                    //for (int i = 0; i < 10; i++) {
+                        //m_drive.resetGyro();
+                        m_drive.setHeading(startingHeadingDegrees);
+                    //}
+                    
+                    break;
+
+                case "x":
+                    // This is a starting point. Reset the robot pose to some starting position
+                    
+                    Translation2d startingPose = new Translation2d(0, 0);
+
+
+                    switch (modifier) 
+                    {
+                        case 1:
+                            startingPose = AutoConstants.TargetLocations.LEFT_TRENCH;
+                            break;
+                        
+                        case 2:
+                            startingPose = AutoConstants.TargetLocations.LEFT_BUMP;
+                            break;
+                    
+                        case 3:
+                            startingPose = AutoConstants.TargetLocations.CENTER_HUB;
+                            break;
+                        
+                        case 4:
+                            startingPose = AutoConstants.TargetLocations.RIGHT_BUMP;
+                            break;
+
+                        case 5:
+                            startingPose = AutoConstants.TargetLocations.RIGHT_TRENCH;
+                            break;
+
+                    }
+
+                    startingPose = AllianceFlipUtil.apply(startingPose);
+                    Pose2d startingPoseWithHeading = new Pose2d(startingPose, Rotation2d.fromDegrees(startingHeadingDegrees));
+                    m_drive.setPose(startingPoseWithHeading);
+                    
+                    break;
+
+                // Go "and" do something 
+                // 0 is nothing
+                // 1 is collect
+                // 2 is shoot
+                // 3 is collect and shoot
+                case "L":
+                    switch(modifier){
+                        case 0:
+                            addCommands( new WaitCommand(waitBeforeStateTime).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 1:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 2:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 3:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                        break;
+                    }
+                    break;
+
+                case "l":
+                    switch(modifier){
+                        case 0:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left_spike"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 1:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left_spike"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))    
+                                )
+                            );
+                            break;
+                        case 2:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left_spike"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 3:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left_spike"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                        break;
+                    }
+                    break;
+
+                case "R":
+                    switch(modifier){
+                        case 0:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left", true
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 1:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left", true
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 2:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left", true
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 3:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left", true
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                        break;
+                    }
+                    break;
+
+                    case "r":
+                    switch(modifier){
+                        case 0:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left_spike",true
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 1:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left_spike",true
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 2:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left_spike",true
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 3:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_left_spike"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                        break;
+                    }
+                    break;
+
+
+                    // Go To Depot and do something
+                    case "d":
+                    switch(modifier){
+                        case 0:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_depot"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 1:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_depot"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 2:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_depot"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 3:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_depot"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                        break;
+                    }
+                    break;
+
+                    // Go To Outpost and do something
+                    case "o":
+                    switch(modifier){
+                        case 0:
+                            addCommands(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_outpost"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 1:
+                            addCommands(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_outpost"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 2:
+                            addCommands(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_outpost"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 3:
+                            addCommands(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_outpost"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                        break;
+                    }
+                    break;
+
+                // Shoot for Time n seconds
+                case "s":
+                    addCommands(
+                        new InstantCommand( 
+                            ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
+                                .withDeadline(new WaitCommand(modifier)
+                        ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOP_SHOOTING)))
+                    );
+                    break;
+
+            
+                default:
+                    // Invalid command
+                    System.out.println("Unexpected character entry: " + command + modifier);
+                    break;
+            }
+        
+        }
 
 }
 

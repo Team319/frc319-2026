@@ -14,13 +14,18 @@
 package frc319.robot.subsystems.drive;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc319.robot.subsystems.drive.ModuleIOInputsAutoLogged;
 import frc319.robot.Constants;
+
+import static edu.wpi.first.units.Units.FeetPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -32,7 +37,7 @@ public class Module {
   private final int index;
 
   private final SimpleMotorFeedforward driveFeedforward;
-  private final PIDController driveFeedback;
+  private final ProfiledPIDController driveFeedback;
   private final PIDController turnFeedback;
   private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
@@ -48,18 +53,18 @@ public class Module {
     switch (Constants.getRobot()) {
       case COMPBOT:
       case DEVBOT:
-        driveFeedforward = new SimpleMotorFeedforward(0.1, 0.115); // V*s/in(?) // 2024 : 0.1, 0.13
-        driveFeedback = new PIDController(0.05, 0.0, 0.0);  // was 0.05, 0.0, 0.0    // EKM - was 0.15 while tuning paths
+        driveFeedforward = new SimpleMotorFeedforward(0.1, 0.175); // V*s/in(?) // 2024 : 0.1, 0.13
+        driveFeedback = new ProfiledPIDController(0.05, 0.0, 0.0, new TrapezoidProfile.Constraints(Constants.DriveConstants.MAX_LINEAR_SPEED, Constants.DriveConstants.MAX_LINEAR_ACCELERATION));  // was 0.05, 0.0, 0.0    // EKM - was 0.15 while tuning paths
         turnFeedback = new PIDController(7.0, 0.0, 0.0);
         break;
       case SIMBOT:
         driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
-        driveFeedback = new PIDController(0.05, 0.0, 0.0);
+        driveFeedback = new ProfiledPIDController(0.05, 0.0, 0.0, new TrapezoidProfile.Constraints(Constants.DriveConstants.MAX_LINEAR_SPEED, Constants.DriveConstants.MAX_LINEAR_ACCELERATION));
         turnFeedback = new PIDController(7.0, 0.0, 0.0);
         break;
       default:
         driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
-        driveFeedback = new PIDController(0.0, 0.0, 0.0);
+        driveFeedback = new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(Constants.DriveConstants.MAX_LINEAR_SPEED, Constants.DriveConstants.MAX_LINEAR_ACCELERATION));
         turnFeedback = new PIDController(0.0, 0.0, 0.0);
         break;
     }

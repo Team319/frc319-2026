@@ -2,6 +2,7 @@ package frc319.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotation;
@@ -14,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -345,4 +347,14 @@ public Angle getCurrentTargetAngleWithVisionCorrection() {
 
     return EqualsUtil.epsilonEquals(currentAngle.in(Degrees), targetAngle.in(Degrees), 10.0); 
   }
+
+public boolean isAtTargetVelocity() {
+    AngularVelocity currentVelocity = super.getCurrentVelocity().times(config.unitToRotorRatio);
+    Logger.recordOutput(pb.makePath("iat_currentVelocity"), currentVelocity.in(RPM));
+    AngularVelocity targetVelocity = RadiansPerSecond.of(0.0);
+    Logger.recordOutput(pb.makePath("iat_targetVelocity"), targetVelocity.in(RPM));
+  
+    return EqualsUtil.epsilonEquals(currentVelocity.in(RPM), targetVelocity.in(RPM), 0.5); 
+  }
+
 }

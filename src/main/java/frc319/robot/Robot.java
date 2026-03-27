@@ -19,11 +19,13 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc319.lib.util.FieldUtils;
 import frc319.robot.RobotContainer.RobotStates;
+import frc319.robot.subsystems.intake.IntakeConstants.IntakeStates;
 import frc319.robot.subsystems.serializer.SerializerConstants.SerializerStates;
 
 public class Robot extends LoggedRobot {
@@ -91,8 +93,19 @@ public class Robot extends LoggedRobot {
       case SHOOTING_DUMB:
       case SHOOTING_ON_MOVE:
       case SNOWBLOW:
+
+        if(m_robotContainer.startedFiringTime > 0.0 && (Timer.getFPGATimestamp() - m_robotContainer.startedFiringTime) > 2.5){
+          m_robotContainer.intakeExtension.setState(IntakeStates.JOSTLE);
+        }
+
+        if(m_robotContainer.startedFiringTime > 0.0 && (Timer.getFPGATimestamp() - m_robotContainer.startedFiringTime) > 3.0){
+          m_robotContainer.intakeExtension.setState(IntakeStates.RETRACTED);
+          m_robotContainer.startedFiringTime = Timer.getFPGATimestamp();
+        }
+
         if(m_robotContainer.flywheels.isAtTargetVelocity() 
             && m_robotContainer.turret.isAtTargetPosition()
+            && m_robotContainer.turret.isAtTargetVelocity()
             && m_robotContainer.hood.isAtTargetPosition()){
               m_robotContainer.ballTunnel.setState(SerializerStates.SHOOT);
               m_robotContainer.spindexer.setState(SerializerStates.SHOOT);

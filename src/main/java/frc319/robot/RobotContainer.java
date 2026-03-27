@@ -9,6 +9,7 @@ package frc319.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -88,6 +89,8 @@ public class RobotContainer {
 
   private boolean isCollecting = false;
   private boolean isShooting = false;
+
+  public double startedFiringTime = 0.0;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser; // AdvantageKit Dependency
@@ -230,8 +233,11 @@ public class RobotContainer {
       autoChooser.addOption("DynamicAutoRoutine", null);
       
       // Add Commands to the dashboard chooser
-      //autoChooser.addOption(
-      //    "Name on Dashboard", Commands);
+      autoChooser.addOption(
+         "2 Spike Right", new DynamicAutoRoutine(drive,"h2x5R1s6r1s5")); //was h2x5R1s5r1s5
+
+      autoChooser.addOption(
+         "2 Spike Left", new DynamicAutoRoutine(drive,"h3x1L1s6l1s5")); // was h3x1L1s5l1s5
   
       configureBindings();
 
@@ -281,7 +287,7 @@ public class RobotContainer {
               () -> -driverController.getLeftX(), 
               () -> -driverController.getRightY(), 
               () -> -driverController.getRightX(),
-              () -> driverController.getLeftTriggerAxis()));
+              () -> driverController.getRightTriggerAxis()));
               
         break;
       }
@@ -308,8 +314,8 @@ public class RobotContainer {
           .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_COLLECTING)));
 
         driverController.leftBumper()
-          .onTrue(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.RETRACTED)))
-          .onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.EXTENDED)));
+          .onTrue(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.JOSTLE)))
+          .onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.RETRACTED)));
 
         driverController.rightTrigger()
           .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)))
@@ -409,6 +415,7 @@ public class RobotContainer {
         break;
 
       case COLLECTING:
+        isCollecting = true;
         intakeExtension.setState(IntakeStates.EXTENDED);
         intakeRollers.setState(IntakeStates.COLLECT); 
         // ballTunnel.setState(SerializerStates.IDLE);
@@ -419,6 +426,7 @@ public class RobotContainer {
         break;
 
       case STOP_COLLECTING:
+        isCollecting = false;
         // Stay extended
         intakeExtension.setState(IntakeStates.EXTENDED);
         // Stop the rollers from collecting game pieces
@@ -426,6 +434,8 @@ public class RobotContainer {
         break;
 
       case SHOOTING:
+        startedFiringTime = Timer.getFPGATimestamp();
+
         flywheels.setState(FlywheelsState.SHOOT);
         //intakeExtension.setState(IntakeStates.JOSTLE);
         intakeRollers.setState(IntakeStates.COLLECT); 
@@ -467,8 +477,11 @@ public class RobotContainer {
           // Keep the hood safe
           hood.setState(LauncherStates.STOWED);
 
-          intakeExtension.setState(IntakeStates.RETRACTED);
-          intakeRollers.setState(IntakeStates.IDLE);
+          if(!isCollecting){
+            intakeExtension.setState(IntakeStates.RETRACTED);
+            intakeRollers.setState(IntakeStates.IDLE);
+          }
+
           break;
 
       case SNOWBLOW:

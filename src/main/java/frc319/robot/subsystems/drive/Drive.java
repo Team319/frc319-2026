@@ -75,6 +75,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
   AprilTagFieldLayout aprilTagFieldLayout = null ;
 
+
+
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; //  FL, FR, BL, BR
@@ -83,6 +85,10 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
   private Rotation2d rawGyroRotation = new Rotation2d();
   private double rawGyroVelocityRadPerSec = 0.0;
+
+  private boolean didGyroLoseConnection = false;
+  private Rotation2d lastGoodGyroRotation = new Rotation2d();
+
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
         new SwerveModulePosition(),
@@ -266,15 +272,30 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         // loop cycle in x, y, and theta based only on the modules,
         // without the gyro. The gyro is always disconnected in simulation.
         if (gyroInputs.connected) {
+
+          if(didGyroLoseConnection){
+            // If the gyro just reconnected, reset the pose estimator to the current position, but keep the current heading from the gyro
+            setHeading(lastGoodGyroRotation.getDegrees());
+            didGyroLoseConnection = false;
+          }
           // If the gyro is connected, replace the theta component of the twist
           // with the change in angle since the last loop cycle.
           rawGyroRotation = gyroInputs.yawPosition;
           rawGyroVelocityRadPerSec = gyroInputs.yawVelocityRadPerSec;
+
+          lastGoodGyroRotation = rawGyroRotation;
+
         } else {
+
+          didGyroLoseConnection = true;
+
           // Apply the twist (change since last loop cycle) to the current pose
           Twist2d twist = kinematics.toTwist2d(moduleDeltas);
           rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
           rawGyroVelocityRadPerSec = 0.0;
+
+          // If gyro is disconncected for a while. use the last estimated rotation
+          lastGoodGyroRotation = rawGyroRotation;
         }
 
 
@@ -285,7 +306,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         Logger.recordOutput("Odometry/Robot", getPose());
  
         // Update / Correct the pose using Localization from Vision (using the 'Reef' Limelight) 
-        if(Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN_BACK) /*&& DriverStation.isTeleop()*/ )
+        if(Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN_BACK) && DriverStation.isEnabled() )
         {
           doRejectVisionUpdate = false;
 
@@ -304,7 +325,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
           LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-drive");
           
-          if(mt2.pose == null){
+          if(mt2 == null){
+            mt2 = new LimelightHelpers.PoseEstimate();
             mt2.pose = new Pose2d();
             doRejectVisionUpdate = true;
           }
@@ -345,7 +367,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         }
 
         // Update / Correct the pose using Localization from Vision (using the 'Reef' Limelight) 
-        if(Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN_RIGHT) /*&& DriverStation.isTeleop()*/ )
+        if(Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN_RIGHT) && DriverStation.isEnabled() )
         {
           doRejectVisionUpdate = false;
 
@@ -363,7 +385,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           LimelightHelpers.SetRobotOrientation("limelight-right", rawGyroRotation.getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-right");
           
-          if(mt2.pose == null){
+          if(mt2 == null){
+            mt2 = new LimelightHelpers.PoseEstimate();
             mt2.pose = new Pose2d();
             doRejectVisionUpdate = true;
           }
@@ -404,7 +427,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         }
 
         // Update / Correct the pose using Localization from Vision (using the 'TURRET' Limelight) 
-        if(Limelight.isValidTargetSeen(LimelightConstants.Device.TURRET) /*&& DriverStation.isTeleop()*/ )
+        if(Limelight.isValidTargetSeen(LimelightConstants.Device.TURRET) && DriverStation.isEnabled() )
         {
           doRejectVisionUpdate = true;
           double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.TURRET);
@@ -419,6 +442,13 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
           LimelightHelpers.SetRobotOrientation("limelight-turret", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-turret");
+          
+          if(mt2 == null){
+            mt2 = new LimelightHelpers.PoseEstimate();
+            mt2.pose = new Pose2d();
+            doRejectVisionUpdate = true;
+          }
+
           Logger.recordOutput("Odometry/mt2Poseturret", mt2.pose);
 
           // If the robot is spinning too fast, ignore vision updates
@@ -515,7 +545,9 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
-    gyroIO.setHeading(pose.getRotation().getDegrees());
+    double newHeading = pose.getRotation().getDegrees();
+    gyroIO.setHeading(newHeading);
+    rawGyroRotation = new Rotation2d(Units.degreesToRadians(newHeading));
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 

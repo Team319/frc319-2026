@@ -131,7 +131,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(7, new CANBus("swerve"));
             turnTalon = new TalonFX(8, new CANBus("swerve"));
             cancoder = new CANcoder(9, new CANBus("swerve"));
-            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(-110.0)); //try -30 next // 170.0+20.0+5.0
+            absoluteEncoderOffset = new Rotation2d(Units.degreesToRadians(-115.0)); //try -30 next // 170.0+20.0+5.0
             break;
         
           case DEVBOT:

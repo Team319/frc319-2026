@@ -97,36 +97,8 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
 
       case JOSTLE:
 
-      if(this.isMotionMagicAtTarget() )
-      {
-        if(getCurrentPositionAsDistance().gt(IntakeConstants.Extension.extendedPosition.minus(Inches.of(2.0)))){
-          CommandScheduler.getInstance().schedule(this.setDistanceCommand(() -> IntakeConstants.Extension.flushPosition));
-        }
-        else
-        {
-          CommandScheduler.getInstance().schedule(this.setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition));
-        }
-
-
-      }
-
-        // if(getCurrentPositionAsDistance().gt(IntakeConstants.Extension.extendedPosition.minus(Inches.of(0.5)))) {
-        //   shouldExtend = false;
-        // }
-        // else {
-        //   shouldExtend = true;
-        // }
-
-        // if(shouldExtend){
-        //   intakePosition = intakePosition.plus(Inches.of(0.25));
-        // }
-        // else
-        // {
-        //   intakePosition = intakePosition.minus(Inches.of(0.25));
-        // }
-        
-        
-
+        //CommandScheduler.getInstance().schedule(setDistanceCommand(() -> IntakeConstants.Extension.flushPosition.minus(Inches.of(6.0).times(Math.sin(Timer.getFPGATimestamp()*2.0 )))));
+        CommandScheduler.getInstance().schedule(setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition.minus(Inches.of(10))));
         break;
 
       case IDLE:

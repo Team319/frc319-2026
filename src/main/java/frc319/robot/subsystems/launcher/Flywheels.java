@@ -132,7 +132,10 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         break;
 
       case PRESPIN:
-        CommandScheduler.getInstance().schedule(this.setVelocity(()->RPM.of(1800.0)));
+        //CommandScheduler.getInstance().schedule(this.setVelocity(()->RPM.of(1800.0)));
+        toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+        Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
+        CommandScheduler.getInstance().schedule(this.setVelocity(()->RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))));
         break;
 
       case DUMB_SHOT:
