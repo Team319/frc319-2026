@@ -75,7 +75,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
   AprilTagFieldLayout aprilTagFieldLayout = null ;
 
-
+  public boolean isCloseToDriveVisionMeasurement = false;
+  public boolean isCloseToRightVisionMeasurement = false;
 
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -320,6 +321,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
           Logger.recordOutput("/Odometry/limelight-drive/poseDifference", poseDifference);
 
+          isCloseToDriveVisionMeasurement = poseDifference <= 0.5;
+
           //LimelightHelpers.SetRobotOrientation("limelight-drive", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.SetRobotOrientation("limelight-drive", rawGyroRotation.getDegrees(), 0, 0, 0, 0, 0);
 
@@ -380,6 +383,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
  
           double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
           Logger.recordOutput("Odometry/limelight-right/poseDifferenceRight", poseDifference);
+
+          isCloseToRightVisionMeasurement = poseDifference <= 0.5;
 
           //LimelightHelpers.SetRobotOrientation("limelight-right", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.SetRobotOrientation("limelight-right", rawGyroRotation.getDegrees(), 0, 0, 0, 0, 0);

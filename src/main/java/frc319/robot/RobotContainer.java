@@ -233,11 +233,16 @@ public class RobotContainer {
       autoChooser.addOption("DynamicAutoRoutine", null);
       
       // Add Commands to the dashboard chooser
-      autoChooser.addOption(
-         "2 Spike Right", new DynamicAutoRoutine(drive,"h2x5R1s6r1s5")); //was h2x5R1s5r1s5
 
-      autoChooser.addOption(
-         "2 Spike Left", new DynamicAutoRoutine(drive,"h3x1L1s6l1s5")); // was h3x1L1s5l1s5
+      // autoChooser.addOption(
+      //    "Right to Outpost", new DynamicAutoRoutine(drive,"h2x5o1s9")); // was h3x1L1s5l1s5
+
+      // autoChooser.addOption(
+      //    "2 Spike Right", new DynamicAutoRoutine(drive,"h2x5R1s6r1s5")); //was h2x5R1s5r1s5
+
+      // autoChooser.addOption(
+      //    "2 Spike Left", new DynamicAutoRoutine(drive,"h3x1L1s6l1s5")); // was h3x1L1s5l1s5
+
   
       configureBindings();
 
@@ -477,10 +482,10 @@ public class RobotContainer {
           // Keep the hood safe
           hood.setState(LauncherStates.STOWED);
 
-          if(!isCollecting){
-            intakeExtension.setState(IntakeStates.RETRACTED);
-            intakeRollers.setState(IntakeStates.IDLE);
-          }
+          // if(!isCollecting){
+          //   intakeExtension.setState(IntakeStates.RETRACTED);
+          //   intakeRollers.setState(IntakeStates.IDLE);
+          // }
 
           break;
 

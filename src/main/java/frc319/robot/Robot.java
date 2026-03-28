@@ -74,7 +74,7 @@ public class Robot extends LoggedRobot {
 
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
 
-    SmartDashboard.putString("DynamicAutoInput", "");
+    SmartDashboard.putString("DynamicAutoInput", "h2x5o1s9");
 
     m_robotContainer = new RobotContainer();
   }
@@ -94,14 +94,14 @@ public class Robot extends LoggedRobot {
       case SHOOTING_ON_MOVE:
       case SNOWBLOW:
 
-        if(m_robotContainer.startedFiringTime > 0.0 && (Timer.getFPGATimestamp() - m_robotContainer.startedFiringTime) > 2.5){
-          m_robotContainer.intakeExtension.setState(IntakeStates.JOSTLE);
-        }
+        // if(m_robotContainer.startedFiringTime > 0.0 && (Timer.getFPGATimestamp() - m_robotContainer.startedFiringTime) > 2.5){
+        //   m_robotContainer.intakeExtension.setState(IntakeStates.JOSTLE);
+        // }
 
-        if(m_robotContainer.startedFiringTime > 0.0 && (Timer.getFPGATimestamp() - m_robotContainer.startedFiringTime) > 3.0){
-          m_robotContainer.intakeExtension.setState(IntakeStates.RETRACTED);
-          m_robotContainer.startedFiringTime = Timer.getFPGATimestamp();
-        }
+        // if(m_robotContainer.startedFiringTime > 0.0 && (Timer.getFPGATimestamp() - m_robotContainer.startedFiringTime) > 3.0){
+        //   m_robotContainer.intakeExtension.setState(IntakeStates.RETRACTED);
+        //   m_robotContainer.startedFiringTime = Timer.getFPGATimestamp();
+        // }
 
         if(m_robotContainer.flywheels.isAtTargetVelocity() 
             && m_robotContainer.turret.isAtTargetPosition()
@@ -223,8 +223,8 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopPeriodic() {
 
-    if (isHubActive()){
-      m_robotContainer.driverController.setRumble(RumbleType.kBothRumble, 0.25);
+    if (m_robotContainer.drive.isCloseToDriveVisionMeasurement || m_robotContainer.drive.isCloseToRightVisionMeasurement ){//(isHubActive()){
+      m_robotContainer.driverController.setRumble(RumbleType.kBothRumble, 1.0);
     }
     else
     {

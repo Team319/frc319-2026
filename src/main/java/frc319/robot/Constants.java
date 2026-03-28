@@ -28,7 +28,7 @@ public class Constants {
 
   public static boolean disableHAL = false;
 
-  public static boolean useTurretLimelight = false;
+  public static boolean useTurretLimelight = true;
 
 
   public static void disableHAL() {
@@ -96,7 +96,7 @@ public class Constants {
 
   public static class DriveConstants{
     public static final double MAX_LINEAR_SPEED = Units.feetToMeters(15.5); 
-    public static final double MAX_LINEAR_ACCELERATION = Units.feetToMeters(6.0); 
+    public static final double MAX_LINEAR_ACCELERATION = Units.feetToMeters(6.0);  // was 6.0
     public static final double TRACK_WIDTH_X = Units.inchesToMeters(29); 
     public static final double TRACK_WIDTH_Y = Units.inchesToMeters(25); 
     public static final double DRIVE_BASE_RADIUS =

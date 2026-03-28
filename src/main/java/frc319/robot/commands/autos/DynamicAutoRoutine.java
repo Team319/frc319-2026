@@ -57,6 +57,11 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
     }
 
     public DynamicAutoRoutine(Drive a_drive, String instruction) {
+
+        if(!DriverStation.isEnabled()){
+            return; // don't want to actually run when initializing... (so we don't mess up the starting pose)
+        }
+
         // Constructor
         m_drive = a_drive;
         //Populate some string from Dashboard with format <ReefPosition><ReefLevel>..." ( ie - A1B2C3D4 ; A4B4C4D4 ; etc )
@@ -413,7 +418,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                                 new InstantCommand( 
                                     ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED))
                                         .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                            "go_outpost"
+                                            "go_right_outpost"
                                     ).andThen(new InstantCommand( 
                                     ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
                                 )
@@ -424,7 +429,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                                 new InstantCommand( 
                                     ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
                                         .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                            "go_outpost"
+                                            "go_right_outpost"
                                     ).andThen(new InstantCommand( 
                                     ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
                                 )
@@ -435,7 +440,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                                 new InstantCommand( 
                                     ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
                                         .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                            "go_outpost"
+                                            "go_right_outpost"
                                     ).andThen(new InstantCommand( 
                                     ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
                                 )
@@ -446,7 +451,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                                 new InstantCommand( 
                                     ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW))
                                         .withDeadline(DriveCommands.pathfindThenFollowPath(
-                                            "go_outpost"
+                                            "go_right_outpost"
                                     ).andThen(new InstantCommand( 
                                     ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
                                 )
