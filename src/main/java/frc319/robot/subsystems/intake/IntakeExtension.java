@@ -52,8 +52,9 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
    * @return
    */
   public Command setDistanceCommand(Supplier<Distance> desiredDistance) {
-    return motionMagicSetpointCommand(
-        () -> convertSubsystemPositionToMotorPosition(desiredDistance.get()));
+    // return motionMagicSetpointCommand(
+    //     () -> convertSubsystemPositionToMotorPosition(desiredDistance.get()));
+      return positionSetpointCommand(() -> convertSubsystemPositionToMotorPosition(desiredDistance.get()));
   }
 
   /**
@@ -100,6 +101,11 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
         //CommandScheduler.getInstance().schedule(setDistanceCommand(() -> IntakeConstants.Extension.flushPosition.minus(Inches.of(6.0).times(Math.sin(Timer.getFPGATimestamp()*2.0 )))));
         CommandScheduler.getInstance().schedule(setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition.minus(Inches.of(10))));
         break;
+
+      case AUTO_JOSTLE:
+        // Fix me. i don't want to fully retract to point 0. stop at some flush point or something...
+        CommandScheduler.getInstance().schedule(setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition.times(Math.abs(Math.sin(1.0*Timer.getFPGATimestamp() )))));
+      break;
 
       case IDLE:
       default:

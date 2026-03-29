@@ -26,14 +26,14 @@ import edu.wpi.first.units.measure.AngularVelocity;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
-  private final Pigeon2 pigeon = new Pigeon2(0, new CANBus("swerve")); // Example CAN ID and bus, replace with actual values
+  private final Pigeon2 pigeon = new Pigeon2(0, new CANBus("rio")); // Example CAN ID and bus, replace with actual values
   private final StatusSignal<Angle> yaw = pigeon.getYaw();
   private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZDevice(); // Note: There is a device frame and a world frame, device = old implementation, but is world better here? - EKM
 
   public GyroIOPigeon2() {
     pigeon.getConfigurator().apply(new Pigeon2Configuration());
     pigeon.getConfigurator().setYaw(0.0);
-    yaw.setUpdateFrequency(50.0);
+    yaw.setUpdateFrequency(100.0);
     yawVelocity.setUpdateFrequency(50.0);
     pigeon.optimizeBusUtilization();
   }

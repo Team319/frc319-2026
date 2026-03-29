@@ -190,7 +190,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                         case 2:
                             addCommands(new WaitCommand(waitBeforeStateTime).andThen(
                                 new InstantCommand( 
-                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING)))
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_AUTO)))
                                         .withDeadline(DriveCommands.pathfindThenFollowPath(
                                             "go_left"
                                     ).andThen(new InstantCommand( 
@@ -239,7 +239,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                         case 2:
                             addCommands(new WaitCommand(waitBeforeStateTime).andThen(
                                 new InstantCommand( 
-                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING)))
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_AUTO)))
                                         .withDeadline(DriveCommands.pathfindThenFollowPath(
                                             "go_left_spike"
                                     ).andThen(new InstantCommand( 
@@ -288,7 +288,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                         case 2:
                             addCommands(new WaitCommand(waitBeforeStateTime).andThen(
                                 new InstantCommand( 
-                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING)))
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_AUTO)))
                                         .withDeadline(DriveCommands.pathfindThenFollowPath(
                                             "go_left", true
                                     ).andThen(new InstantCommand( 
@@ -337,7 +337,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                         case 2:
                             addCommands(new WaitCommand(waitBeforeStateTime).andThen(
                                 new InstantCommand( 
-                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING)))
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_AUTO)))
                                         .withDeadline(DriveCommands.pathfindThenFollowPath(
                                             "go_left_spike",true
                                     ).andThen(new InstantCommand( 
@@ -388,7 +388,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                         case 2:
                             addCommands(new WaitCommand(waitBeforeStateTime).andThen(
                                 new InstantCommand( 
-                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING)))
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_AUTO)))
                                         .withDeadline(DriveCommands.pathfindThenFollowPath(
                                             "go_depot"
                                     ).andThen(new InstantCommand( 
@@ -438,7 +438,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                         case 2:
                             addCommands(
                                 new InstantCommand( 
-                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_AUTO))
                                         .withDeadline(DriveCommands.pathfindThenFollowPath(
                                             "go_right_outpost"
                                     ).andThen(new InstantCommand( 
@@ -464,7 +464,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                 case "s":
                     addCommands(
                         new InstantCommand( 
-                            ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING))
+                            ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_AUTO))
                                 .withDeadline(new WaitCommand(modifier)
                         ).andThen(new InstantCommand( 
                                     ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOP_SHOOTING)))

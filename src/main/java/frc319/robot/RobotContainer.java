@@ -230,7 +230,7 @@ public class RobotContainer {
       // Set up auto routines
       autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-      autoChooser.addOption("DynamicAutoRoutine", null);
+      autoChooser.addDefaultOption("DynamicAutoRoutine", null);
       
       // Add Commands to the dashboard chooser
 
@@ -386,6 +386,7 @@ public class RobotContainer {
     STOP_COLLECTING, 
     
     SHOOTING,
+    SHOOTING_AUTO,
     SHOOTING_DUMB,
     SHOOTING_ON_MOVE,
     STOP_SHOOTING, 
@@ -443,6 +444,20 @@ public class RobotContainer {
 
         flywheels.setState(FlywheelsState.SHOOT);
         //intakeExtension.setState(IntakeStates.JOSTLE);
+        intakeRollers.setState(IntakeStates.COLLECT); 
+
+        // This is handled in Robot.java
+        // ballTunnel.setState(SerializerStates.SHOOT);
+        // spindexer.setState(SerializerStates.SHOOT);
+        turret.setState(LauncherStates.TRACKING_TARGET);
+        hood.setState(LauncherStates.TRACKING_TARGET);
+        break;
+
+      case SHOOTING_AUTO:
+        startedFiringTime = Timer.getFPGATimestamp();
+
+        flywheels.setState(FlywheelsState.SHOOT);
+        intakeExtension.setState(IntakeStates.AUTO_JOSTLE);
         intakeRollers.setState(IntakeStates.COLLECT); 
 
         // This is handled in Robot.java

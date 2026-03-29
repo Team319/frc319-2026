@@ -20,6 +20,7 @@ public final class IntakeConstants {
     COLLECT,
     EJECT,
     JOSTLE, // ? is there a better work...
+    AUTO_JOSTLE,
     TUNING
 
   }
@@ -51,8 +52,8 @@ public final class IntakeConstants {
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
         // Motion Magic parameters
-        config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1000.0; 
-        config.fxConfig.MotionMagic.MotionMagicAcceleration = 1500.0; 
+        // config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1000.0; 
+        // config.fxConfig.MotionMagic.MotionMagicAcceleration = 1500.0; 
     }
 
     public static Distance extendedPosition = Inches.of(34.0); // fake

@@ -90,6 +90,7 @@ public class Robot extends LoggedRobot {
     switch(m_robotContainer.getCurrentRobotState()) {
 
       case SHOOTING:
+      case SHOOTING_AUTO:
       case SHOOTING_DUMB:
       case SHOOTING_ON_MOVE:
       case SNOWBLOW:
@@ -105,7 +106,7 @@ public class Robot extends LoggedRobot {
 
         if(m_robotContainer.flywheels.isAtTargetVelocity() 
             && m_robotContainer.turret.isAtTargetPosition()
-            && m_robotContainer.turret.isAtTargetVelocity()
+           // && m_robotContainer.turret.isAtTargetVelocity()
             && m_robotContainer.hood.isAtTargetPosition()){
               m_robotContainer.ballTunnel.setState(SerializerStates.SHOOT);
               m_robotContainer.spindexer.setState(SerializerStates.SHOOT);
