@@ -16,11 +16,14 @@ package frc319.robot.subsystems.drive;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
+import com.ctre.phoenix6.StatusCode;
+
 public interface GyroIO {
   
   @AutoLog
   public static class GyroIOInputs {
     public boolean connected = false;
+    public StatusCode status = StatusCode.OK;
     public Rotation2d yawPosition = new Rotation2d();
     public double yawVelocityRadPerSec = 0.0;
   }

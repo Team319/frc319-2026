@@ -72,6 +72,9 @@ public final class LauncherConstants {
       config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
       config.fxConfig.CurrentLimits.StatorCurrentLimit = 35.0;
 
+      config.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 20.0;
+
       
       config.unitToRotorRatio =  1.0/(28.5*3.0); // (28.5*3.0) to 1
 
@@ -122,8 +125,11 @@ public final class LauncherConstants {
       leftConfig.fxConfig.Slot0.kV = 0.12; 
       leftConfig.fxConfig.Slot0.kA = 0.01; 
 
-      leftConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = false;
-      // leftConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 80.0;
+      leftConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      leftConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 80.0;
+
+      leftConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+      leftConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
 
       leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -197,6 +203,9 @@ public final class LauncherConstants {
 
       config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
       config.fxConfig.CurrentLimits.StatorCurrentLimit = 35.0;
+
+      config.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 20.0;
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
