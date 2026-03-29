@@ -279,9 +279,21 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           gyroDisconnectCounter = 0;
 
           if (didGyroLoseConnection) {
-            // Gyro CAN recovered — trust the Pigeon's onboard IMU directly.
-            // Do NOT call setHeading(): the Pigeon was tracking internally the whole
-            // time; overwriting it with dead-reckoned data would corrupt orientation.
+            // Gyro CAN recovered — check if the Pigeon rebooted (yaw reset to ~0)
+            // or just had a stale frame (yaw roughly matches dead-reckoned estimate).
+            // If the difference is large, the Pigeon lost power and we need to reseed
+            // it with our dead-reckoned angle. Otherwise trust it directly.
+            double pigeonYawDeg = gyroInputs.yawPosition.getDegrees();
+            double deadReckonedYawDeg = lastGoodGyroRotation.getDegrees();
+            double yawDiffDeg = Math.abs(
+                Rotation2d.fromDegrees(pigeonYawDeg)
+                    .minus(Rotation2d.fromDegrees(deadReckonedYawDeg))
+                    .getDegrees());
+            if (yawDiffDeg > 10.0) {
+              // Pigeon clearly rebooted — restore the dead-reckoned heading
+              gyroIO.setHeading(deadReckonedYawDeg);
+              rawGyroRotation = Rotation2d.fromDegrees(deadReckonedYawDeg);
+            }
             didGyroLoseConnection = false;
           }
 
