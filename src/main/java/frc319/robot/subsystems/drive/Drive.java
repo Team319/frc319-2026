@@ -89,6 +89,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
   private boolean didGyroLoseConnection = false;
   private Rotation2d lastGoodGyroRotation = new Rotation2d();
+  private int gyroDisconnectCounter = 0;
+  private static final int GYRO_DISCONNECT_DEBOUNCE_CYCLES = 5; // ~100ms at 50Hz
 
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
@@ -274,28 +276,33 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         // without the gyro. The gyro is always disconnected in simulation.
         if (gyroInputs.connected) {
 
-          if(didGyroLoseConnection){
-            // If the gyro just reconnected, reset the pose estimator to the current position, but keep the current heading from the gyro
-            setHeading(lastGoodGyroRotation.getDegrees());
+          gyroDisconnectCounter = 0;
+
+          if (didGyroLoseConnection) {
+            // Gyro CAN recovered — trust the Pigeon's onboard IMU directly.
+            // Do NOT call setHeading(): the Pigeon was tracking internally the whole
+            // time; overwriting it with dead-reckoned data would corrupt orientation.
             didGyroLoseConnection = false;
           }
-          // If the gyro is connected, replace the theta component of the twist
-          // with the change in angle since the last loop cycle.
+
+          // Use the gyro's actual reading.
           rawGyroRotation = gyroInputs.yawPosition;
           rawGyroVelocityRadPerSec = gyroInputs.yawVelocityRadPerSec;
-
           lastGoodGyroRotation = rawGyroRotation;
 
         } else {
 
-          didGyroLoseConnection = true;
+          // Debounce: require several consecutive stale frames before treating
+          // the gyro as truly disconnected (avoids reacting to a single bad frame).
+          gyroDisconnectCounter++;
+          if (gyroDisconnectCounter >= GYRO_DISCONNECT_DEBOUNCE_CYCLES) {
+            didGyroLoseConnection = true;
+          }
 
           // Apply the twist (change since last loop cycle) to the current pose
           Twist2d twist = kinematics.toTwist2d(moduleDeltas);
           rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
           rawGyroVelocityRadPerSec = 0.0;
-
-          // If gyro is disconncected for a while. use the last estimated rotation
           lastGoodGyroRotation = rawGyroRotation;
         }
 
