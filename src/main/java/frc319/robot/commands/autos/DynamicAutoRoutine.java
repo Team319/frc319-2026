@@ -199,6 +199,31 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                     pathToFollow = "go_right_outpost";
                     dynamicAction(pathToFollow, modifier, waitBeforeStateTime);
                     break;
+
+                case "P":
+                    pathToFollow = "go_left_fast";
+                    dynamicChoreoAction(pathToFollow, modifier, waitBeforeStateTime, false);
+                    break;
+
+                case "p":
+                    pathToFollow = "go_left_spike_fast";
+                    dynamicChoreoAction(pathToFollow, modifier, waitBeforeStateTime, false);
+                    break;
+
+                case "Q":
+                    pathToFollow = "go_left_fast";
+                    dynamicChoreoAction(pathToFollow, modifier, waitBeforeStateTime, true);
+                    break;
+
+                case "q":
+                    pathToFollow = "go_left_spike_fast";
+                    dynamicChoreoAction(pathToFollow, modifier, waitBeforeStateTime, true);
+                    break;
+
+                case "O":
+                    pathToFollow = "go_right_outpost";
+                    dynamicChoreoAction(pathToFollow, modifier, waitBeforeStateTime);
+                    break;
                     
                 // Shoot for Time n seconds
                 case "s":
@@ -271,6 +296,47 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
 
     private void dynamicAction(String pathToFollow, int modifier, double waitBeforeStateTime){
         dynamicAction(pathToFollow, modifier, waitBeforeStateTime, false);
+    }
+
+    private void dynamicChoreoAction(String pathToFollow, int modifier, double waitBeforeStateTime, boolean mirrorPath){
+
+        Command commandToAdd = new InstantCommand(); // default command if we don't match any cases is just to wait for a bit (so we have time to set up the robot and then it will just sit there)
+
+        switch(modifier){
+        case 0:
+            commandToAdd = new InstantCommand( 
+                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED));
+            
+            break;
+        case 1:
+            commandToAdd = new InstantCommand( 
+                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING));
+            break;
+
+
+        case 2:
+            commandToAdd = new InstantCommand( 
+                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING));
+            break;
+        case 3:
+            commandToAdd = new InstantCommand( 
+                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.SNOWBLOW));
+            break;
+
+        }
+
+        addCommands( new WaitCommand(waitBeforeStateTime).andThen(commandToAdd)
+                            .withDeadline(DriveCommands.pathfindThenFollowChoreoPath(
+                                pathToFollow, mirrorPath
+                        ).andThen(new InstantCommand( 
+                        ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                        )
+                    );
+
+    }
+
+    private void dynamicChoreoAction(String pathToFollow, int modifier, double waitBeforeStateTime){
+        dynamicChoreoAction(pathToFollow, modifier, waitBeforeStateTime, false);
     }
 
 }

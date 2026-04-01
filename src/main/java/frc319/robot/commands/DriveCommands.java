@@ -230,6 +230,8 @@ public class DriveCommands {
     return AutoBuilder.pathfindToPose(targetPose, constraints);
   }
 
+  // ========================= Pathfinding + Following =========================
+
     public static Command pathfindThenFollowPath(String pathName ) {
     try{
       
@@ -244,7 +246,7 @@ public class DriveCommands {
 
   }
 
-      public static Command pathfindThenFollowPath(String pathName, boolean mirrorPath ) {
+  public static Command pathfindThenFollowPath(String pathName, boolean mirrorPath ) {
     try{
       
       PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
@@ -252,7 +254,7 @@ public class DriveCommands {
         path = path.mirrorPath();
       }
 
-    return AutoBuilder.pathfindThenFollowPath(path, Constants.DriveConstants.autoPathingConstraints);
+      return AutoBuilder.pathfindThenFollowPath(path, Constants.DriveConstants.autoPathingConstraints);
 
     } catch (Exception e) {
         DriverStation.reportError("Something went wrong while following a path (2): " + e.getMessage(), e.getStackTrace());
@@ -301,6 +303,35 @@ public class DriveCommands {
         return Commands.none();
     }
 
+  }
+
+  // ========================= Choreo Paths =========================
+
+  public static Command pathfindThenFollowChoreoPath(PathConstraints constraints, String pathName, boolean mirrorPath){
+    try{
+      PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(pathName);
+      if(mirrorPath ){
+        path = path.mirrorPath();
+      }
+    
+    return AutoBuilder.pathfindThenFollowPath(path, constraints);
+
+    } catch (Exception e) {
+        DriverStation.reportError("Something went wrong while following a Choreo path (1): " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
+  }
+
+  public static Command pathfindThenFollowChoreoPath(PathConstraints constraints,String pathName ) {
+    return pathfindThenFollowChoreoPath(constraints, pathName, false);
+  }
+
+    public static Command pathfindThenFollowChoreoPath(String pathName, boolean mirrorPath ) {
+    return pathfindThenFollowChoreoPath(DriveConstants.pathingConstraints, pathName, mirrorPath);
+  }
+
+  public static Command pathfindThenFollowChoreoPath(String pathName ) {
+    return pathfindThenFollowChoreoPath(DriveConstants.pathingConstraints, pathName, false);
   }
 
   // ========================= Trench Pathfinding =========================
