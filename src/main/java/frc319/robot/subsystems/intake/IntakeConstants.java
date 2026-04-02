@@ -68,7 +68,6 @@ public final class IntakeConstants {
 
     public static TalonFXSubsystemConfig leadConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followConfig = new TalonFXSubsystemConfig();
-    public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     static {
       leadConfig.name = "Intake Rollers Lead";
       leadConfig.tunable = false;
@@ -80,10 +79,7 @@ public final class IntakeConstants {
       followConfig.talonCANID = new CANDeviceId(32); // Example CAN ID, replace with actual ID
       followConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       followConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-      config.name = "Intake Rollers ";
-      config.tunable = false;
-      config.talonCANID = new CANDeviceId(31); // Example CAN ID, replace with actual ID
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
+
     }
 
     public static double intakeDutyCycle = 1.0;
