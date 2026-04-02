@@ -132,9 +132,10 @@ public class RobotContainer {
             new IntakeExtension(
               IntakeConstants.Extension.config, new TalonFXIO(IntakeConstants.Extension.config));
 
-          intakeRollers =
-            new IntakeRollers(
-              IntakeConstants.Rollers.config, new SimTalonFXIO(IntakeConstants.Rollers.config));
+           intakeRollers =
+             new IntakeRollers(
+              IntakeConstants.Rollers.leadConfig, IntakeConstants.Rollers.followConfig,
+              new TalonFXIO(IntakeConstants.Rollers.leadConfig), new TalonFXIO(IntakeConstants.Rollers.followConfig));
 
           break;
 
@@ -175,9 +176,10 @@ public class RobotContainer {
             new IntakeExtension(
               IntakeConstants.Extension.config, new SimTalonFXIO(IntakeConstants.Extension.config));
 
-          intakeRollers =
-            new IntakeRollers(
-              IntakeConstants.Rollers.config, new SimTalonFXIO(IntakeConstants.Rollers.config));
+           intakeRollers =
+             new IntakeRollers(
+              IntakeConstants.Rollers.leadConfig, IntakeConstants.Rollers.followConfig,
+              new SimTalonFXIO(IntakeConstants.Rollers.leadConfig), new SimTalonFXIO(IntakeConstants.Rollers.followConfig));
             
             break;
       } // End of robot-specific subsystem instantiation switch statement
