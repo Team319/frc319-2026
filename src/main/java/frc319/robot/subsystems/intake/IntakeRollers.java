@@ -12,18 +12,23 @@ import frc319.lib.subsystem.TalonFXSubsystemConfig;
 import frc319.lib.io.MotorInputsAutoLogged;
 import frc319.robot.subsystems.intake.IntakeConstants.IntakeStates;
 
-public class IntakeRollers extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO> {
-
+public class IntakeRollers extends MotorFollowerSubsystem<MotorInputsAutoLogged, TalonFXIO> {
   IntakeStates intakeState = IntakeStates.IDLE;
   private double currentDutyCycle = 0.0;
 
   public IntakeRollers(
-    final TalonFXSubsystemConfig config, 
-    final TalonFXIO intakeRollersMotorIO) {
+    final TalonFXSubsystemConfig leadConfig, 
+    final TalonFXSubsystemConfig followConfig, 
+    final TalonFXIO intakeRollersLeadMotorIO,
+    final TalonFXIO intakeRollersFollowMotorIO) {
     super(
-      config, 
+      "IntakeRollers",
+      leadConfig, 
+      followConfig,
       new MotorInputsAutoLogged(),
-      intakeRollersMotorIO
+      new MotorInputsAutoLogged(),
+      intakeRollersLeadMotorIO,
+      intakeRollersFollowMotorIO
       );
   }
 
