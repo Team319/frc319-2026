@@ -461,7 +461,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                     break;
 
                                         // Go To Outpost and do something
-                    case "O":
+                    case "C":
                     switch(modifier){
                         case 0:
                             addCommands(
