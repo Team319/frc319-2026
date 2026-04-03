@@ -459,6 +459,7 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                         break;
                     }
                     break;
+                
                 case "O":
                     switch(modifier){
                         case 0:
@@ -484,9 +485,10 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                             );
                             break;
                     }
+                    break;
 
                                         // Go To Outpost and do something
-                    case "C":
+                case "C":
                     switch(modifier){
                         case 0:
                             addCommands(
