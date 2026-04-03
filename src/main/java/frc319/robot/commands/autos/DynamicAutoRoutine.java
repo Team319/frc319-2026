@@ -459,6 +459,31 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                         break;
                     }
                     break;
+                case "O":
+                    switch(modifier){
+                        case 0:
+                            addCommands(new WaitCommand(waitBeforeStateTime).andThen(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.STOWED)))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_right_from_outpost"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                        case 1:
+                            addCommands(
+                                new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
+                                        .withDeadline(DriveCommands.pathfindThenFollowPath(
+                                            "go_right_from_outpost"
+                                    ).andThen(new InstantCommand( 
+                                    ()-> Robot.m_robotContainer.setRobotState(RobotStates.IDLE)))
+                                )
+                            );
+                            break;
+                    }
 
                 // Shoot for Time n seconds
                 case "s":
