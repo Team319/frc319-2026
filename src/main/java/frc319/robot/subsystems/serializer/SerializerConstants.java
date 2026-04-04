@@ -16,7 +16,8 @@ public final class SerializerConstants {
   public enum SerializerStates{
     IDLE,
     JOSTLE,
-    SHOOT
+    SHOOT,
+    EJECT
   }
 
   public static final class Spindexer {
@@ -72,6 +73,8 @@ public final class SerializerConstants {
 
 
       config.unitToRotorRatio = 1.0; // 1:1 ratio
+      
     }
   }
+  public static double outtakeDutyCycle = -1.0;
 }
