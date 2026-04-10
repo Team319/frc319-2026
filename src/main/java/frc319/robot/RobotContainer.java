@@ -25,6 +25,7 @@ import frc319.robot.Constants.DemoMode;
 import frc319.robot.Constants.DriveConstants;
 import frc319.robot.commands.DriveCommands;
 import frc319.robot.commands.autos.DynamicAutoRoutine;
+import frc319.robot.commands.autos.RightSweepToOutpost;
 import frc319.robot.subsystems.drive.Drive;
 import frc319.robot.subsystems.drive.GyroIO;
 import frc319.robot.subsystems.drive.GyroIOPigeon2;
@@ -233,17 +234,9 @@ public class RobotContainer {
       autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
       autoChooser.addDefaultOption("DynamicAutoRoutine", null);
+
+      autoChooser.addOption("Right Sweep", RightSweepToOutpost.getCommand(drive));
       
-      // Add Commands to the dashboard chooser
-
-      // autoChooser.addOption(
-      //    "Right to Outpost", new DynamicAutoRoutine(drive,"h2x5o1s9")); // was h3x1L1s5l1s5
-
-      // autoChooser.addOption(
-      //    "2 Spike Right", new DynamicAutoRoutine(drive,"h2x5R1s6r1s5")); //was h2x5R1s5r1s5
-
-      // autoChooser.addOption(
-      //    "2 Spike Left", new DynamicAutoRoutine(drive,"h3x1L1s6l1s5")); // was h3x1L1s5l1s5
 
   
       configureBindings();

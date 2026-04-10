@@ -177,10 +177,19 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   @Override
   public Transform3d getTransform3d() {
     
-    Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
+    Angle rotations;
+    
+    // In simulation, use the target angle instead of encoder position for instant response
+    if (frc319.robot.Robot.isSimulation()) {
+      rotations = targetAngle;
+      Logger.recordOutput(pb.makePath("sim_using_target"), true);
+    } else {
+      rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
+      Logger.recordOutput(pb.makePath("sim_using_target"), false);
+    }
+    
     Logger.recordOutput(pb.makePath("motor_rotations"), super.getCurrentPosition().in(Rotations));
     Logger.recordOutput(pb.makePath("turret_rotations"), rotations.in(Rotations));
-
     Logger.recordOutput(pb.makePath("turret_local_radians"), rotations.in(Radians));
     
     return config.initialTransform.plus(
@@ -349,12 +358,28 @@ public Angle getCurrentTargetAngleWithVisionCorrection() {
   }
 
 public boolean isAtTargetVelocity() {
-    AngularVelocity currentVelocity = super.getCurrentVelocity().times(config.unitToRotorRatio);
-    Logger.recordOutput(pb.makePath("iat_currentVelocity"), currentVelocity.in(RPM));
-    AngularVelocity targetVelocity = RadiansPerSecond.of(0.0);
-    Logger.recordOutput(pb.makePath("iat_targetVelocity"), targetVelocity.in(RPM));
-  
-    return EqualsUtil.epsilonEquals(currentVelocity.in(RPM), targetVelocity.in(RPM), 0.5); 
+    // Get turret's angular velocity relative to the robot chassis
+    AngularVelocity turretVelocityLocal = super.getCurrentVelocity().times(config.unitToRotorRatio);
+    
+    // Get drivetrain's angular velocity (rotation rate) from kinematics manager
+    // This is the chassis spinning (ID 0), which affects the turret's global velocity
+    Translation3d driveAngularVelocity = KinematicsManager.getInstance().getGlobalAngularVelocity(0);
+    double drivetrainAngularVelRadPerSec = driveAngularVelocity.getZ(); // Z-axis is yaw rotation
+    
+    // Calculate turret's angular velocity in the global/field coordinate system
+    // Global velocity = local turret velocity + drivetrain rotation
+    double turretGlobalVelocityRadPerSec = turretVelocityLocal.in(RadiansPerSecond) + drivetrainAngularVelRadPerSec;
+    
+    // Convert to RPM for logging and comparison
+    double turretGlobalVelocityRPM = Math.toDegrees(turretGlobalVelocityRadPerSec) * 60.0 / 360.0;
+    
+    Logger.recordOutput(pb.makePath("iat_turretVelocityLocal"), turretVelocityLocal.in(RPM));
+    Logger.recordOutput(pb.makePath("iat_drivetrainAngularVel"), Math.toDegrees(drivetrainAngularVelRadPerSec) * 60.0 / 360.0);
+    Logger.recordOutput(pb.makePath("iat_turretVelocityGlobal"), turretGlobalVelocityRPM);
+    
+    // Check if global velocity is below threshold (e.g., 5 RPM)
+    double maxAllowedVelocityRPM = 5.0;
+    return Math.abs(turretGlobalVelocityRPM) < maxAllowedVelocityRPM; 
   }
 
 }

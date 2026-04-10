@@ -307,6 +307,31 @@ public class DriveCommands {
 
   // ========================= Choreo Paths =========================
 
+    public static Command followChoreoPathCommand(String pathName) {
+    try{
+        PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(pathName);
+      return AutoBuilder.followPath(path);
+
+    } catch (Exception e) {
+        DriverStation.reportError("Something went wrong while following a Choreo path (1): " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
+  }
+
+    public static Command followChoreoPathCommand(String pathName, boolean mirrorPath ) {
+    try{
+        PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(pathName);
+        if(mirrorPath ){
+          path = path.mirrorPath();
+        }
+      return AutoBuilder.followPath(path);
+
+    } catch (Exception e) {
+        DriverStation.reportError("Something went wrong while following a Choreo path (1): " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
+  }
+
   public static Command pathfindThenFollowChoreoPath(PathConstraints constraints, String pathName, boolean mirrorPath){
     try{
       PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(pathName);
