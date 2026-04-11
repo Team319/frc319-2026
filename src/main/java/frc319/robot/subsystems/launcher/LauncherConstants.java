@@ -159,11 +159,11 @@ public final class LauncherConstants {
 
     static {
       // Distance (m) -> Ball Velocity (ft/s)  // We dont use this one. This is for the Launching solution calculations
-      velocityMap.put(1.0, 20.0);
-      velocityMap.put(1.5, 20.0);
-      velocityMap.put(3.0, 23.0);
-      velocityMap.put(4.0, 25.0);
-      velocityMap.put(5.17, 28.0);
+      velocityMap.put(1.0, 20.0*2.0);
+      velocityMap.put(1.5, 20.0*2.0);
+      velocityMap.put(3.0, 23.0*2.0);
+      velocityMap.put(4.0, 25.0*2.0);
+      velocityMap.put(5.17, 28.0*2.0);
     }
 
       public static InterpolatingDoubleTreeMap flywheelRPMMap = new InterpolatingDoubleTreeMap();

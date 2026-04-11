@@ -140,7 +140,7 @@ public class Constants {
     public static enum Device{
       DRIVETRAIN_BACK,
       DRIVETRAIN_RIGHT,
-      TURRET,
+      DRIVETRAIN_LEFT,
       COLLECTOR
     }
   

@@ -136,14 +136,14 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   public Transform3d getTransform3d() {
     Angle hoodAngle;
     
-    // In simulation, use the target angle instead of encoder position for instant response
-    if (frc319.robot.Robot.isSimulation()) {
-      hoodAngle = aimAngle;
-      Logger.recordOutput(super.pb.makePath("sim_using_target"), true);
-    } else {
+    // // In simulation, use the target angle instead of encoder position for instant response
+    // if (frc319.robot.Robot.isSimulation()) {
+    //   hoodAngle = aimAngle;
+    //   Logger.recordOutput(super.pb.makePath("sim_using_target"), true);
+    // } else {
       hoodAngle = this.convertMotorPositionToSubsystemPosition(super.getCurrentPosition());
       Logger.recordOutput(super.pb.makePath("sim_using_target"), false);
-    }
+    // }
     
     Logger.recordOutput(super.pb.makePath("hoodAngle_Degrees"), hoodAngle.in(Degrees));
 

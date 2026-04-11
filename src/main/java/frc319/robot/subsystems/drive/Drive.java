@@ -371,7 +371,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           if(!doRejectVisionUpdate)
           {
             // Calculate dynamic standard deviations based on distance
-            double xyStdDev = 0.5 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
+            double xyStdDev = 0.1 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
             double thetaStdDev = 999999; // Still keep rotation very uncertain
 
             // Optionally, also scale based on number of tags (more tags = more confident)
@@ -433,7 +433,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           if(!doRejectVisionUpdate)
           {
             // Calculate dynamic standard deviations based on distance
-            double xyStdDev = 0.5 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
+            double xyStdDev = 0.1 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
             double thetaStdDev = 999999; // Still keep rotation very uncertain
 
             // Optionally, also scale based on number of tags (more tags = more confident)
@@ -450,22 +450,22 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           
         }
 
-        // Update / Correct the pose using Localization from Vision (using the 'TURRET' Limelight) 
-        if(Limelight.isValidTargetSeen(LimelightConstants.Device.TURRET) && DriverStation.isEnabled() )
+        // Update / Correct the pose using Localization from Vision (using the 'DRIVETRAIN_LEFT' Limelight) 
+        if(Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN_LEFT) && DriverStation.isEnabled() )
         {
-          doRejectVisionUpdate = true;
-          double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.TURRET);
+          doRejectVisionUpdate = false;
+          double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.DRIVETRAIN_LEFT);
           Pose3d visionPose = new Pose3d(
                                 new Translation3d(poseBuf[0],poseBuf[1],poseBuf[2]), 
                                 new Rotation3d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]),Units.degreesToRadians(poseBuf[5]))
                               );
-          Logger.recordOutput("Odometry/VisionPoseTurret", visionPose.toPose2d());
+          Logger.recordOutput("Odometry/VisionPoseLeft", visionPose.toPose2d());
  
           double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
           Logger.recordOutput("/Drive/poseDifference", poseDifference);
 
-          LimelightHelpers.SetRobotOrientation("limelight-turret", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-          LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-turret");
+          LimelightHelpers.SetRobotOrientation("limelight-left", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+          LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left");
           
           if(mt2 == null){
             mt2 = new LimelightHelpers.PoseEstimate();
@@ -486,20 +486,20 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           }
           if(!doRejectVisionUpdate)
           {
-            // // Calculate dynamic standard deviations based on distance
-            // double xyStdDev = 0.5 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
-            // double thetaStdDev = 999999; // Still keep rotation very uncertain
+            // Calculate dynamic standard deviations based on distance
+            double xyStdDev = 0.1 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
+            double thetaStdDev = 999999; // Still keep rotation very uncertain
 
-            // // Optionally, also scale based on number of tags (more tags = more confident)
-            // if (mt2.tagCount >= 2) {
-            //     xyStdDev *= 0.5; // Cut uncertainty in half with 2+ tags
-            // }
+            // Optionally, also scale based on number of tags (more tags = more confident)
+            if (mt2.tagCount >= 2) {
+                xyStdDev *= 0.5; // Cut uncertainty in half with 2+ tags
+            }
 
-            // poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev));
+            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev));
             
-            // poseEstimator.addVisionMeasurement(
-            //     mt2.pose,
-            //     mt2.timestampSeconds);
+            poseEstimator.addVisionMeasurement(
+                mt2.pose,
+                mt2.timestampSeconds);
           }
           doRejectVisionUpdate = false;
           

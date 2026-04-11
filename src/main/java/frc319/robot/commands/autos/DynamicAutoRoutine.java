@@ -40,8 +40,8 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
 
             // These are all for blue origin, blue alliance case. We apply a flip when used for red alliance. 
 
-            public static final Translation2d LEFT_TRENCH = new Translation2d(FieldConstants.LinesVertical.starting, 7.5 ); // we can grab these from pathplanner too...
-            public static final Translation2d LEFT_BUMP = new Translation2d(FieldConstants.LinesVertical.starting, 5.5);
+            public static final Translation2d DRIVETRAIN_LEFT_TRENCH = new Translation2d(FieldConstants.LinesVertical.starting, 7.5 ); // we can grab these from pathplanner too...
+            public static final Translation2d DRIVETRAIN_LEFT_BUMP = new Translation2d(FieldConstants.LinesVertical.starting, 5.5);
             
             public static final Translation2d CENTER_HUB = new Translation2d(FieldConstants.LinesVertical.starting, FieldConstants.LinesHorizontal.center);
 
@@ -135,11 +135,11 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                     switch (modifier) 
                     {
                         case 1:
-                            startingPose = AutoConstants.TargetLocations.LEFT_TRENCH;
+                            startingPose = AutoConstants.TargetLocations.DRIVETRAIN_LEFT_TRENCH;
                             break;
                         
                         case 2:
-                            startingPose = AutoConstants.TargetLocations.LEFT_BUMP;
+                            startingPose = AutoConstants.TargetLocations.DRIVETRAIN_LEFT_BUMP;
                             break;
                     
                         case 3:

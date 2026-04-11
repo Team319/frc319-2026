@@ -1,8 +1,8 @@
 {
   "NetworkTables": {
     "transitory": {
-      "limelight-turret": {
-        "double[]##v_/limelight-turret/robot_orientation_set": {
+      "limelight-left": {
+        "double[]##v_/limelight-left/robot_orientation_set": {
           "open": true
         },
         "open": true

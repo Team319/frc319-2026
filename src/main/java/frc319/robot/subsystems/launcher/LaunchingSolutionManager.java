@@ -10,6 +10,8 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -100,11 +102,6 @@ public void calculateCurrentTargets(){
     Logger.recordOutput("LaunchingSolutionManager/calculate/rangeVec", rangeVec);
     Logger.recordOutput("LaunchingSolutionManager/calculate/dist", dist);
 
-    // B. Check Range
-    if (dist > 8.0 || dist < 1.0) {
-      //return new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), dist, true); // TODO - this was set false
-    }
-
     // C. Get Ideal Static Launch Params (Ground Relative)
     double idealSpeed =
         FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(dist)).in(MetersPerSecond);
@@ -123,19 +120,23 @@ public void calculateCurrentTargets(){
             .plus(new Translation3d(0, 0, idealSpeed * Math.sin(idealPitchRad)));
 
     // E. Subtract Robot Velocity (V_muzzle = V_ideal - V_robot)
-    Translation3d neededMuzzleVelocity = idealVelocity.minus(robotVel);
+    //Translation3d neededMuzzleVelocity = idealVelocity.minus(robotVel);
 
     // F. Extract Parameters from Resulting Vector
-    double newSpeed = neededMuzzleVelocity.getNorm();
+    double newSpeed = 0.0;//neededMuzzleVelocity.getNorm();
 
     // Vertical Angle (Pitch)
-    double newPitch =
-        Math.atan2(
-            neededMuzzleVelocity.getZ(),
-            Math.hypot(neededMuzzleVelocity.getX(), neededMuzzleVelocity.getY()));
+    double newPitch = 0.0;
+        // Math.atan2(
+        //     neededMuzzleVelocity.getZ(),
+        //     Math.hypot(neededMuzzleVelocity.getX(), neededMuzzleVelocity.getY()));
+
+    targetOnMovePose = new Pose3d(this.targetPose.getTranslation().minus(robotVel), new Rotation3d());
+
+    Transform3d diff = targetOnMovePose.minus(robotPose);
 
     // Horizontal Angle (Yaw)
-    double newYaw = Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX());
+    double newYaw = Math.atan2(diff.getY(), diff.getX());
 
     return new LaunchSolution(
         new Rotation2d(newYaw), newSpeed, new Rotation2d(newPitch), dist, true);

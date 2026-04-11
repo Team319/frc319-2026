@@ -30,6 +30,7 @@ import frc319.lib.subsystem.TalonFXSubsystemConfig;
 import frc319.lib.util.EqualsUtil;
 import frc319.lib.util.Util;
 import frc319.lib.io.MotorInputsAutoLogged;
+import frc319.robot.Constants;
 import frc319.robot.FieldConstants;
 import frc319.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 
@@ -136,17 +137,18 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       //   break;
 
       case TRACKING_TARGET:
-        if (LauncherVisionManager.getInstance().isTargetVisible()) { // add leniency if the last vision measurement was recent fpga timestamp
-            CommandScheduler.getInstance().schedule(this.setAngle(() -> getTurretAngleFromVision()));
-            targetAngle = getTurretAngleFromVision();
-        } else {
+        // if (Constants.useTurretLimelight && LauncherVisionManager.getInstance().isTargetVisible()) { // add leniency if the last vision measurement was recent fpga timestamp
+        //     CommandScheduler.getInstance().schedule(this.setAngle(() -> getTurretAngleFromVision()));
+        //     targetAngle = getTurretAngleFromVision();
+        // } else {
             // Fall back to drive base pose until LL acquires
             CommandScheduler.getInstance().schedule(this.setAngle(() -> getCurrentTargetAngle()));
             targetAngle = getCurrentTargetAngle();
-        }
+        // }
         break;
       
       case TRACK_HUB_ON_MOVE:
+        targetAngle = getLauncOnTheFlyAngle();
         CommandScheduler.getInstance().schedule(this.setAngle(() -> getLauncOnTheFlyAngle()));
         currentTargetPose = LaunchingSolutionManager.getInstance().getTargetOnMovePose();
         Logger.recordOutput(super.pb.makePath("currentTargetPose"), currentTargetPose);
@@ -180,13 +182,13 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     Angle rotations;
     
     // In simulation, use the target angle instead of encoder position for instant response
-    if (frc319.robot.Robot.isSimulation()) {
-      rotations = targetAngle;
-      Logger.recordOutput(pb.makePath("sim_using_target"), true);
-    } else {
+    // if (frc319.robot.Robot.isSimulation()) {
+    //   rotations = targetAngle;
+    //   Logger.recordOutput(pb.makePath("sim_using_target"), true);
+    // } else {
       rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
       Logger.recordOutput(pb.makePath("sim_using_target"), false);
-    }
+    // }
     
     Logger.recordOutput(pb.makePath("motor_rotations"), super.getCurrentPosition().in(Rotations));
     Logger.recordOutput(pb.makePath("turret_rotations"), rotations.in(Rotations));
@@ -310,22 +312,32 @@ public Angle getCurrentTargetAngleWithVisionCorrection() {
 }
 
   public Angle getLauncOnTheFlyAngle() {
-    // 1. Get the latest solution
-    var solution = LaunchingSolutionManager.getInstance().getSolution();
+    Translation3d diff = this.getTranslationTo(LaunchingSolutionManager.getInstance().getTargetOnMovePose().getTranslation());
+    // 2. Calculate the Global Yaw needed to face the target
+    // Math.atan2(y, x) handles all quadrants correctly
+    double globalTargetRadians = Math.atan2(diff.getY(), diff.getX());
 
-    //if (solution.isValid()) {
-      // 2. Convert Field-Relative Goal to Robot-Relative Setpoint
+    // 3. Get the Chassis Heading (Global)
+    // You need the Robot's orientation on the field to make this relative.
+    // Assuming ID 0 is your Drive/Chassis in KinematicsManager:
+    Rotation3d chassisRotation = KinematicsManager.getInstance().getGlobalPose(0).getRotation();
+    double chassisHeadingRadians = chassisRotation.getZ();
 
-      // Get Chassis Heading from Kinematics
-      Rotation2d chassisHeading =
-          KinematicsManager.getInstance().getGlobalPose(0).getRotation().toRotation2d();
+    // 4. Calculate Relative Angle (Target - Chassis)
+    double relativeRadians = globalTargetRadians - chassisHeadingRadians;
 
-      // TargetYaw - ChassisYaw = TurretSetpoint
-      Rotation2d localSetpoint = solution.turretFieldRelativeYaw().minus(chassisHeading);
+    // 5. Normalize to range (-PI to PI) so the turret takes the shortest path
+    // e.g., if result is 350 degrees, this turns it into -10 degrees
+    //double normalizedRadians = MathUtil.angleModulus(relativeRadians);
 
-      return localSetpoint.getMeasure();
-    //}
-   // return Degrees.of(0);
+    // I want the wrap around to be at a different point to I will clamp it 
+    double wrapAroundPoint = (7*Math.PI / 4); // Wrap around at 90 degrees instead of 180
+    
+    double normalizedRadians = MathUtil.inputModulus(relativeRadians, -2*Math.PI + wrapAroundPoint, wrapAroundPoint);
+
+
+
+    return Radians.of(normalizedRadians);
   }
 
   public boolean isAtTargetPosition() {
@@ -343,10 +355,11 @@ public Angle getCurrentTargetAngleWithVisionCorrection() {
         break;
       
       case TRACK_HUB_ON_MOVE:
-       targetAngle = getLauncOnTheFlyAngle();
+       //targetAngle = getLauncOnTheFlyAngle();
+       break;
 
       case DUMB_SHOT:
-      targetAngle = Degrees.of(0);
+        targetAngle = Degrees.of(0);
 
         break;
 

@@ -39,7 +39,7 @@ public class LauncherVisionManager extends SubsystemBase {
     @Override
     public void periodic() {
         // Update the Limelight's heading based on the turret's current pose
-        updateLimelightHeading();
+        //updateLimelightHeading();
 
         Logger.recordOutput("LaunchingVisionManager/2dDistanceToCurrentTarget", get2dDistanceToCurrentTarget());
         Logger.recordOutput("LaunchingVisionManager/GlobalPoseFromVision", getGlobalPoseFromVision());
@@ -47,7 +47,7 @@ public class LauncherVisionManager extends SubsystemBase {
     }
 
     public boolean isTargetVisible(){
-        return Limelight.isValidTargetSeen(LimelightConstants.Device.TURRET);
+        return Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN_LEFT);
     }
 
     public boolean isTurretPoseValid() {
@@ -55,7 +55,7 @@ public class LauncherVisionManager extends SubsystemBase {
     
     // Require at least 2 tags for unambiguous 6DOF solve
     boolean tagVisable = NetworkTableInstance.getDefault()
-        .getTable("limelight-turret")
+        .getTable("limelight-left")
         .getEntry("tv")  
         .getBoolean(false);
     
@@ -74,7 +74,7 @@ public class LauncherVisionManager extends SubsystemBase {
         }
         else{
 
-            double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.TURRET);
+            double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.DRIVETRAIN_LEFT);
             Pose3d visionPose = new Pose3d(
                                 new Translation3d(poseBuf[0],poseBuf[1],poseBuf[2]), 
                                 new Rotation3d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]),Units.degreesToRadians(poseBuf[5]))
@@ -88,8 +88,8 @@ public class LauncherVisionManager extends SubsystemBase {
     }
 
     public Pose3d getGlobalPoseFromVision(){
-        if(Limelight.isValidTargetSeen(LimelightConstants.Device.TURRET)){
-            double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.TURRET);
+        if(Limelight.isValidTargetSeen(LimelightConstants.Device.DRIVETRAIN_LEFT)){
+            double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.DRIVETRAIN_LEFT);
         
             // TODO - add protection to make sure poseBuf is big enough...
             Pose3d visionPose = new Pose3d(
@@ -108,7 +108,7 @@ public class LauncherVisionManager extends SubsystemBase {
     // In LauncherVisionManager
 public Pose3d getTurretCameraPoseInField() {
     double[] buf = NetworkTableInstance.getDefault()
-        .getTable("limelight-turret")
+        .getTable("limelight-left")
         .getEntry("botpose_wpiblue")
         .getDoubleArray(new double[6]);
     return new Pose3d(
@@ -126,7 +126,7 @@ public Pose3d getTurretCameraPoseInField() {
 
         Pose2d currentTurretPose = KinematicsManager.getInstance().getGlobalPoseFor(Robot.m_robotContainer.turret).toPose2d();
 
-        LimelightHelpers.SetRobotOrientation("limelight-turret", 
+        LimelightHelpers.SetRobotOrientation("limelight-left", 
             currentTurretPose.getRotation().getDegrees(), 
             0, 0, 0, 0, 0);
         

@@ -18,7 +18,7 @@ import frc319.robot.Constants.LimelightConstants;
 
 public class Limelight {
 
-  private static final NetworkTable m_turretTable = NetworkTableInstance.getDefault().getTable("limelight-turret"); // Makes the Limelight data table.
+  private static final NetworkTable m_turretTable = NetworkTableInstance.getDefault().getTable("limelight-left"); // Makes the Limelight data table.
   private static NetworkTableEntry m_botPose_turret = m_turretTable.getEntry("botpose_wpiblue"); // Makes a double array to hold the robot pose.
   private static NetworkTableEntry m_tv_turret = m_turretTable.getEntry("tv");
   private static NetworkTableEntry m_tx_turret = m_turretTable.getEntry("tx");
@@ -53,7 +53,7 @@ public class Limelight {
   //Returns latency
   public static double getLatency(LimelightConstants.Device device) {
     switch(device){
-      case TURRET:
+      case DRIVETRAIN_LEFT:
         return m_tl_turret.getDouble(0.0); 
       case DRIVETRAIN_BACK:
         return m_tl_drivetrain.getDouble(0.0);
@@ -67,7 +67,7 @@ public class Limelight {
   //Returns total latency
   public static double getTotalLatency(LimelightConstants.Device device) {
     switch(device){
-      case TURRET:
+      case DRIVETRAIN_LEFT:
         return m_cl_turret.getDouble(0.0); 
       case DRIVETRAIN_BACK:
         return m_cl_drivetrain.getDouble(0.0);
@@ -81,7 +81,7 @@ public class Limelight {
   //Returns target area
    public static double getTargetArea(LimelightConstants.Device device){
     switch(device){
-      case TURRET:
+      case DRIVETRAIN_LEFT:
         return m_ta_turret.getDouble(0.0); 
       case DRIVETRAIN_BACK:
         return m_ta_drivetrain.getDouble(0.0); 
@@ -96,7 +96,7 @@ public class Limelight {
   // Returns the horizontal offset from valid target
   public static double getHorizontalOffset(LimelightConstants.Device device) {
     switch(device){
-      case TURRET:
+      case DRIVETRAIN_LEFT:
         return m_tx_turret.getDouble(0.0); 
       case DRIVETRAIN_BACK:
         return m_tx_drivetrain.getDouble(0.0); 
@@ -110,7 +110,7 @@ public class Limelight {
   // Returns the vertical offset from valid target
   public static double getVerticalOffset(LimelightConstants.Device device) {
     switch(device){
-      case TURRET:
+      case DRIVETRAIN_LEFT:
         return m_ty_turret.getDouble(0.0); 
       case DRIVETRAIN_BACK:
         return m_ty_drivetrain.getDouble(0.0); 
@@ -124,9 +124,9 @@ public class Limelight {
   // Returns the distance from the target
   public static double getDistance(LimelightConstants.Device device) {
     switch(device){
-      case TURRET:
+      case DRIVETRAIN_LEFT:
       return 0.0;
-        //return (Constants.kTargetHeight - Constants.kCameraHeight) / Math.tan(Math.toRadians(Constants.kCameraAngle + getVerticalOffset(LimelightConstants.Device.TURRET))); 
+        //return (Constants.kTargetHeight - Constants.kCameraHeight) / Math.tan(Math.toRadians(Constants.kCameraAngle + getVerticalOffset(LimelightConstants.Device.DRIVETRAIN_LEFT))); 
       case DRIVETRAIN_BACK:
       case DRIVETRAIN_RIGHT:
       default:
@@ -139,7 +139,7 @@ public class Limelight {
   public static boolean isValidTargetSeen (LimelightConstants.Device device) {
     double result = 0.0;
     switch(device){
-      case TURRET:
+      case DRIVETRAIN_LEFT:
         result = m_tv_turret.getDouble(0.0); 
         break;
       case DRIVETRAIN_BACK:
@@ -159,7 +159,7 @@ public class Limelight {
   //Returns field space robot pose
   public static double[] getBotPose(LimelightConstants.Device device) {
     switch(device){
-      case TURRET:
+      case DRIVETRAIN_LEFT:
         if (m_botPose_turret.getDoubleArray(new double[7]).length >= 7){
           return m_botPose_turret.getDoubleArray(new double[7]);
         }

@@ -25,6 +25,7 @@ import frc319.robot.Constants.DemoMode;
 import frc319.robot.Constants.DriveConstants;
 import frc319.robot.commands.DriveCommands;
 import frc319.robot.commands.autos.DynamicAutoRoutine;
+import frc319.robot.commands.autos.RightSnowblow;
 import frc319.robot.commands.autos.RightSweepToOutpost;
 import frc319.robot.subsystems.drive.Drive;
 import frc319.robot.subsystems.drive.GyroIO;
@@ -236,6 +237,7 @@ public class RobotContainer {
       autoChooser.addDefaultOption("DynamicAutoRoutine", null);
 
       autoChooser.addOption("Right Sweep", RightSweepToOutpost.getCommand(drive));
+      autoChooser.addOption("Right Snowblow", RightSnowblow.getCommand(drive));
       
 
   
@@ -318,7 +320,7 @@ public class RobotContainer {
           .onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.RETRACTED)));
 
         driverController.rightTrigger()
-          .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING)))
+          .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING_ON_MOVE)))
           .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_SHOOTING)));
 
         driverController.rightBumper()
@@ -439,7 +441,7 @@ public class RobotContainer {
 
         flywheels.setState(FlywheelsState.SHOOT);
         //intakeExtension.setState(IntakeStates.JOSTLE);
-        intakeRollers.setState(IntakeStates.COLLECT); 
+        //intakeRollers.setState(IntakeStates.COLLECT); 
 
         // This is handled in Robot.java
         // ballTunnel.setState(SerializerStates.SHOOT);
@@ -488,7 +490,7 @@ public class RobotContainer {
           ballTunnel.setState(SerializerStates.IDLE);
           spindexer.setState(SerializerStates.IDLE);
           // Keep pointing at target
-          turret.setState(LauncherStates.TRACKING_TARGET);
+          turret.setState(LauncherStates.TRACK_HUB_ON_MOVE);
           // Keep the hood safe
           hood.setState(LauncherStates.STOWED);
 
