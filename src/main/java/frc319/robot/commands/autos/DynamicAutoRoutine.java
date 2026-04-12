@@ -221,8 +221,8 @@ public class DynamicAutoRoutine extends SequentialCommandGroup {
                     break;
 
                 case "O":
-                    pathToFollow = "go_right_from_outpost";
-                    dynamicChoreoAction(pathToFollow, modifier, waitBeforeStateTime);
+                    pathToFollow = "go_outpost";
+                    dynamicAction(pathToFollow, modifier, waitBeforeStateTime);
                     break;
 
                 // Shoot for Time n seconds

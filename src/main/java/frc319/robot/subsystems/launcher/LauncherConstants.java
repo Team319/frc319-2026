@@ -83,8 +83,8 @@ public final class LauncherConstants {
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1500.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 750.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 2000.0; // rotations per second    // was 1500 at uvm
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 1000.0; // rotations per second^2    // was 750
       config.fxConfig.MotionMagic.MotionMagicJerk = 3000.0; // limit jerk for smooth motion
 
       config.initialTransform =
@@ -178,6 +178,7 @@ public final class LauncherConstants {
       flywheelRPMMap.put(3.75, 2450.0+modifier);
       flywheelRPMMap.put(4.5, 2635.0+50.0+modifier); 
       flywheelRPMMap.put(7.0, 2800.0+modifier);
+      flywheelRPMMap.put(10.0, 4000.0+modifier);
 
     }
 

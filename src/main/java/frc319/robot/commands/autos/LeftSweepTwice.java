@@ -21,29 +21,40 @@ import frc319.robot.subsystems.intake.IntakeConstants.IntakeStates;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class RightSweepToOutpost {
+public class LeftSweepTwice {
 
-  static double defaultHeading = 90.0;
-  static Pose2d startingPose = AllianceFlipUtil.apply(new Pose2d(new Translation2d(FieldConstants.LinesVertical.starting, 0.575), new Rotation2d(Math.toRadians(defaultHeading))));
+  static double defaultHeading = 270.0;
+  static Pose2d startingPose = AllianceFlipUtil.apply(new Pose2d(new Translation2d(FieldConstants.LinesVertical.starting, 7.5), new Rotation2d(Math.toRadians(defaultHeading))));
 
   public static Command getCommand(Drive drive) {
-    return Commands.sequence(
+    return 
+    Commands.sequence(
       Commands.runOnce(() -> System.out.println("Running Right Sweep to Outpost Auto")),
       Commands.runOnce(() -> drive.setPose(startingPose)),
       Commands.parallel(
-        DriveCommands.followPathCommand("go_right_outpost",false),
+        DriveCommands.followPathCommand("go_left",false),
         Commands.waitSeconds(1.0)
         .andThen(
           Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))
         ) 
       ),
       Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_ON_MOVE)),
-      Commands.waitSeconds(3.5),
+      Commands.waitSeconds(0.5),
       Commands.runOnce(()-> Robot.m_robotContainer.intakeExtension.setState(IntakeStates.JOSTLE)),
       Commands.waitSeconds(1.0),
       Commands.runOnce(()-> Robot.m_robotContainer.intakeExtension.setState(IntakeStates.RETRACTED)),
-      Commands.waitSeconds(5.0),
-      Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.STOP_SHOOTING))      
+      Commands.waitSeconds(1.5),
+      Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.STOP_SHOOTING)),
+      Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING)),
+      
+      DriveCommands.followPathCommand("go_left_mid",false),
+      Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_ON_MOVE)),
+      Commands.waitSeconds(0.5),
+      Commands.runOnce(()-> Robot.m_robotContainer.intakeExtension.setState(IntakeStates.JOSTLE)),
+      Commands.waitSeconds(1.0),
+      Commands.runOnce(()-> Robot.m_robotContainer.intakeExtension.setState(IntakeStates.RETRACTED)),
+      Commands.waitSeconds(2.5),
+      Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.STOP_SHOOTING))
     );
   }
 }

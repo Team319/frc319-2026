@@ -25,8 +25,12 @@ import frc319.robot.Constants.DemoMode;
 import frc319.robot.Constants.DriveConstants;
 import frc319.robot.commands.DriveCommands;
 import frc319.robot.commands.autos.DynamicAutoRoutine;
+import frc319.robot.commands.autos.LeftSweepTwice;
+import frc319.robot.commands.autos.Orbit;
 import frc319.robot.commands.autos.RightSnowblow;
 import frc319.robot.commands.autos.RightSweepToOutpost;
+import frc319.robot.commands.autos.RightSweepTwice;
+import frc319.robot.commands.autos.TestPath;
 import frc319.robot.subsystems.drive.Drive;
 import frc319.robot.subsystems.drive.GyroIO;
 import frc319.robot.subsystems.drive.GyroIOPigeon2;
@@ -236,8 +240,13 @@ public class RobotContainer {
 
       autoChooser.addDefaultOption("DynamicAutoRoutine", null);
 
-      autoChooser.addOption("Right Sweep", RightSweepToOutpost.getCommand(drive));
+      autoChooser.addOption("Right Sweep -> Outpost", RightSweepToOutpost.getCommand(drive));
+      autoChooser.addOption("Right Sweep 2x ", RightSweepTwice.getCommand(drive));
       autoChooser.addOption("Right Snowblow", RightSnowblow.getCommand(drive));
+      autoChooser.addOption("Left Sweep 2x ", LeftSweepTwice.getCommand(drive));
+      //autoChooser.addOption("Test Path", TestPath.getCommand(drive));
+      autoChooser.addOption("Orbit Auto", Orbit.getCommand(drive));
+      
       
 
   
@@ -316,8 +325,8 @@ public class RobotContainer {
           .onFalse(new InstantCommand(()->this.setRobotState(RobotStates.STOP_COLLECTING)));
 
         driverController.leftBumper()
-          .onTrue(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.JOSTLE)))
-          .onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.RETRACTED)));
+          .onTrue(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.JOSTLE)).andThen(new InstantCommand(()->this.intakeRollers.setState(IntakeStates.COLLECT))))
+          .onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.RETRACTED)).andThen(new InstantCommand(()->this.intakeRollers.setState(IntakeStates.IDLE))));
 
         driverController.rightTrigger()
           .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING_ON_MOVE)))

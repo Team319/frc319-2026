@@ -39,7 +39,7 @@ public final class SerializerConstants {
       config.fxConfig.CurrentLimits.StatorCurrentLimit = 35.0;
 
       config.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-      config.fxConfig.CurrentLimits.StatorCurrentLimit = 20.0;
+      config.fxConfig.CurrentLimits.SupplyCurrentLimit = 35.0;
 
       config.unitToRotorRatio = 1.0; // 1:1 ratio
       config.initialTransform =

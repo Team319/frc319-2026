@@ -356,11 +356,11 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           Logger.recordOutput("Odometry/limelight-drive/mt2PoseDrive", mt2.pose);
 
           // If the robot is spinning too fast, ignore vision updates
-          if(Math.abs(rawGyroVelocityRadPerSec) > Units.degreesToRadians(720) ) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+          if(Math.abs(rawGyroVelocityRadPerSec) > Units.degreesToRadians(360) ) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
           {
             doRejectVisionUpdate = true;
           }
-          if(mt2.tagCount == 0)
+          if(mt2.tagCount < 2)
           {
             doRejectVisionUpdate = true;
           }
@@ -368,8 +368,12 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           {
             doRejectVisionUpdate = true;
           }
+          // if(poseDifference > 2.5){
+          //   doRejectVisionUpdate = true;
+          // }
           if(!doRejectVisionUpdate)
           {
+            Logger.recordOutput("Odometry/VisionPoseDrive_accepted", visionPose.toPose2d());
             // Calculate dynamic standard deviations based on distance
             double xyStdDev = 0.1 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
             double thetaStdDev = 999999; // Still keep rotation very uncertain
@@ -418,11 +422,11 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           Logger.recordOutput("Odometry/limelight-right/mt2PoseDrive", mt2.pose);
 
           // If the robot is spinning too fast, ignore vision updates
-          if(Math.abs(rawGyroVelocityRadPerSec) > Units.degreesToRadians(720) ) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+          if(Math.abs(rawGyroVelocityRadPerSec) > Units.degreesToRadians(360) ) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
           {
             doRejectVisionUpdate = true;
           }
-          if(mt2.tagCount == 0)
+          if(mt2.tagCount < 2)
           {
             doRejectVisionUpdate = true;
           }
@@ -430,8 +434,12 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           {
             doRejectVisionUpdate = true;
           }
+          // if(poseDifference > 2.5){
+          //   doRejectVisionUpdate = true;
+          // }
           if(!doRejectVisionUpdate)
           {
+            Logger.recordOutput("Odometry/VisionPoseRight_accepted", visionPose.toPose2d());
             // Calculate dynamic standard deviations based on distance
             double xyStdDev = 0.1 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
             double thetaStdDev = 999999; // Still keep rotation very uncertain
@@ -476,16 +484,21 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           Logger.recordOutput("Odometry/mt2Poseturret", mt2.pose);
 
           // If the robot is spinning too fast, ignore vision updates
-          if(Math.abs(rawGyroVelocityRadPerSec) > Units.degreesToRadians(720) ) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+          if(Math.abs(rawGyroVelocityRadPerSec) > Units.degreesToRadians(360) ) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
           {
             doRejectVisionUpdate = true;
           }
-          if(mt2.tagCount == 0)
+          if(mt2.tagCount < 2)
           {
             doRejectVisionUpdate = true;
           }
+          // if(poseDifference > 2.5){
+          //   doRejectVisionUpdate = true;
+          // }
           if(!doRejectVisionUpdate)
           {
+            Logger.recordOutput("Odometry/VisionPoseLeft_accepted", visionPose.toPose2d());
+
             // Calculate dynamic standard deviations based on distance
             double xyStdDev = 0.1 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
             double thetaStdDev = 999999; // Still keep rotation very uncertain
