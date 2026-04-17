@@ -25,8 +25,11 @@ import frc319.robot.Constants.DemoMode;
 import frc319.robot.Constants.DriveConstants;
 import frc319.robot.commands.DriveCommands;
 import frc319.robot.commands.autos.DynamicAutoRoutine;
+import frc319.robot.commands.autos.LeftBump2xToDepot;
+import frc319.robot.commands.autos.LeftBumpToDepot;
 import frc319.robot.commands.autos.LeftSweepTwice;
 import frc319.robot.commands.autos.Orbit;
+import frc319.robot.commands.autos.RightBumpToOutpost;
 import frc319.robot.commands.autos.RightSnowblow;
 import frc319.robot.commands.autos.RightSweepToOutpost;
 import frc319.robot.commands.autos.RightSweepTwice;
@@ -242,13 +245,14 @@ public class RobotContainer {
 
       autoChooser.addOption("Right Sweep -> Outpost", RightSweepToOutpost.getCommand(drive));
       autoChooser.addOption("Right Sweep 2x ", RightSweepTwice.getCommand(drive));
-      autoChooser.addOption("Right Snowblow", RightSnowblow.getCommand(drive));
-      autoChooser.addOption("Left Sweep 2x ", LeftSweepTwice.getCommand(drive));
-      //autoChooser.addOption("Test Path", TestPath.getCommand(drive));
-      autoChooser.addOption("Orbit Auto", Orbit.getCommand(drive));
-      
-      
+      autoChooser.addOption("Right Orbit Auto", Orbit.getCommand(drive));
+      autoChooser.addOption("Right Bump to Outpost ", RightBumpToOutpost.getCommand(drive));  
 
+      autoChooser.addOption("Left Sweep 2x ", LeftSweepTwice.getCommand(drive));
+      autoChooser.addOption("Left Bump to Depot ", LeftBumpToDepot.getCommand(drive));
+      autoChooser.addOption("Left Bump 2x to Depot ", LeftBump2xToDepot.getCommand(drive));
+
+      //autoChooser.addOption("Test Path", TestPath.getCommand(drive));
   
       configureBindings();
 
@@ -326,7 +330,7 @@ public class RobotContainer {
 
         driverController.leftBumper()
           .onTrue(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.JOSTLE)).andThen(new InstantCommand(()->this.intakeRollers.setState(IntakeStates.COLLECT))))
-          .onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.RETRACTED)).andThen(new InstantCommand(()->this.intakeRollers.setState(IntakeStates.IDLE))));
+          .onFalse(new InstantCommand(()->this.intakeExtension.setState(IntakeStates.RETRACTED)).andThen(new InstantCommand(()->this.intakeRollers.setState(IntakeStates.COLLECT))));
 
         driverController.rightTrigger()
           .onTrue(new InstantCommand(()->this.setRobotState(RobotStates.SHOOTING_ON_MOVE)))
@@ -348,7 +352,9 @@ public class RobotContainer {
 
         driverController.b()
           .onTrue( new InstantCommand(()->intakeRollers.setState(IntakeStates.EJECT)))
-          .onFalse(new InstantCommand(()->intakeRollers.setState(IntakeStates.IDLE)));
+          .onTrue( new InstantCommand(()->spindexer.setState(SerializerStates.EJECT)))
+          .onFalse(new InstantCommand(()->intakeRollers.setState(IntakeStates.IDLE)))
+          .onFalse( new InstantCommand(()->spindexer.setState(SerializerStates.IDLE)));
 
         
         // if (Constants.getDemoMode() == DemoMode.OFF){ // Auto Pathing Turned off for safety at demos

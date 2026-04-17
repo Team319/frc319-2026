@@ -39,7 +39,7 @@ public final class LauncherConstants {
 
     public static class TargetPoses {
       public static final Pose3d hub =
-          new Pose3d(FieldConstants.Hub.innerCenterPoint, new Rotation3d());
+          new Pose3d(FieldConstants.Hub.innerCenterPoint.plus(new Translation3d(0.0,Units.feetToMeters(0.75),0.0)), new Rotation3d());
       public static final Pose3d allianceLeft =
           new Pose3d(new Translation3d(FieldConstants.LinesVertical.allianceZone/2,3*(FieldConstants.LinesHorizontal.center/2),1), new Rotation3d());
       public static final Pose3d allianceRight =
@@ -167,7 +167,7 @@ public final class LauncherConstants {
     }
 
       public static InterpolatingDoubleTreeMap flywheelRPMMap = new InterpolatingDoubleTreeMap();
-      private static double modifier = -50.0;
+      private static double modifier = 50.0;
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
@@ -178,7 +178,7 @@ public final class LauncherConstants {
       flywheelRPMMap.put(3.75, 2450.0+modifier);
       flywheelRPMMap.put(4.5, 2635.0+50.0+modifier); 
       flywheelRPMMap.put(7.0, 2800.0+modifier);
-      flywheelRPMMap.put(10.0, 4000.0+modifier);
+      flywheelRPMMap.put(10.0, 4075.0+modifier);
 
     }
 
@@ -211,7 +211,7 @@ public final class LauncherConstants {
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(100);
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 1000; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 2000; // rotations per second
       config.fxConfig.MotionMagic.MotionMagicAcceleration = 1500; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 5000; // limit jerk for smooth motion
 

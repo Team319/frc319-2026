@@ -50,17 +50,21 @@ public class Spindexer extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     Logger.recordOutput(pb.makePath("state"), serializerState);
     Logger.recordOutput(pb.makePath("curretSpindexerRPM"), super.getCurrentVelocity().in(RPM));
 
-
     super.periodic();
     
     switch(serializerState){
       case SHOOT:
           //spindexerVelocity = RPM.of(SmartDashboard.getNumber("Tuning_Mode/Spindexer_Tuning_RPM", 0.0));
-          spindexerVelocity = RPM.of(6000.0);
+          spindexerVelocity = RPM.of(4500.0);
           CommandScheduler.getInstance().schedule(this.setVelocity(()-> spindexerVelocity));
         break;
 
-      
+      case EJECT:
+          //spindexerVelocity = RPM.of(SmartDashboard.getNumber("Tuning_Mode/Spindexer_Tuning_RPM", 0.0));
+          spindexerVelocity = RPM.of(-4500.0);
+          CommandScheduler.getInstance().schedule(this.setVelocity(()-> spindexerVelocity));
+        break;
+
       case IDLE:
       case JOSTLE:
       default:

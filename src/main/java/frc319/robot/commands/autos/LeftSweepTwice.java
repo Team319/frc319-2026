@@ -23,14 +23,18 @@ import frc319.robot.subsystems.intake.IntakeConstants.IntakeStates;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class LeftSweepTwice {
 
-  static double defaultHeading = 270.0;
-  static Pose2d startingPose = AllianceFlipUtil.apply(new Pose2d(new Translation2d(FieldConstants.LinesVertical.starting, 7.5), new Rotation2d(Math.toRadians(defaultHeading))));
 
   public static Command getCommand(Drive drive) {
+
+    double defaultHeading = 270.0;
+
+
     return 
     Commands.sequence(
       Commands.runOnce(() -> System.out.println("Running Right Sweep to Outpost Auto")),
-      Commands.runOnce(() -> drive.setPose(startingPose)),
+      Commands.runOnce(() -> drive.setPose(AllianceFlipUtil.apply(new Pose2d(new Translation2d(FieldConstants.LinesVertical.starting, 7.5), new Rotation2d(Math.toRadians(defaultHeading)))))),
+      Commands.waitSeconds(0.1),
+      
       Commands.parallel(
         DriveCommands.followPathCommand("go_left",false),
         Commands.waitSeconds(1.0)

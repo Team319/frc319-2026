@@ -224,7 +224,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopPeriodic() {
 
-    if (m_robotContainer.drive.isCloseToDriveVisionMeasurement || m_robotContainer.drive.isCloseToRightVisionMeasurement ){//(isHubActive()){
+    if (m_robotContainer.drive.isLocalized ){//(isHubActive()){
       m_robotContainer.driverController.setRumble(RumbleType.kBothRumble, 1.0);
     }
     else

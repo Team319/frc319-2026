@@ -26,6 +26,7 @@ import frc319.lib.subsystem.MotorFollowerSubsystem;
 import frc319.lib.subsystem.TalonFXSubsystemConfig;
 import frc319.lib.util.EqualsUtil;
 import frc319.lib.util.RobotTime;
+import frc319.lib.util.RollingAverage;
 import frc319.lib.io.MotorInputsAutoLogged;
 import frc319.robot.Constants;
 import frc319.robot.FieldConstants;
@@ -40,6 +41,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
+
+  private RollingAverage rollingAverageDistance = new RollingAverage(10);
 
 
   private FlywheelsState flywheelsState = LauncherConstants.Flywheels.FlywheelsState.IDLE;
@@ -89,6 +92,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   @Override
   public void periodic() {
+
+    
     Logger.recordOutput(pb.makePath("state"), flywheelsState);
     Logger.recordOutput(pb.makePath("curretFlywheelRPM"), super.getCurrentVelocity().in(RPM));
 
@@ -103,10 +108,12 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
       case SHOOT:
           if(Constants.useTurretLimelight){
-            toGoal = LauncherVisionManager.getInstance().get2dDistanceToCurrentTarget();
+            rollingAverageDistance.add(LauncherVisionManager.getInstance().get2dDistanceToCurrentTarget().in(Meters));
+            toGoal = Meters.of(rollingAverageDistance.getAverage());
           }
           else{
-            toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+            rollingAverageDistance.add(this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose()).in(Meters));
+            toGoal =  Meters.of(rollingAverageDistance.getAverage());
           }
 
         Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
@@ -120,7 +127,11 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         break;
 
       case SHOOT_ON_MOVE:
-        toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetOnMovePose());
+
+        rollingAverageDistance.add(this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetOnMovePose()).in(Meters));
+        toGoal =  Meters.of(rollingAverageDistance.getAverage());
+        
+        //toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetOnMovePose());
         Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
         CommandScheduler.getInstance().schedule(this.setVelocity(()->RPM.of(LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters)))));
         
@@ -228,7 +239,9 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public boolean isAtTargetVelocity() {
     double currentRPM = super.getCurrentVelocity().in(RPM);
    // Distance toGoal ;//= this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
-    double targetRPM = LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters));
+   // double targetRPM = LauncherConstants.Flywheels.flywheelRPMMap.get(toGoal.in(Meters));
+    double targetRPM = LauncherConstants.Flywheels.flywheelRPMMap.get(rollingAverageDistance.getAverage());
+
     AngularVelocity targetVelocity = RPM.of(targetRPM) ;
     Logger.recordOutput(pb.makePath("targetFlywheelRPM"), targetVelocity);
     Logger.recordOutput(pb.makePath("currentFlywheelRPM"), currentRPM);

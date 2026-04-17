@@ -22,10 +22,11 @@ import frc319.robot.subsystems.drive.Drive;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class Orbit {
 
-  static double defaultHeading = 90.0; // AllianceUtils.isBlueAlliance() ? 0.0 : 180.0;
-  static Pose2d startingPose = AllianceFlipUtil.apply(new Pose2d(new Translation2d(FieldConstants.LinesVertical.starting, 0.575), new Rotation2d(Math.toRadians(defaultHeading))));
 
   public static Command getCommand(Drive drive) {
+
+   double defaultHeading = 90.0; // AllianceUtils.isBlueAlliance() ? 0.0 : 180.0;
+
     return Commands.parallel(
       Commands.sequence(Commands.waitSeconds(1.0).andThen(Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING))),
       Commands.waitSeconds(1.0).andThen(Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_ON_MOVE))),
@@ -33,7 +34,8 @@ public class Orbit {
        Commands.waitSeconds(5.0).andThen(Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_ON_MOVE)))),
       Commands.sequence(
         Commands.runOnce(() -> System.out.println("Running test Auto")),
-        Commands.runOnce(() -> drive.setPose(startingPose)),
+        Commands.runOnce(() -> drive.setPose(AllianceFlipUtil.apply(new Pose2d(new Translation2d(FieldConstants.LinesVertical.starting, 0.575), new Rotation2d(Math.toRadians(defaultHeading)))))),
+        Commands.waitSeconds(0.1),
         DriveCommands.followPathCommand("orbit")
         )
     );

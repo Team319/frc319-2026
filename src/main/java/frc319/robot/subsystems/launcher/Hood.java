@@ -19,6 +19,7 @@ import frc319.lib.io.TalonFXIO;
 import frc319.lib.subsystem.MotorSubsystem;
 import frc319.lib.subsystem.TalonFXSubsystemConfig;
 import frc319.lib.util.EqualsUtil;
+import frc319.lib.util.RollingAverage;
 import frc319.lib.io.MotorInputsAutoLogged;
 import frc319.robot.Constants;
 import frc319.robot.FieldConstants;
@@ -34,6 +35,9 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     implements ArticulatedComponent {
 
   private LauncherConstants.LauncherStates laucherState = LauncherConstants.LauncherStates.IDLE;
+
+  private RollingAverage rollingAverageDistance = new RollingAverage(10);
+
 
   Angle aimAngle = Degrees.of(0.0);
   Distance toGoal = Meters.of(0.0);
@@ -98,10 +102,11 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
       case TRACKING_TARGET:
           if(Constants.useTurretLimelight){
-            toGoal = LauncherVisionManager.getInstance().get2dDistanceToCurrentTarget();
-          }
+            rollingAverageDistance.add(LauncherVisionManager.getInstance().get2dDistanceToCurrentTarget().in(Meters));
+            toGoal = Meters.of(rollingAverageDistance.getAverage());          }
           else{
-            toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose());
+            rollingAverageDistance.add(this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetPose()).in(Meters));
+            toGoal =  Meters.of(rollingAverageDistance.getAverage());
           }
           
           Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
@@ -112,7 +117,9 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
       
       case TRACK_HUB_ON_MOVE:
           // Calculate angle to adjust when Shooting on the Move
-          toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetOnMovePose());
+          rollingAverageDistance.add(this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetOnMovePose()).in(Meters));
+          toGoal =  Meters.of(rollingAverageDistance.getAverage());
+          //toGoal = this.getDistance2d(LaunchingSolutionManager.getInstance().getTargetOnMovePose());
           Logger.recordOutput(super.pb.makePath("distanceToGoal"), toGoal);
           aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
           Logger.recordOutput(super.pb.makePath("aimAngle"), aimAngle);

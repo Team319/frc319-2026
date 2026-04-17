@@ -75,8 +75,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
   AprilTagFieldLayout aprilTagFieldLayout = null ;
 
-  public boolean isCloseToDriveVisionMeasurement = false;
-  public boolean isCloseToRightVisionMeasurement = false;
+  public boolean isMt1CloseToDriveVisionMeasurement = false;
+
 
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -115,6 +115,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   private boolean headingLocked = false;
 
   private boolean updatePoseUsingVision = false;
+  public boolean isLocalized = false;
 
   public Drive(
       GyroIO gyroIO,
@@ -331,16 +332,16 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           doRejectVisionUpdate = false;
 
           double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.DRIVETRAIN_BACK);
-          Pose3d visionPose = new Pose3d(
-                                new Translation3d(poseBuf[0],poseBuf[1],poseBuf[2]), 
-                                new Rotation3d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]),Units.degreesToRadians(poseBuf[5]))
-                              );
-          Logger.recordOutput("Odometry/limelight-drive/VisionPoseDrivetrain", visionPose.toPose2d());
+          Pose2d visionPose = new Pose2d(
+                                new Translation2d(poseBuf[0],poseBuf[1]), 
+                                new Rotation2d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4])));
+
+          Logger.recordOutput("Odometry/limelight-drive/VisionPoseDrivetrain", visionPose);
  
-          double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
+          double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.getTranslation());
           Logger.recordOutput("/Odometry/limelight-drive/poseDifference", poseDifference);
 
-          isCloseToDriveVisionMeasurement = poseDifference <= 0.5;
+          isMt1CloseToDriveVisionMeasurement = poseDifference <= 0.5;
 
           //LimelightHelpers.SetRobotOrientation("limelight-drive", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.SetRobotOrientation("limelight-drive", rawGyroRotation.getDegrees(), 0, 0, 0, 0, 0);
@@ -352,6 +353,10 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
             mt2.pose = new Pose2d();
             doRejectVisionUpdate = true;
           }
+
+          double poseDifferenceMt2 = poseEstimator.getEstimatedPosition().getTranslation().getDistance(mt2.pose.getTranslation());
+
+          double poseDifferenceLL = mt2.pose.getTranslation().getDistance(visionPose.getTranslation());
           
           Logger.recordOutput("Odometry/limelight-drive/mt2PoseDrive", mt2.pose);
 
@@ -360,20 +365,27 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           {
             doRejectVisionUpdate = true;
           }
-          if(mt2.tagCount < 2)
+          if(mt2.tagCount < 2 )
           {
-            doRejectVisionUpdate = true;
+            if(mt2.tagCount > 0 && mt2.rawFiducials[0].distToCamera <= 1.0 )
+            {
+              // Do nothing, we want this data!
+            }
+            else
+            {
+              doRejectVisionUpdate = true;
+            }
           }
           if(mt2.pose == new Pose2d())
           {
             doRejectVisionUpdate = true;
           }
-          // if(poseDifference > 2.5){
-          //   doRejectVisionUpdate = true;
-          // }
+          if(poseDifferenceLL > 1.0){
+            doRejectVisionUpdate = true;
+          }
           if(!doRejectVisionUpdate)
           {
-            Logger.recordOutput("Odometry/VisionPoseDrive_accepted", visionPose.toPose2d());
+            Logger.recordOutput("Odometry/VisionPoseDrive_accepted", visionPose);
             // Calculate dynamic standard deviations based on distance
             double xyStdDev = 0.1 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
             double thetaStdDev = 999999; // Still keep rotation very uncertain
@@ -387,6 +399,13 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
                         poseEstimator.addVisionMeasurement(
                 mt2.pose,
                 mt2.timestampSeconds);
+
+            poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(mt2.pose.getTranslation());
+            if(poseDifference < 0.5){
+              isLocalized = true;
+            }
+            
+          
           }
           doRejectVisionUpdate = false;
           
@@ -398,16 +417,16 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           doRejectVisionUpdate = false;
 
           double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.DRIVETRAIN_RIGHT);
-          Pose3d visionPose = new Pose3d(
-                                new Translation3d(poseBuf[0],poseBuf[1],poseBuf[2]), 
-                                new Rotation3d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]),Units.degreesToRadians(poseBuf[5]))
-                              );
-          Logger.recordOutput("Odometry/limelight-right/VisionPoseDrivetrainRight", visionPose.toPose2d());
+          Pose2d visionPose = new Pose2d(
+                                new Translation2d(poseBuf[0],poseBuf[1]), 
+                                new Rotation2d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]))
+                                );
+          Logger.recordOutput("Odometry/limelight-right/VisionPoseDrivetrainRight", visionPose);
  
-          double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
+          double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.getTranslation());
           Logger.recordOutput("Odometry/limelight-right/poseDifferenceRight", poseDifference);
 
-          isCloseToRightVisionMeasurement = poseDifference <= 0.5;
+          isMt1CloseToDriveVisionMeasurement = poseDifference <= 0.5;
 
           //LimelightHelpers.SetRobotOrientation("limelight-right", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.SetRobotOrientation("limelight-right", rawGyroRotation.getDegrees(), 0, 0, 0, 0, 0);
@@ -418,6 +437,11 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
             mt2.pose = new Pose2d();
             doRejectVisionUpdate = true;
           }
+
+          double poseDifferenceMt2 = poseEstimator.getEstimatedPosition().getTranslation().getDistance(mt2.pose.getTranslation());
+
+          double poseDifferenceLL = mt2.pose.getTranslation().getDistance(visionPose.getTranslation());
+
           
           Logger.recordOutput("Odometry/limelight-right/mt2PoseDrive", mt2.pose);
 
@@ -426,20 +450,27 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           {
             doRejectVisionUpdate = true;
           }
-          if(mt2.tagCount < 2)
+          if(mt2.tagCount < 2 )
           {
-            doRejectVisionUpdate = true;
+            if(mt2.tagCount > 0 && mt2.rawFiducials[0].distToCamera <= 1.0 )
+            {
+              // Do nothing, we want this data!
+            }
+            else
+            {
+              doRejectVisionUpdate = true;
+            }
           }
           if(mt2.pose == new Pose2d())
           {
             doRejectVisionUpdate = true;
           }
-          // if(poseDifference > 2.5){
-          //   doRejectVisionUpdate = true;
-          // }
+          if(poseDifferenceLL > 1.0){
+            doRejectVisionUpdate = true;
+          }
           if(!doRejectVisionUpdate)
           {
-            Logger.recordOutput("Odometry/VisionPoseRight_accepted", visionPose.toPose2d());
+            Logger.recordOutput("Odometry/VisionPoseRight_accepted", visionPose);
             // Calculate dynamic standard deviations based on distance
             double xyStdDev = 0.1 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
             double thetaStdDev = 999999; // Still keep rotation very uncertain
@@ -453,6 +484,11 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
             poseEstimator.addVisionMeasurement(
                 mt2.pose,
                 mt2.timestampSeconds);
+
+            poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(mt2.pose.getTranslation());
+            if(poseDifference < 0.5){
+              isLocalized = true;
+            }
           }
           doRejectVisionUpdate = false;
           
@@ -463,14 +499,16 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         {
           doRejectVisionUpdate = false;
           double [] poseBuf = Limelight.getBotPose(LimelightConstants.Device.DRIVETRAIN_LEFT);
-          Pose3d visionPose = new Pose3d(
-                                new Translation3d(poseBuf[0],poseBuf[1],poseBuf[2]), 
-                                new Rotation3d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]),Units.degreesToRadians(poseBuf[5]))
+          Pose2d visionPose = new Pose2d(
+                                new Translation2d(poseBuf[0],poseBuf[1]), 
+                                new Rotation2d(Units.degreesToRadians(poseBuf[3]), Units.degreesToRadians(poseBuf[4]))
                               );
-          Logger.recordOutput("Odometry/VisionPoseLeft", visionPose.toPose2d());
+          Logger.recordOutput("Odometry/VisionPoseLeft", visionPose);
  
-          double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.toPose2d().getTranslation());
+          double poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(visionPose.getTranslation());
           Logger.recordOutput("/Drive/poseDifference", poseDifference);
+
+          isMt1CloseToDriveVisionMeasurement = poseDifference <= 0.5;
 
           LimelightHelpers.SetRobotOrientation("limelight-left", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
           LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left");
@@ -481,6 +519,11 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
             doRejectVisionUpdate = true;
           }
 
+          double poseDifferenceMt2 = poseEstimator.getEstimatedPosition().getTranslation().getDistance(mt2.pose.getTranslation());
+
+          double poseDifferenceLL = mt2.pose.getTranslation().getDistance(visionPose.getTranslation());
+
+
           Logger.recordOutput("Odometry/mt2Poseturret", mt2.pose);
 
           // If the robot is spinning too fast, ignore vision updates
@@ -488,16 +531,23 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           {
             doRejectVisionUpdate = true;
           }
-          if(mt2.tagCount < 2)
+          if(mt2.tagCount < 2 )
           {
+            if(mt2.tagCount > 0 && mt2.rawFiducials[0].distToCamera <= 1.0 )
+            {
+              // Do nothing, we want this data!
+            }
+            else
+            {
+              doRejectVisionUpdate = true;
+            }
+          }
+          if(poseDifferenceLL > 1.0){
             doRejectVisionUpdate = true;
           }
-          // if(poseDifference > 2.5){
-          //   doRejectVisionUpdate = true;
-          // }
           if(!doRejectVisionUpdate)
           {
-            Logger.recordOutput("Odometry/VisionPoseLeft_accepted", visionPose.toPose2d());
+            Logger.recordOutput("Odometry/VisionPoseLeft_accepted", visionPose);
 
             // Calculate dynamic standard deviations based on distance
             double xyStdDev = 0.1 + (0.5 * Math.pow(mt2.avgTagDist / 4.0, 2)); // Quadratic scaling
@@ -513,6 +563,12 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
             poseEstimator.addVisionMeasurement(
                 mt2.pose,
                 mt2.timestampSeconds);
+
+            poseDifference = poseEstimator.getEstimatedPosition().getTranslation().getDistance(mt2.pose.getTranslation());
+            if(poseDifference < 0.5){
+              isLocalized = true;
+            }
+
           }
           doRejectVisionUpdate = false;
           
