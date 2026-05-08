@@ -37,9 +37,16 @@ public class LeftBumpToDepot {
         
         Commands.waitSeconds(2.0)
         .andThen(Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING)))
-        .andThen(Commands.waitSeconds(10.0))
+        .andThen(Commands.waitSeconds(9.0))
         .andThen(Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.SHOOTING_ON_MOVE)))
-        .andThen(Commands.runOnce(()-> Robot.m_robotContainer.setRobotState(RobotStates.COLLECTING)))
+        .andThen(Commands.waitSeconds(3.5))
+        .andThen(Commands.runOnce(()-> Robot.m_robotContainer.intakeExtension.setState(IntakeStates.JOSTLE)))
+        .andThen(Commands.waitSeconds(1.0))
+        .andThen(Commands.runOnce(()-> Robot.m_robotContainer.intakeExtension.setState(IntakeStates.EXTENDED)))
+        .andThen(Commands.waitSeconds(0.5))
+        .andThen(Commands.runOnce(()-> Robot.m_robotContainer.intakeExtension.setState(IntakeStates.RETRACTED)))
+        
+        
       )// end of parallel
     ); // end of sequence
   }
